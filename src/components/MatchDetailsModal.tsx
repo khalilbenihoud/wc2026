@@ -115,13 +115,11 @@ export default function MatchDetailsModal({
             </div>
             <div className="teams grid grid-cols-1 justify-items-center gap-1.5 px-6 pb-8 pt-2">
               <div className="side text-center">
-                <div className="fl text-[52px] leading-none mb-3">🔮</div>
                 <div className="nm font-unbounded text-lg tracking-wide text-brand-text mb-2">
                   Not yet played
                 </div>
                 <div className="stage-line text-xs text-brand-muted max-w-[280px] leading-relaxed">
-                  The {data._year} bracket is a seeded projection — results will
-                  be written by history once the matches occur.
+                  This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
                 </div>
               </div>
             </div>
@@ -203,7 +201,7 @@ export default function MatchDetailsModal({
             <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-white/[0.015] border-t border-brand-line/50">
               🏆{" "}
               <span className="font-semibold">{getTeamName(winnerCode)}</span>{" "}
-              progressed
+              {round === "final" ? "lift the trophy" : "advance to the next round"}
             </div>
           </>
         )}

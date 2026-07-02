@@ -200,14 +200,20 @@ export default function App() {
       : null;
 
   return (
-    <div className="min-h-screen text-brand-text flex flex-col justify-between">
+    <div className="min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col justify-between">
       {/* Dynamic Background Layout Frame */}
-      <div className="app grid grid-cols-1 md:grid-cols-[300px_1fr] min-h-[100vh] items-stretch">
+      <div className="app relative grid grid-cols-1 md:grid-cols-[300px_1fr] min-h-[100vh] md:min-h-0 md:flex-1 items-stretch">
+        {/* Sidebar divider — pinned to the full height of the app frame, fading out toward the bottom */}
+        <div
+          className="hidden md:block absolute top-0 bottom-0 left-[300px] w-px pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, var(--line) 0%, var(--line) 70%, transparent 100%)" }}
+        />
+
         {/* Left Rail: Brand + Timeline */}
-        <aside className="rail relative z-20 flex flex-col p-6 md:py-9 md:pr-6 md:pl-9 border-b md:border-b-0 md:border-r border-brand-line bg-gradient-to-b from-white/[0.016] to-transparent animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
+        <aside className="rail relative z-20 flex flex-col md:min-h-0 p-6 md:py-9 md:pr-6 md:pl-9 border-b md:border-b-0 bg-gradient-to-b from-white/[0.016] to-transparent animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
           <div className="brand mb-6 max-md:text-center">
             <div className="kicker inline-flex items-center gap-2.5 font-sans font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
-              <span className="k-line w-6 h-[1px] bg-gradient-to-r from-transparent to-brand-gold-deep max-md:hidden" />
+              
               FIFA World Cup
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
@@ -216,7 +222,7 @@ export default function App() {
               </span>
             </h1>
             <p className="sub text-brand-muted text-xs mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
-              Every knockout stage since 1986, drawn as one concentric radial bracket.
+              Every knockout run since 1986, traced from first match to final whistle.
             </p>
           </div>
 
@@ -228,9 +234,9 @@ export default function App() {
         </aside>
 
         {/* Right Main Panel: Interactive Bracket */}
-        <main className="main relative z-10 flex flex-col items-center justify-center p-4 md:py-4 md:px-6">
+        <main className="main relative z-10 flex flex-col md:min-h-0 items-center justify-center p-4 md:py-4 md:px-6">
           {/* Header Metadata */}
-          <div className="flex items-stretch w-fit max-w-full mb-4 relative z-10 rounded-xl border border-brand-line bg-white/[0.025] backdrop-blur-sm overflow-hidden divide-x divide-brand-line animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
+          <div className="flex-none flex items-stretch w-fit max-w-full mb-4 relative z-10 rounded-xl border border-brand-line bg-white/[0.025] backdrop-blur-sm overflow-hidden divide-x divide-brand-line animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
             <div className="flex flex-col items-center justify-center py-3 px-5 gap-1.5">
               <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
               <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
@@ -240,14 +246,14 @@ export default function App() {
             <div className="flex flex-col items-center justify-center py-3 px-5 gap-1.5 bg-brand-gold/[0.04]">
               <span className="text-[9px] uppercase tracking-[0.28em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
               <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be decided"}
+                {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
               </span>
             </div>
           </div>
 
           {/* Svg Radial Stage */}
-          <div className="stage-wrap flex justify-center items-center p-1 w-full max-w-[760px] mx-auto">
-            <div className="stage relative w-full aspect-square animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
+          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[760px] mx-auto">
+            <div className="stage relative h-full max-h-[760px] w-auto max-w-full aspect-square animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
               <RadialBracket
                 data={currentData}
                 analysis={currentAnalysis}
@@ -260,28 +266,28 @@ export default function App() {
           </div>
 
           {/* Radial Legend / Interactive Hints */}
-          <div className="legend flex gap-6 justify-center flex-wrap items-center text-brand-muted text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 animate-[riseIn_0.8s_ease_0.5s_both]">
+          <div className="legend flex-none flex gap-6 justify-center flex-wrap items-center text-brand-muted text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 animate-[riseIn_0.8s_ease_0.5s_both]">
             <div className="item flex items-center gap-2">
               <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
-              Hover a nation → its color run
+              Hover a flag to trace its run
             </div>
             <div className="item flex items-center gap-2">
               <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
-              Winners advance inward
+              Winners advance toward the center
             </div>
             <div className="item text-brand-gold/75 font-medium">
-              Tap any match for full scores &nbsp;·&nbsp; 👑 Champion
+              Click any match for the full score
             </div>
           </div>
         </main>
       </div>
 
-      {/* Results details panel list */}
-      <ResultsPanel
+      {/* Results details panel list — hidden for now, revisit later */}
+      {/* <ResultsPanel
         data={currentData}
         analysis={currentAnalysis}
         onSelectMatch={handleSelectMatch}
-      />
+      /> */}
 
       {/* Floating Tooltip */}
       {tooltip.visible && (
@@ -308,8 +314,8 @@ export default function App() {
       />
 
       {/* Subtle Branding Footer */}
-      <footer className="text-center text-brand-muted text-[10px] tracking-widest uppercase py-2 px-5 pb-10 opacity-50 select-none animate-[riseIn_0.8s_ease_0.6s_both]">
-        Real historical knockout results · 1986 – 2022 · 2026 bracket to be determined · 11 tournaments
+      <footer className="flex-none text-center text-brand-muted text-[10px] tracking-widest uppercase py-2 px-5 pb-10 opacity-50 select-none animate-[riseIn_0.8s_ease_0.6s_both]">
+        Real results, 1986–2022 · 2026 draw still to come · 11 tournaments, one bracket
       </footer>
     </div>
   );
