@@ -37,33 +37,6 @@
   --win: #22c55e;
 }
 
-/* ---- Light mode overrides ---- */
-:root.light {
-  --bg: #f8f7f4;
-  --bg-2: #f0ede6;
-  --panel: #ffffff;
-  --gold: #b8790a;
-  --gold-hi: #8a5a06;
-  --gold-deep: #6b4304;
-  --steel: #c0bdb8;
-  --steel-dim: #e8e5e0;
-  --line: #e0ddd8;
-  --text: #1a1814;
-  --muted: #7a756e;
-
-  --color-brand-bg: #f8f7f4;
-  --color-brand-bg-2: #f0ede6;
-  --color-brand-panel: #ffffff;
-  --color-brand-gold: #b8790a;
-  --color-brand-gold-hi: #8a5a06;
-  --color-brand-gold-deep: #6b4304;
-  --color-brand-steel: #c0bdb8;
-  --color-brand-steel-dim: #e8e5e0;
-  --color-brand-line: #e0ddd8;
-  --color-brand-text: #1a1814;
-  --color-brand-muted: #7a756e;
-}
-
 body {
   background-color: var(--bg);
   background-image:
@@ -74,12 +47,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-}
-
-.light body {
-  background-image:
-    radial-gradient(1100px 820px at 50% 50%, rgba(184, 121, 10, 0.06), transparent 62%),
-    linear-gradient(180deg, var(--bg-2), var(--bg) 66%);
 }
 
 /* grain overlay */
@@ -236,6 +203,30 @@ body::after {
 
 .crest.junc .flag {
   font-size: 20px;
+}
+
+/* Round of 32 outer ring */
+.crest.r32node .disc {
+  fill: var(--panel);
+  stroke: var(--steel);
+  stroke-width: 1.5;
+  opacity: 0.85;
+}
+
+.crest.r32node.empty .disc {
+  fill: var(--bg);
+  stroke: var(--steel-dim);
+  stroke-dasharray: 2 3;
+  opacity: 0.7;
+}
+
+.conn.r32conn {
+  stroke-width: 1.2;
+  opacity: 0.3;
+}
+
+.conn.r32conn.used {
+  opacity: 0.4;
 }
 
 /* Medallion */

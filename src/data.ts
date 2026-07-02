@@ -66,6 +66,7 @@ export const TEAMS: Record<string, [string, string]> = {
   COD: ["DR Congo", "🇨🇩"],
   BIH: ["Bosnia-Herz.", "🇧🇦"],
   AUT: ["Austria", "🇦🇹"],
+  TBD: ["To Be Decided", ""],
 };
 
 export const COLORS: Record<string, string> = {
@@ -121,6 +122,7 @@ export const COLORS: Record<string, string> = {
   COD: "#007FFF",
   BIH: "#0032A0",
   AUT: "#ED2939",
+  TBD: "#71717a",
 };
 
 export const getTeamName = (code: string): string =>
@@ -507,40 +509,9 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "USA · Canada · Mexico",
     hostFlag: "🇺🇸 🇨🇦 🇲🇽",
     seeded: false,
-    teams: [
-      "RSA", "CAN",
-      "BRA", "JPN",
-      "GER", "PAR",
-      "NED", "MAR",
-      "CIV", "NOR",
-      "FRA", "SWE",
-      "MEX", "ECU",
-      "ENG", "COD",
-    ],
-    r32: [
-      { ta: "RSA", tb: "CAN", s: [0, 1], w: 1 },
-      { ta: "BRA", tb: "JPN", s: [2, 1], w: 0 },
-      { ta: "GER", tb: "PAR", s: [1, 1], w: 1, p: "3-4" },
-      { ta: "NED", tb: "MAR", s: [1, 1], w: 1, p: "2-3" },
-      { ta: "CIV", tb: "NOR", s: [1, 2], w: 1 },
-      { ta: "FRA", tb: "SWE", s: [3, 0], w: 0 },
-      { ta: "MEX", tb: "ECU", s: [2, 0], w: 0 },
-      { ta: "ENG", tb: "COD", s: [2, 1], w: 0 },
-      { ta: "BEL", tb: "SEN", s: [3, 2], w: 0, x: "a.e.t." },
-      { ta: "USA", tb: "BIH", s: [2, 0], w: 0 },
-      { ta: "ESP", tb: "AUT", s: null, w: null },
-      { ta: "POR", tb: "CRO", s: null, w: null },
-    ],
-    r16: [
-      M(0, 1, 1),           // RSA 0–1 CAN
-      M(2, 1, 0),           // BRA 2–1 JPN
-      M(1, 1, 1, "3-4"),    // GER 1–1 PAR (pens)
-      M(1, 1, 1, "2-3"),    // NED 1–1 MAR (pens)
-      M(1, 2, 1),           // CIV 1–2 NOR
-      M(3, 0, 0),           // FRA 3–0 SWE
-      M(2, 0, 0),           // MEX 2–0 ECU
-      M(2, 1, 0),           // ENG 2–1 COD
-    ],
+    teams: new Array(16).fill("TBD"),
+    r32: null,
+    r16: null,
     qf: null,
     sf: null,
     final: null,

@@ -96,7 +96,7 @@ export default function ResultsPanel({
                 {data._year} · Round of 16
               </div>
               <h2 className="res-title font-unbounded font-bold text-2xl md:text-3xl tracking-tight text-brand-text leading-none">
-                {r32 ? "Match results" : "Seeded projection"}
+                {r32 ? "Match results" : "Bracket not yet set"}
               </h2>
             </div>
             <div className="res-champ font-unbounded font-semibold text-base tracking-wide text-brand-gold pb-1 max-md:mt-2">
@@ -108,6 +108,7 @@ export default function ResultsPanel({
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {r32.map((m, i) => {
+                  if (m.ta === "TBD" && m.tb === "TBD") return null;
                   const played = m.s !== null && m.w !== null;
                   const wA = played && m.w === 0;
                   const wB = played && m.w === 1;
@@ -239,7 +240,7 @@ export default function ResultsPanel({
             <div className="flex items-start gap-3.5 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4">
               <Info className="w-5 h-5 text-brand-gold/80 flex-none mt-0.5" />
               <p className="res-note-big text-brand-muted text-sm leading-relaxed">
-                The {data._year} bracket is a seeded projection based on historical forms and power rankings. Real tournament fixtures and live match scores will populate this section as the matches occur.
+                The {data._year} bracket has not been drawn yet. Team fixtures and live match scores will populate this section once the tournament kicks off.
               </p>
             </div>
           )}

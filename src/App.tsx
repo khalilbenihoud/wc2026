@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName, getTeamColor } from "./data";
 import Timeline from "./components/Timeline";
@@ -61,13 +61,7 @@ function analyze(d: TournamentData): TournamentAnalysis {
 }
 
 export default function App() {
-  const [light, setLight] = useState(() => localStorage.getItem("theme") === "light");
   const [activeYear, setActiveYear] = useState<number>(2022);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("light", light);
-    localStorage.setItem("theme", light ? "light" : "dark");
-  }, [light]);
   const [hoveredLeaf, setHoveredLeaf] = useState<number | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<{
     round: string;
@@ -212,19 +206,12 @@ export default function App() {
         {/* Left Rail: Brand + Timeline */}
         <aside className="rail relative z-20 flex flex-col p-6 md:py-9 md:pr-6 md:pl-9 border-b md:border-b-0 md:border-r border-brand-line bg-gradient-to-b from-white/[0.016] to-transparent animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
           <div className="brand mb-6 max-md:text-center">
-            <button
-              onClick={() => setLight(v => !v)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 flex items-center justify-center rounded-full border border-brand-line bg-brand-panel hover:bg-brand-line transition-colors text-brand-muted hover:text-brand-text text-sm"
-              aria-label="Toggle light/dark mode"
-            >
-              {light ? "🌙" : "☀️"}
-            </button>
             <div className="kicker inline-flex items-center gap-2.5 font-sans font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
               <span className="k-line w-6 h-[1px] bg-gradient-to-r from-transparent to-brand-gold-deep max-md:hidden" />
               FIFA World Cup
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
-              <span className={`tt bg-clip-text text-transparent ${light ? "bg-gradient-to-b from-brand-gold-deep via-brand-gold to-brand-gold-hi" : "bg-gradient-to-b from-[#fff8ea] via-brand-gold to-brand-gold-deep"} filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]`}>
+              <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-[#fff8ea] via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
                 The Road to Glory
               </span>
             </h1>
@@ -268,7 +255,6 @@ export default function App() {
                 hoveredLeaf={hoveredLeaf}
                 setHoveredLeaf={setHoveredLeaf}
                 onShowTooltip={handleShowTooltip}
-                light={light}
               />
             </div>
           </div>
@@ -323,7 +309,7 @@ export default function App() {
 
       {/* Subtle Branding Footer */}
       <footer className="text-center text-brand-muted text-[10px] tracking-widest uppercase py-2 px-5 pb-10 opacity-50 select-none animate-[riseIn_0.8s_ease_0.6s_both]">
-        Real historical knockout results · 1986 – 2022 · 2026 Round of 16 in progress · 11 tournaments
+        Real historical knockout results · 1986 – 2022 · 2026 bracket to be determined · 11 tournaments
       </footer>
     </div>
   );

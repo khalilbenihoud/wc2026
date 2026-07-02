@@ -15,7 +15,6 @@ interface RadialBracketProps {
     y: number,
     visible: boolean
   ) => void;
-  light?: boolean;
 }
 
 const CX = 450;
@@ -23,6 +22,8 @@ const CY = 450;
 const R = [368, 288, 202, 120];
 const TROPHY_R = 60;
 const CLEAR: Record<number, number> = { 0: 31, 1: 19, 2: 22, 3: 26 };
+const R32_RING = 428;
+const R32_SUBSPAN = 5.625; // half of the 22.5deg leaf spacing
 
 const nodeAngle = (level: number, index: number): number => {
   const span = 1 << level;
@@ -52,7 +53,6 @@ export default function RadialBracket({
   hoveredLeaf,
   setHoveredLeaf,
   onShowTooltip,
-  light = false,
 }: RadialBracketProps) {
   const bracketId = useId();
   const champCode =
@@ -284,18 +284,13 @@ export default function RadialBracket({
               </text>
             )}
             {isEmpty && (
-              <text
-                x={f2(x)}
-                y={f2(y + 1)}
-                textAnchor="middle"
-                dominantBaseline="central"
+              <circle
+                cx={f2(x)}
+                cy={f2(y)}
+                r={qMarkSize[lvl] / 3}
                 fill="var(--steel)"
-                fontWeight="700"
-                style={{ fontSize: `${qMarkSize[lvl]}px`, fontFamily: "inherit" }}
                 className="select-none"
-              >
-                ?
-              </text>
+              />
             )}
             <circle
               className="hit fill-transparent cursor-pointer"
@@ -323,7 +318,10 @@ export default function RadialBracket({
       const isLit = litNodes.has(nodeId);
       const isDim = hasFocus && !isLit;
 
+      const isUnknown = code === "TBD";
+
       let className = "crest";
+      if (isUnknown) className += " junc empty";
       if (isLit) className += " lit";
       if (isDim) className += " dim";
 
@@ -350,9 +348,13 @@ export default function RadialBracket({
             cy={f2(y)}
             r="28"
           />
-          <text className="flag font-sans select-none" x={f2(x)} y={f2(y + 1)}>
-            {getTeamFlag(code)}
-          </text>
+          {isUnknown ? (
+            <circle cx={f2(x)} cy={f2(y)} r={5} fill="var(--steel)" />
+          ) : (
+            <text className="flag font-sans select-none" x={f2(x)} y={f2(y + 1)}>
+              {getTeamFlag(code)}
+            </text>
+          )}
           <text
             className="code font-unbounded select-none"
             x={f2(lx)}
@@ -366,6 +368,90 @@ export default function RadialBracket({
             cy={f2(y)}
             r="34"
           />
+        </g>
+      );
+    });
+  };
+
+  // 5b. Render Round-of-32 outer ring (only when data supplies one entry per leaf)
+  const renderR32Ring = () => {
+    if (!data.r32 || data.r32.length !== data.teams.length) return null;
+
+    return data.r32.map((m, i) => {
+      const known = !(m.ta === "TBD" && m.tb === "TBD");
+      const ang = nodeAngle(0, i);
+      const angA = ang - R32_SUBSPAN;
+      const angB = ang + R32_SUBSPAN;
+      const [ax, ay] = polar(R32_RING, angA);
+      const [bx, by] = polar(R32_RING, angB);
+      const [px, py] = polar(R[0] + 30, ang);
+      const dl = introDelay(0, i, 16);
+
+      const played = m.s !== null && m.w !== null;
+      const wA = played && m.w === 0;
+      const wB = played && m.w === 1;
+
+      const notes: string[] = [];
+      if (m.x) notes.push(m.x.trim());
+      if (m.p) notes.push(`pens ${m.p.replace("-", "–")}`);
+      const scoreLabel = played
+        ? `${m.s![0]}–${m.s![1]}${notes.length ? ` (${notes.join(", ")})` : ""}`
+        : "vs";
+
+      const renderNode = (
+        code: string,
+        x: number,
+        y: number,
+        isWinner: boolean,
+        keySuffix: string
+      ) => (
+        <g
+          key={`r32-${i}-${keySuffix}`}
+          className={`crest r32node${!known ? " empty" : ""}`}
+          style={
+            {
+              "--c": known ? getTeamColor(code) : undefined,
+              "--d": `${dl}s`,
+              opacity: known && played && !isWinner ? 0.55 : 1,
+              transformOrigin: `${f2(x)}px ${f2(y)}px`,
+            } as React.CSSProperties
+          }
+        >
+          <circle className="disc" cx={f2(x)} cy={f2(y)} r={15} />
+          {known ? (
+            <>
+              <text
+                className="flag font-sans select-none"
+                style={{ fontSize: "15px" }}
+                x={f2(x)}
+                y={f2(y + 1)}
+              >
+                {getTeamFlag(code)}
+              </text>
+              <title>{`${getTeamName(m.ta)} vs ${getTeamName(m.tb)} · ${scoreLabel}`}</title>
+            </>
+          ) : (
+            <circle cx={f2(x)} cy={f2(y)} r={4} fill="var(--steel)" className="select-none" />
+          )}
+        </g>
+      );
+
+      return (
+        <g key={`r32grp-${i}`}>
+          <path
+            className={`conn r32conn${!played ? " tbd" : " used"}`}
+            pathLength="100"
+            d={`M ${f2(ax)} ${f2(ay)} L ${f2(px)} ${f2(py)}`}
+            style={{ "--d": `${dl}s` } as React.CSSProperties}
+          />
+          <path
+            className={`conn r32conn${!played ? " tbd" : " used"}`}
+            pathLength="100"
+            d={`M ${f2(bx)} ${f2(by)} L ${f2(px)} ${f2(py)}`}
+            style={{ "--d": `${dl}s` } as React.CSSProperties}
+          />
+          {renderNode(m.ta, ax, ay, wA, "a")}
+          {renderNode(m.tb, bx, by, wB, "b")}
         </g>
       );
     });
@@ -499,8 +585,8 @@ export default function RadialBracket({
           </feMerge>
         </filter>
         <radialGradient id={medFaceId} cx="0.5" cy="0.4" r="0.7">
-          <stop offset="0" stopColor={light ? "#e8e5e0" : "#27272a"} />
-          <stop offset="1" stopColor={light ? "#f8f7f4" : "#09090b"} />
+          <stop offset="0" stopColor="#27272a" />
+          <stop offset="1" stopColor="#09090b" />
         </radialGradient>
       </defs>
 
@@ -519,6 +605,9 @@ export default function RadialBracket({
 
       {/* Outer team crests */}
       {renderCrests()}
+
+      {/* Round of 32 outer ring (2026 in-progress bracket) */}
+      {renderR32Ring()}
     </svg>
   );
 }
