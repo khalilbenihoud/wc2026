@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-unbounded: "Unbounded", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-bg: #09090b;
+  --color-brand-bg-2: #0c0c0e;
+  --color-brand-panel: #18181b;
+  --color-brand-gold: #f6c453;
+  --color-brand-gold-hi: #ffdf8e;
+  --color-brand-gold-deep: #b8862f;
+  --color-brand-steel: #3f3f46;
+  --color-brand-steel-dim: #18181b;
+  --color-brand-line: #27272a;
+  --color-brand-text: #f4f4f5;
+  --color-brand-muted: #71717a;
+  --color-brand-danger: #e11d48;
+  --color-brand-win: #22c55e;
+}
+
+:root {
+  --bg: #09090b;
+  --bg-2: #0c0c0e;
+  --panel: #18181b;
+  --gold: #f6c453;
+  --gold-hi: #ffdf8e;
+  --gold-deep: #b8862f;
+  --steel: #3f3f46;
+  --steel-dim: #18181b;
+  --line: #27272a;
+  --text: #f4f4f5;
+  --muted: #71717a;
+  --danger: #e11d48;
+  --win: #22c55e;
+}
+
+/* ---- Light mode overrides ---- */
+:root.light {
+  --bg: #f8f7f4;
+  --bg-2: #f0ede6;
+  --panel: #ffffff;
+  --gold: #b8790a;
+  --gold-hi: #8a5a06;
+  --gold-deep: #6b4304;
+  --steel: #c0bdb8;
+  --steel-dim: #e8e5e0;
+  --line: #e0ddd8;
+  --text: #1a1814;
+  --muted: #7a756e;
+
+  --color-brand-bg: #f8f7f4;
+  --color-brand-bg-2: #f0ede6;
+  --color-brand-panel: #ffffff;
+  --color-brand-gold: #b8790a;
+  --color-brand-gold-hi: #8a5a06;
+  --color-brand-gold-deep: #6b4304;
+  --color-brand-steel: #c0bdb8;
+  --color-brand-steel-dim: #e8e5e0;
+  --color-brand-line: #e0ddd8;
+  --color-brand-text: #1a1814;
+  --color-brand-muted: #7a756e;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1100px 820px at 50% 50%, rgba(246, 196, 83, 0.05), transparent 62%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 66%);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.light body {
+  background-image:
+    radial-gradient(1100px 820px at 50% 50%, rgba(184, 121, 10, 0.06), transparent 62%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 66%);
+}
+
+/* grain overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- orchestrated entrance ---- */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes crestPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes drawIn {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Custom classes for svg paths and circles */
+.guide {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  opacity: 0.16;
+}
+
+.conn {
+  fill: none;
+  stroke: var(--steel);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.42;
+  transition: stroke 0.28s ease, color 0.28s ease, opacity 0.28s ease, stroke-width 0.28s ease;
+  pointer-events: none;
+  stroke-dasharray: 100;
+  animation: drawIn 0.8s cubic-bezier(0.4, 0.6, 0.2, 1) var(--d, 0s) both;
+}
+
+.conn.used {
+  opacity: 0.52;
+}
+
+.conn.tbd {
+  stroke-dasharray: 4 5;
+  opacity: 0.28;
+  animation: none;
+}
+
+.conn.dim {
+  stroke: var(--steel-dim);
+  opacity: 0.22;
+}
+
+.conn.lit {
+  stroke: var(--c, var(--gold));
+  opacity: 1;
+  stroke-width: 3.6;
+  filter: drop-shadow(0 0 6px var(--c, var(--gold)));
+}
+
+.crest {
+  cursor: pointer;
+  transition: opacity 0.28s ease, filter 0.28s ease, transform 0.28s ease;
+  transform-box: view-box;
+  animation: crestPop 0.55s cubic-bezier(0.34, 1.4, 0.5, 1) var(--d, 0s) both;
+}
+
+.crest .disc {
+  fill: var(--panel);
+  stroke: var(--steel);
+  stroke-width: 2;
+  transition: stroke 0.28s ease, filter 0.28s ease, stroke-width 0.28s ease;
+}
+
+.crest .flag {
+  font-size: 31px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.crest .code {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-anchor: middle;
+  transition: fill 0.28s ease;
+}
+
+.crest .crown {
+  font-size: 21px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.crest.dim {
+  filter: grayscale(1);
+  opacity: 0.34;
+}
+
+.crest.lit .disc {
+  stroke: var(--c, var(--gold));
+  stroke-width: 2.8;
+  filter: drop-shadow(0 0 9px var(--c, var(--gold)));
+}
+
+.crest.lit .code {
+  fill: var(--gold-hi);
+}
+
+.crest.junc .disc {
+  fill: var(--panel);
+  stroke: var(--steel);
+  stroke-width: 2;
+  opacity: 0.9;
+}
+
+.crest.junc.empty .disc {
+  fill: var(--bg);
+  stroke: var(--steel-dim);
+  stroke-dasharray: 3 3;
+  opacity: 1;
+}
+
+.crest.junc .flag {
+  font-size: 20px;
+}
+
+/* Medallion */
+.medallion {
+  cursor: pointer;
+  transform-box: view-box;
+  transform-origin: 450px 450px;
+  animation: crestPop 0.6s cubic-bezier(0.34, 1.4, 0.5, 1) var(--d, 0.28s) both;
+}
+
+.medallion .ring-outer {
+  fill: none;
+  stroke: url(#goldgrad);
+  stroke-width: 3;
+}
+
+.medallion .core {
+  fill: #0c111b;
+  stroke: var(--gold-deep);
+  stroke-width: 1.5;
+}
+
+.medallion .trophy {
+  font-size: 42px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.medallion .champ-name {
+  font-family: var(--font-unbounded);
+  font-weight: 700;
+  fill: var(--gold-hi);
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  text-anchor: middle;
+}
+
+.medallion .champ-year {
+  fill: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  text-anchor: middle;
+  font-weight: 600;
+}
+
+/* Trophy & Glow keyframe animations */
+@keyframes goldGlowPulse {
+  0%, 100% {
+    opacity: 0.38;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes goldGlowPulseReverse {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.97);
+  }
+}
+
+.medallion-glow-pulse {
+  transform-origin: 450px 450px;
+  animation: goldGlowPulse 6s ease-in-out infinite;
+}
+
+.medallion-glow-pulse-reverse {
+  transform-origin: 450px 450px;
+  animation: goldGlowPulseReverse 5s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--steel);
+}
