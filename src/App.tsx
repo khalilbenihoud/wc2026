@@ -308,35 +308,35 @@ export default function App() {
         {/* Right Main Panel: Interactive Bracket */}
         <main className="main relative z-10 flex flex-col md:min-h-0 items-center justify-center pt-9 pb-4 px-4 md:pb-4 md:px-6">
           {/* Header Metadata */}
-          <div className="flex-none w-full max-w-[900px] mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-t-xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.025)] backdrop-blur-sm px-5 py-4">
+          <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-1 py-1">
               {/* Edition + editorial quote */}
               <div className="text-center md:text-left min-w-0">
-                <div className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold mb-1.5">
+                <div className="text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold mb-2">
                   Edition · {activeYear}
                 </div>
-                <p className="font-serif italic text-sm md:text-base leading-snug max-w-[380px] mx-auto md:mx-0 text-brand-text">
+                <p className="font-serif italic text-lg md:text-2xl leading-snug max-w-[480px] mx-auto md:mx-0 text-brand-text">
                   {currentData.quote ?? "The story is still being written."}
                 </p>
               </div>
 
               {/* Host / Champion / Golden Boot chips */}
-              <div className="flex items-stretch justify-center rounded-xl border border-brand-line overflow-hidden divide-x divide-brand-line flex-none mx-auto md:mx-0">
-                <div className="flex flex-col items-center justify-center py-3 px-4 gap-1.5">
-                  <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
-                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
+              <div className="flex items-stretch justify-center gap-3 flex-none mx-auto md:mx-0">
+                <div className="flex flex-col items-center justify-center py-4 px-6 gap-2 rounded-xl border border-brand-line">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
+                  <span className="text-brand-text font-bold text-base uppercase tracking-wide leading-none whitespace-nowrap">
                     {currentData.hostFlag} {currentData.host}
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-3 px-4 gap-1.5 bg-brand-gold/[0.04]">
-                  <span className="text-[9px] uppercase tracking-[0.28em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
-                  <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
+                <div className="flex flex-col items-center justify-center py-4 px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.04]">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
+                  <span className="text-brand-gold font-bold text-base uppercase tracking-wide leading-none whitespace-nowrap">
                     {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-3 px-4 gap-1.5">
-                  <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
-                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
+                <div className="flex flex-col items-center justify-center py-4 px-6 gap-2 rounded-xl border border-brand-line">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
+                  <span className="text-brand-text font-bold text-base uppercase tracking-wide leading-none whitespace-nowrap">
                     {currentData.goldenBoot
                       ? `⚽ ${currentData.goldenBoot.name} · ${currentData.goldenBoot.goals}`
                       : "TBD"}
@@ -346,7 +346,7 @@ export default function App() {
             </div>
 
             {/* Secondary stat strip */}
-            <div className="flex items-center justify-between px-5 py-2 border-x border-b border-brand-line rounded-b-xl bg-[rgba(var(--overlay-rgb),0.015)] text-[9px] tracking-[0.2em] uppercase text-brand-muted">
+            <div className="flex items-center justify-between px-1 pt-3 mt-3 border-t border-brand-line text-[10px] tracking-[0.25em] uppercase text-brand-muted">
               <span>Est. 1930</span>
               <span className="text-brand-gold/80 font-semibold">{editionsCount} Editions</span>
             </div>
