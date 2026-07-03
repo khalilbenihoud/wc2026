@@ -76,7 +76,7 @@ export default function App() {
     localStorage.setItem("wc-classic-mode", lightMode ? "light" : "dark");
   }, [lightMode]);
 
-  const [activeYear, setActiveYear] = useState<number>(2022);
+  const [activeYear, setActiveYear] = useState<number>(2026);
 
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
