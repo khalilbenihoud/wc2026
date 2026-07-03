@@ -56,6 +56,50 @@
         }
       }
     },
+    "/.well-known/mcp/server-card.json": {
+      "get": {
+        "summary": "MCP Server Card",
+        "description": "Model Context Protocol server card for agent discovery.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-authorization-server": {
+      "get": {
+        "summary": "OAuth 2.0 Authorization Server metadata",
+        "description": "OAuth 2.0 Authorization Server discovery metadata (RFC 8414).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-protected-resource": {
+      "get": {
+        "summary": "OAuth Protected Resource metadata",
+        "description": "OAuth Protected Resource metadata (RFC 9728).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/.well-known/openid-configuration": {
+      "get": {
+        "summary": "OpenID Connect discovery metadata",
+        "description": "OpenID Connect Discovery metadata (OpenID.Core).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/auth.md": {
       "get": {
         "summary": "Agent authentication documentation",

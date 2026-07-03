@@ -1,0 +1,7 @@
+{
+  "resource": "https://worldcuparchive.net/",
+  "authorization_servers": [
+    "https://worldcuparchive.net/"
+  ],
+  "scopes_supported": []
+}

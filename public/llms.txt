@@ -14,6 +14,10 @@ A single page presenting one FIFA World Cup tournament's knockout bracket at a t
 
 - [/.well-known/api-catalog](https://worldcuparchive.net/.well-known/api-catalog): RFC 9727 API/resource catalog (JSON).
 - [/.well-known/agent-skills/index.json](https://worldcuparchive.net/.well-known/agent-skills/index.json): Agent Skills Discovery index.
+- [/.well-known/mcp/server-card.json](https://worldcuparchive.net/.well-known/mcp/server-card.json): MCP Server Card for agent tool/resource discovery.
+- [/.well-known/oauth-authorization-server](https://worldcuparchive.net/.well-known/oauth-authorization-server): OAuth 2.0 Authorization Server metadata.
+- [/.well-known/oauth-protected-resource](https://worldcuparchive.net/.well-known/oauth-protected-resource): OAuth Protected Resource metadata (RFC 9728).
+- [/.well-known/openid-configuration](https://worldcuparchive.net/.well-known/openid-configuration): OpenID Connect discovery metadata.
 - [/auth.md](https://worldcuparchive.net/auth.md): agent authentication/registration metadata.
 - [/llms.txt](https://worldcuparchive.net/llms.txt): this file.
 
@@ -22,12 +26,14 @@ A single page presenting one FIFA World Cup tournament's knockout bracket at a t
 - [worldcup2026 API](https://worldcup26.ir): source for 2026 fixtures, scores, and explicit bracket-feed labels (e.g. "Winner Match 74") for the 48-team format. Matches not yet played show as pending; the bracket updates as results come in.
 - [worldcup2026 API source code](https://github.com/rezarahiminia/worldcup2026): the open-source project behind that API.
 - 1986–2022 results were entered manually from real historical records; no single API source for that range.
+- 1934 and 1938 results were entered manually from real historical records.
 
 ## Key facts an agent answering questions about this site should know
 
 - Format changed in 2026: 48 teams (up from 32), adding a Round of 32 before the traditional Round of 16.
 - The bracket is circular/radial, not a traditional left-to-right tree: 16 outer leaves (Round of 16 participants) converge toward a central trophy through Quarter-final and Semi-final rings.
 - Interactions (hovering a flag, clicking a match) are JavaScript-driven and will not be visible to a crawler that does not execute JS.
+- The site now includes 1934 and 1938 World Cup data in addition to 1986–2026.
 
 ## Optional
 

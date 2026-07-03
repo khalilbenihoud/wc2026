@@ -1,0 +1,33 @@
+{
+  "serverInfo": {
+    "name": "worldcuparchive.net",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "endpoint": "https://worldcuparchive.net/"
+  },
+  "capabilities": {
+    "resources": {
+      "enabled": true,
+      "resources": [
+        {
+          "uri": "https://worldcuparchive.net/llms.txt",
+          "name": "Site Summary",
+          "mimeType": "text/markdown"
+        },
+        {
+          "uri": "https://worldcuparchive.net/openapi.json",
+          "name": "OpenAPI Specification",
+          "mimeType": "application/json"
+        }
+      ]
+    },
+    "tools": {
+      "enabled": false
+    },
+    "prompts": {
+      "enabled": false
+    }
+  },
+  "description": "World Cup knockout bracket visualizer — read-only access to tournament data from 1986 through 2026."
+}
