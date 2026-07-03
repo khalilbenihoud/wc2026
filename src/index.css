@@ -144,6 +144,12 @@ body::after {
   to { transform: translateX(100%); }
 }
 
+/* -- sidebar divider shimmer animation -- */
+@keyframes shimmerDown {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 200%; }
+}
+
 /* ---- orchestrated entrance ---- */
 @keyframes riseIn {
   from {
@@ -391,6 +397,13 @@ body::after {
 }
 
 /* Scrollbar styling */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
   height: 4px;

@@ -1,4 +1,10 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+//    ___           _                _       ___           _     _       
+//   |_ _|_ __  ___(_)_ _ ___  ___  (_)__   / __| ___  ___(_)___| |_ ___ 
+//    | || '_ \/ -_) | '_/ _ \/ _ \ | / _|  \__ \/ _ \/ _ \ / -_)  _/ -_)
+//   |___| .__/\___|_|_| \___/\___/ |_\__|  |___/\___/\___/_\___|\__\___|
+//       |_|                                                              
+// Inspired by Emilio Sansolini
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName, getTeamColor } from "./data";
 import Timeline from "./components/Timeline";
@@ -124,6 +130,52 @@ export default function App() {
     y: 0,
     visible: false,
   });
+
+  const [gbHover, setGbHover] = useState(false);
+  const [gbPhoto, setGbPhoto] = useState<string | null>(null);
+  const gbPos = useRef({ x: 0, y: 0 });
+  const gbCache = useRef<Record<string, string>>({});
+
+  const handleGbMouseEnter = useCallback((e: React.MouseEvent, name: string) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    gbPos.current = { x: rect.left + rect.width / 2, y: rect.top };
+    setGbHover(true);
+
+    const page: Record<string, string> = {
+      "Ronaldo": "Ronaldo_Nazário",
+      "Oldřich Nejedlý": "Oldřich_Nejedlý",
+      "Leônidas": "Leônidas",
+      "Salvatore Schillaci": "Salvatore_Schillaci",
+      "Hristo Stoichkov / Oleg Salenko": "Hristo_Stoichkov",
+      "Davor Šuker": "Davor_Šuker",
+      "Miroslav Klose": "Miroslav_Klose",
+      "Thomas Müller": "Thomas_Müller",
+      "James Rodríguez": "James_Rodríguez",
+      "Harry Kane": "Harry_Kane",
+      "Kylian Mbappé": "Kylian_Mbappé",
+    };
+    const clean = page[name] || name.split("/")[0].split(" (")[0].trim();
+    if (gbCache.current[clean]) {
+      setGbPhoto(gbCache.current[clean]);
+      return;
+    }
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.thumbnail?.source) {
+          gbCache.current[clean] = data.thumbnail.source;
+          setGbPhoto(data.thumbnail.source);
+        } else {
+          setGbPhoto(null);
+        }
+      })
+      .catch(() => setGbPhoto(null));
+  }, []);
+
+  const handleGbMouseLeave = useCallback(() => {
+    setGbHover(false);
+    setGbPhoto(null);
+  }, []);
 
   // Pre-calculate tournament analyses
   const analyses = useMemo(() => {
@@ -251,7 +303,7 @@ export default function App() {
   // FIFA World Cup editions run every 4 years from 1930, skipping 1942/1946
   // (WWII). 1986 was the 13th edition, so this holds for every year on our
   // timeline (all >= 1986, stepping by 4).
-  const editionsCount = 13 + (activeYear - 1986) / 4;
+  const editionsCount = Math.floor((activeYear - 1930) / 4) + 1 - (activeYear > 1938 ? 2 : 0);
 
   useEffect(() => {
     const champName = champCode ? getTeamName(champCode) : "TBD";
@@ -267,10 +319,13 @@ export default function App() {
 
       {/* Dynamic Background Layout Frame */}
       <div className="app relative grid grid-cols-1 md:grid-cols-[300px_1fr] md:min-h-0 md:flex-1 items-stretch">
-        {/* Sidebar divider — pinned to the full height of the app frame, fading out toward the bottom */}
+        {/* Sidebar divider — pinned to the full height of the app frame, gradient effect */}
         <div
-          className="hidden md:block absolute top-0 bottom-0 left-[300px] w-px pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, var(--line) 0%, var(--line) 70%, transparent 100%)" }}
+          className="hidden md:block absolute top-0 bottom-0 left-[300px] w-px pointer-events-none opacity-30 animate-[shimmerDown_20s_linear_infinite]"
+          style={{
+            background: "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
+            backgroundSize: "100% 200%",
+          }}
         />
 
         {/* Left Rail: Brand + Timeline */}
@@ -286,7 +341,7 @@ export default function App() {
             </button>
 
             <div className="kicker inline-flex items-center gap-2.5 font-sans font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
-              FIFA World Cup
+              World Cup
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
               <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-brand-gold-hi via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
@@ -306,54 +361,72 @@ export default function App() {
         </aside>
 
         {/* Right Main Panel: Interactive Bracket */}
-        <main className="main relative z-10 flex flex-col md:min-h-0 items-center justify-center pt-9 pb-4 px-4 md:pb-4 md:px-6">
+        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center pt-9 px-0 md:px-6 pb-28 md:pb-4">
           {/* Header Metadata */}
-          <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
+          <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:hidden md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-1 py-1">
               {/* Edition + editorial quote */}
-              <div className="text-center md:text-left min-w-0">
+              <div className="text-center md:text-left min-w-0 max-md:hidden">
                 <div className="text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold mb-2">
                   Edition · {activeYear}
                 </div>
-                <p className="font-serif italic text-lg md:text-2xl leading-snug max-w-[480px] mx-auto md:mx-0 text-brand-text">
+                <p className="font-serif italic text-lg md:text-xl leading-snug max-w-[480px] mx-auto md:mx-0 text-brand-text whitespace-nowrap">
                   {currentData.quote ?? "The story is still being written."}
                 </p>
               </div>
 
               {/* Host / Champion / Golden Boot chips */}
-              <div className="flex items-stretch justify-center gap-3 flex-none mx-auto md:mx-0">
-                <div className="flex flex-col items-center justify-center py-4 px-6 gap-2 rounded-xl border border-brand-line">
+              <div className="flex items-stretch justify-start md:justify-center gap-2 md:gap-3 flex-none mx-auto md:mx-0 overflow-x-auto md:overflow-visible max-md:hidden">
+                <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line shrink-0">
                   <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
-                  <span className="text-brand-text font-bold text-base uppercase tracking-wide leading-none whitespace-nowrap">
+                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
                     {currentData.hostFlag} {currentData.host}
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-4 px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.04]">
+                <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.04] shrink-0">
                   <span className="text-[10px] uppercase tracking-[0.3em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
-                  <span className="text-brand-gold font-bold text-base uppercase tracking-wide leading-none whitespace-nowrap">
+                  <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
                     {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-4 px-6 gap-2 rounded-xl border border-brand-line">
+                <div
+                  className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line relative shrink-0"
+                  onMouseEnter={(e) => currentData.goldenBoot && handleGbMouseEnter(e, currentData.goldenBoot.name)}
+                  onMouseLeave={handleGbMouseLeave}
+                >
                   <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
-                  <span className="text-brand-text font-bold text-base uppercase tracking-wide leading-none whitespace-nowrap">
+                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
                     {currentData.goldenBoot
                       ? `⚽ ${currentData.goldenBoot.name} · ${currentData.goldenBoot.goals}`
                       : "TBD"}
                   </span>
+                  {gbHover && gbPhoto && (
+                    <img
+                      src={gbPhoto}
+                      alt={currentData.goldenBoot!.name}
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-16 h-16 rounded-full object-cover border-2 border-brand-gold shadow-[0_0_16px_rgba(246,196,83,0.45)] animate-[crestPop_0.35s_cubic-bezier(0.34,1.4,0.5,1)_both]"
+                    />
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Secondary stat strip */}
-            <div className="flex items-center justify-between px-1 pt-3 mt-3 border-t border-brand-line text-[10px] tracking-[0.25em] uppercase text-brand-muted">
+            <div className="flex items-center justify-between px-1 pt-3 mt-3 text-[10px] tracking-[0.25em] uppercase text-brand-muted"
+              style={{
+                backgroundImage: "linear-gradient(to right, transparent, var(--line) 20%, var(--line) 80%, transparent)",
+                backgroundPosition: "0 0",
+                backgroundSize: "100% 1px",
+                backgroundRepeat: "no-repeat",
+              }}
+            >
               <span>Est. 1930</span>
               <span className="text-brand-gold/80 font-semibold">{editionsCount} Editions</span>
             </div>
           </div>
 
           {/* Svg Radial Stage */}
-          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[860px] mx-auto">
+          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[860px] max-md:max-w-none mx-auto">
             <div className="stage relative h-full max-h-[860px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
               <RadialBracket
                 data={currentData}
@@ -367,7 +440,7 @@ export default function App() {
           </div>
 
           {/* Radial Legend / Interactive Hints */}
-          <div className="legend flex-none flex gap-6 justify-center flex-wrap items-center text-brand-muted text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
+          <div className="legend flex-none max-md:hidden flex gap-6 justify-center flex-wrap items-center text-brand-muted text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
             <div className="item flex items-center gap-2">
               <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
               Hover a flag to trace its run
@@ -381,6 +454,32 @@ export default function App() {
             </div>
           </div>
         </main>
+      </div>
+
+      {/* Mobile year picker — fixed to bottom on mobile */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-to-t from-brand-bg via-brand-bg/95 to-transparent pt-6 pb-3 px-4 z-50">
+        <div className="relative">
+          <select
+            value={activeYear}
+            onChange={(e) => setActiveYear(Number(e.target.value))}
+            aria-label="Select tournament year"
+            className="w-full appearance-none rounded-xl border border-brand-gold/30 bg-brand-gold/[0.08] text-brand-gold-hi font-unbounded font-semibold text-base py-3 pl-4 pr-10 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
+          >
+            {Object.keys(TOURNAMENTS).map(Number).sort((a, b) => a - b).map((year) => {
+              const d = TOURNAMENTS[year];
+              const isFuture = d.seeded;
+              return (
+                <option key={year} value={year} className="bg-brand-bg text-brand-text">
+                  {year} — {d.host}
+                  {isFuture ? " (upcoming)" : ""}
+                </option>
+              );
+            })}
+          </select>
+          <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-3" viewBox="0 0 17.3242 10.4004" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.48633 10.4004C8.73047 10.4004 8.97461 10.3027 9.14062 10.1172L16.6992 2.37305C16.8652 2.20703 16.9629 1.99219 16.9629 1.74805C16.9629 1.24023 16.582 0.849609 16.0742 0.849609C15.8301 0.849609 15.6055 0.947266 15.4395 1.10352L7.95898 8.75L9.00391 8.75L1.52344 1.10352C1.36719 0.947266 1.14258 0.849609 0.888672 0.849609C0.380859 0.849609 0 1.24023 0 1.74805C0 1.99219 0.0976562 2.20703 0.263672 2.38281L7.82227 10.1172C8.00781 10.3027 8.23242 10.4004 8.48633 10.4004Z" fill="currentColor" className="text-brand-gold/80"/>
+          </svg>
+        </div>
       </div>
 
       {/* Results details panel list — hidden for now, revisit later */}

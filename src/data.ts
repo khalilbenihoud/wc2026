@@ -80,6 +80,9 @@ export const TEAMS: Record<string, [string, string]> = {
   HAI: ["Haiti", "🇭🇹"],
   PAN: ["Panama", "🇵🇦"],
   IRN: ["Iran", "🇮🇷"],
+  HUN: ["Hungary", "🇭🇺"],
+  CUB: ["Cuba", "🇨🇺"],
+  IDN: ["Dutch East Indies", "🇮🇩"],
   TBD: ["To Be Decided", ""],
 };
 
@@ -150,6 +153,9 @@ export const COLORS: Record<string, string> = {
   HAI: "#00209F",
   PAN: "#DA121A",
   IRN: "#239F40",
+  HUN: "#CE1126",
+  CUB: "#002A8F",
+  IDN: "#CE1126",
   TBD: "#71717a",
 };
 
@@ -163,6 +169,66 @@ export const getTeamColor = (code: string): string =>
   COLORS[code] || "#3c4658";
 
 export const TOURNAMENTS: Record<number, TournamentData> = {
+  1934: {
+    host: "Italy",
+    hostFlag: "🇮🇹",
+    goldenBoot: { name: "Oldřich Nejedlý", goals: 5 },
+    quote: "Italy's first star, born at home.",
+    teams: [
+      "ITA", "USA",
+      "ESP", "BRA",
+      "AUT", "FRA",
+      "HUN", "EGY",
+      "TCH", "SUI",
+      "GER", "BEL",
+      "SWE", "ARG",
+      "NED", "ROU",
+    ],
+    r16: [
+      M(7, 1, 0),
+      M(3, 1, 0),
+      M(3, 2, 0, null, "a.e.t."),
+      M(4, 2, 0),
+      M(3, 1, 0),
+      M(5, 2, 0),
+      M(3, 2, 0),
+      M(2, 1, 0),
+    ],
+    qf: [M(1, 0, 0), M(2, 1, 0), M(3, 2, 0), M(2, 1, 0)],
+    sf: [M(1, 0, 0), M(3, 1, 0)],
+    final: [M(2, 1, 0, null, "a.e.t.")],
+  },
+
+  1938: {
+    host: "France",
+    hostFlag: "🇫🇷",
+    goldenBoot: { name: "Leônidas", goals: 7 },
+    quote: "Leônidas dazzles, Italy repeats.",
+    teams: [
+      "SWE", "AUT",
+      "CUB", "ROU",
+      "HUN", "IDN",
+      "GER", "SUI",
+      "FRA", "BEL",
+      "ITA", "NOR",
+      "BRA", "POL",
+      "TCH", "NED",
+    ],
+    r16: [
+      M(1, 0, 0),
+      M(2, 1, 0),
+      M(6, 0, 0),
+      M(2, 4, 1),
+      M(3, 1, 0),
+      M(2, 1, 0),
+      M(6, 5, 0, null, "a.e.t."),
+      M(3, 0, 0, null, "a.e.t."),
+    ],
+    qf: [M(8, 0, 0), M(2, 0, 0), M(1, 3, 1), M(2, 1, 0)],
+    sf: [M(1, 5, 1), M(2, 1, 0)],
+    final: [M(2, 4, 1)],
+  },
+
   1986: {
     host: "Mexico",
     hostFlag: "🇲🇽",
@@ -205,7 +271,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "Italy",
     hostFlag: "🇮🇹",
     goldenBoot: { name: "Salvatore Schillaci", goals: 6 },
-    quote: "Notte Magica — Schillaci's fairytale, Germany's fourth star.",
+    quote: "Schillaci's eyes, Germany's prize.",
     teams: [
       "ARG",
       "BRA",
@@ -569,7 +635,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       "MEX", "ENG",
       "POR", "ESP",
       "USA", "BEL",
-      "TBD", "TBD",
+      "TBD", "EGY",
       "SUI", "TBD",
     ],
     r32: [
@@ -586,7 +652,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       { ta: "USA", tb: "BIH", s: [2, 0], w: 0, date: "Jul 1 · 17:00" },
       { ta: "BEL", tb: "SEN", s: [3, 2], w: 0, x: "a.e.t.", date: "Jul 1 · 13:00" },
       { ta: "ARG", tb: "CPV", s: null, w: null, date: "Jul 3 · 18:00" },
-      { ta: "AUS", tb: "EGY", s: null, w: null, date: "Jul 3 · 13:00" },
+      { ta: "AUS", tb: "EGY", s: [1, 1], w: 1, p: "4-2", date: "Jul 3 · 13:00" },
       { ta: "SUI", tb: "ALG", s: [2, 0], w: 0, date: "Jul 2 · 20:00" },
       { ta: "COL", tb: "GHA", s: null, w: null, date: "Jul 3 · 20:30" },
     ],

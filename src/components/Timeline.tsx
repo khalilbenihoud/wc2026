@@ -19,30 +19,6 @@ export default function Timeline({
 
   return (
     <>
-      {/* Mobile: compact year picker */}
-      <div className="relative mt-3 md:hidden">
-        <select
-          value={activeYear}
-          onChange={(e) => onSelectYear(Number(e.target.value))}
-          aria-label="Select tournament year"
-          className="w-full appearance-none rounded-xl border border-brand-gold/30 bg-brand-gold/[0.08] text-brand-gold-hi font-unbounded font-semibold text-base py-3 pl-4 pr-10 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
-        >
-          {years.map((year) => {
-            const d = TOURNAMENTS[year];
-            const isFuture = d.seeded;
-            return (
-              <option key={year} value={year} className="bg-brand-bg text-brand-text">
-                {year} — {d.host}
-                {isFuture ? " (upcoming)" : ""}
-              </option>
-            );
-          })}
-        </select>
-        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-brand-gold text-xs">
-          ▾
-        </span>
-      </div>
-
       {/* Desktop: vertical timeline */}
       <nav
         className="timeline relative mt-2 pl-10 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar hidden md:block"
