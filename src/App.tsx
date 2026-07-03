@@ -1,9 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName, getTeamColor } from "./data";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
-import ResultsPanel from "./components/ResultsPanel";
+// ResultsPanel is currently disabled (see below) — re-add this import if reactivating it.
 import MatchDetailsModal from "./components/MatchDetailsModal";
 
 const ROUND_NAME: Record<string, string> = {
@@ -105,11 +105,11 @@ export default function App() {
     return analyses[activeYear];
   }, [analyses, activeYear]);
 
-  const handleSelectMatch = (round: string, idx: number) => {
+  const handleSelectMatch = useCallback((round: string, idx: number) => {
     setSelectedMatch({ round, idx });
-  };
+  }, []);
 
-  const handleShowTooltip = (
+  const handleShowTooltip = useCallback((
     round: string,
     idx: number,
     x: number,
@@ -117,7 +117,7 @@ export default function App() {
     visible: boolean
   ) => {
     setTooltip({ round, idx, x, y, visible });
-  };
+  }, []);
 
   const getTooltipContent = () => {
     if (!tooltip.visible || !tooltip.round) return null;

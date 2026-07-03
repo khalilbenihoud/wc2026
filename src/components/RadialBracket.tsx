@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React, { useId, memo } from "react";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamColor, getTeamFlag, getTeamName } from "../data";
 
@@ -46,7 +46,7 @@ const introDelay = (level: number, idx: number, count: number) => {
   );
 };
 
-export default function RadialBracket({
+function RadialBracket({
   data,
   analysis,
   onSelectMatch,
@@ -612,3 +612,5 @@ export default function RadialBracket({
     </svg>
   );
 }
+
+export default memo(RadialBracket);
