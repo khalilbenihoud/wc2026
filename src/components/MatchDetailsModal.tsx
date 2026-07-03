@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamFlag, getTeamName } from "../data";
 
@@ -40,7 +40,29 @@ export default function MatchDetailsModal({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  // Keep the drawer mounted for one animation cycle after isOpen goes false,
+  // so it can play a matching close transition instead of vanishing instantly.
+  const CLOSE_MS = 250;
+  const [rendered, setRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setRendered(true);
+      setIsClosing(false);
+      return;
+    }
+    if (rendered) {
+      setIsClosing(true);
+      const t = setTimeout(() => {
+        setRendered(false);
+        setIsClosing(false);
+      }, CLOSE_MS);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen, rendered]);
+
+  if (!rendered) return null;
 
   // Competitor resolution logic
   const getCompetitors = (): [string, string] => {
@@ -101,12 +123,20 @@ export default function MatchDetailsModal({
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease]"
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${
+          isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : "animate-[fadeIn_0.2s_ease]"
+        }`}
         onClick={onClose}
       />
 
       {/* Side drawer */}
-      <div className="absolute top-0 right-0 h-full w-full max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
+      <div
+        className={`absolute top-0 right-0 h-full w-full max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
+          isClosing
+            ? "animate-[slideOutRight_0.25s_cubic-bezier(0.4,0,0.6,1)_forwards]"
+            : "animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]"
+        }`}
+      >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between px-6 pt-6 pb-4 bg-brand-panel border-b border-brand-line">
           <div>

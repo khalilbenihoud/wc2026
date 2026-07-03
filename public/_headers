@@ -1,0 +1,6 @@
+# Cloudflare Pages custom response headers.
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  Link: </llms.txt>; rel="llms.txt", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
+  X-Content-Type-Options: nosniff

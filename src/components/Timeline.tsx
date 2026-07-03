@@ -102,7 +102,13 @@ export default function Timeline({
               {year}
             </span>
 
-            <span className="tl-champ ml-auto text-base leading-none opacity-40 transition-opacity duration-200 hover:opacity-85">
+            <span
+              className={`tl-champ ml-auto leading-none transition-all duration-200 ${
+                isActive
+                  ? "text-xl opacity-100 drop-shadow-[0_0_8px_rgba(246,196,83,0.5)] scale-110"
+                  : "text-base opacity-40 hover:opacity-85"
+              }`}
+            >
               {champFlag}
             </span>
           </button>

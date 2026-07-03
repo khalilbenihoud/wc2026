@@ -134,6 +134,16 @@ body::after {
   to { transform: translateX(0); }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
 /* ---- orchestrated entrance ---- */
 @keyframes riseIn {
   from {

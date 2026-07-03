@@ -1,6 +1,6 @@
 # The Road to Glory
 
-> An interactive radial bracket visualizing every FIFA World Cup knockout
+> https://worldcuparchive.net/ — An interactive radial bracket visualizing every FIFA World Cup knockout
 > stage from 1986 through 2026. Built as a client-rendered single-page app
 > (React + TypeScript); this file exists because the rendered page requires
 > JavaScript execution to show its content to a crawler.

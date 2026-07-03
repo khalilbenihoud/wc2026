@@ -1,3 +1,10 @@
+# Content usage preferences (contentsignals.org / draft-romm-aipref-contentsignals).
+# search=yes: fine to index and surface in search results.
+# ai-input=yes: fine for an assistant to read this page to answer a user's question about it.
+# ai-train=no: not for training-data collection — the tournament data here is
+# sourced from third parties (see llms.txt), not ours to license for training.
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+
 # All conventional crawlers welcome.
 User-agent: *
 Allow: /
@@ -30,5 +37,4 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-# The Sitemap directive requires an absolute URL — add it once deployed:
-# Sitemap: https://your-domain.example/sitemap.xml
+Sitemap: https://worldcuparchive.net/sitemap.xml

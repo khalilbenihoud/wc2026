@@ -71,6 +71,46 @@ export default function App() {
   }, [lightMode]);
 
   const [activeYear, setActiveYear] = useState<number>(2022);
+
+  // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
+  // the browser supports it. Experimental API (navigator.modelContext isn't
+  // in the DOM lib yet), feature-detected so this is a no-op everywhere else.
+  useEffect(() => {
+    const modelContext = (
+      navigator as unknown as {
+        modelContext?: { provideContext: (options: unknown) => void };
+      }
+    ).modelContext;
+    if (!modelContext) return;
+
+    modelContext.provideContext({
+      tools: [
+        {
+          name: "select_world_cup_year",
+          description:
+            "Switch the displayed bracket to a specific FIFA World Cup year, to view that tournament's host, champion, and knockout results.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              year: {
+                type: "number",
+                enum: Object.keys(TOURNAMENTS).map(Number),
+                description: "The tournament year to display, e.g. 2022.",
+              },
+            },
+            required: ["year"],
+          },
+          execute: async ({ year }: { year: number }) => {
+            setActiveYear(year);
+            return {
+              content: [{ type: "text", text: `Now showing the ${year} World Cup bracket.` }],
+            };
+          },
+        },
+      ],
+    });
+  }, []);
+
   const [hoveredLeaf, setHoveredLeaf] = useState<number | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<{
     round: string;
@@ -208,6 +248,11 @@ export default function App() {
       ? currentData.teams[currentAnalysis.champ]
       : null;
 
+  // FIFA World Cup editions run every 4 years from 1930, skipping 1942/1946
+  // (WWII). 1986 was the 13th edition, so this holds for every year on our
+  // timeline (all >= 1986, stepping by 4).
+  const editionsCount = 13 + (activeYear - 1986) / 4;
+
   useEffect(() => {
     const champName = champCode ? getTeamName(champCode) : "TBD";
     document.title = `${activeYear} World Cup Bracket — ${champName} · The Road to Glory`;
@@ -263,18 +308,47 @@ export default function App() {
         {/* Right Main Panel: Interactive Bracket */}
         <main className="main relative z-10 flex flex-col md:min-h-0 items-center justify-center pt-9 pb-4 px-4 md:pb-4 md:px-6">
           {/* Header Metadata */}
-          <div className="flex-none flex items-stretch w-fit max-w-full mb-4 relative z-10 rounded-xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.025)] backdrop-blur-sm overflow-hidden divide-x divide-brand-line max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
-            <div className="flex flex-col items-center justify-center py-3 px-5 gap-1.5">
-              <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
-              <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                {currentData.hostFlag} {currentData.host}
-              </span>
+          <div className="flex-none w-full max-w-[900px] mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-t-xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.025)] backdrop-blur-sm px-5 py-4">
+              {/* Edition + editorial quote */}
+              <div className="text-center md:text-left min-w-0">
+                <div className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold mb-1.5">
+                  Edition · {activeYear}
+                </div>
+                <p className="font-serif italic text-sm md:text-base leading-snug max-w-[380px] mx-auto md:mx-0 text-brand-text">
+                  {currentData.quote ?? "The story is still being written."}
+                </p>
+              </div>
+
+              {/* Host / Champion / Golden Boot chips */}
+              <div className="flex items-stretch justify-center rounded-xl border border-brand-line overflow-hidden divide-x divide-brand-line flex-none mx-auto md:mx-0">
+                <div className="flex flex-col items-center justify-center py-3 px-4 gap-1.5">
+                  <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
+                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
+                    {currentData.hostFlag} {currentData.host}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-3 px-4 gap-1.5 bg-brand-gold/[0.04]">
+                  <span className="text-[9px] uppercase tracking-[0.28em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
+                  <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
+                    {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-3 px-4 gap-1.5">
+                  <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
+                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
+                    {currentData.goldenBoot
+                      ? `⚽ ${currentData.goldenBoot.name} · ${currentData.goldenBoot.goals}`
+                      : "TBD"}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-center py-3 px-5 gap-1.5 bg-brand-gold/[0.04]">
-              <span className="text-[9px] uppercase tracking-[0.28em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
-              <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
-              </span>
+
+            {/* Secondary stat strip */}
+            <div className="flex items-center justify-between px-5 py-2 border-x border-b border-brand-line rounded-b-xl bg-[rgba(var(--overlay-rgb),0.015)] text-[9px] tracking-[0.2em] uppercase text-brand-muted">
+              <span>Est. 1930</span>
+              <span className="text-brand-gold/80 font-semibold">{editionsCount} Editions</span>
             </div>
           </div>
 

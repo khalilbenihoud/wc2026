@@ -25,6 +25,8 @@ export interface TournamentData {
   sf: Match[] | null;
   final: Match[] | null;
   seeded?: boolean;
+  goldenBoot?: { name: string; goals: number } | null;
+  quote?: string | null; // short editorial line about the final, e.g. "Messi. At last."
 }
 
 export interface TournamentAnalysis {

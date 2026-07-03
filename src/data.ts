@@ -166,6 +166,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1986: {
     host: "Mexico",
     hostFlag: "🇲🇽",
+    goldenBoot: { name: "Gary Lineker", goals: 6 },
+    quote: "Maradona's tournament, and no one else's.",
     teams: [
       "FRA",
       "ITA",
@@ -202,6 +204,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1990: {
     host: "Italy",
     hostFlag: "🇮🇹",
+    goldenBoot: { name: "Salvatore Schillaci", goals: 6 },
+    quote: "Notte Magica — Schillaci's fairytale, Germany's fourth star.",
     teams: [
       "ARG",
       "BRA",
@@ -238,6 +242,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1994: {
     host: "United States",
     hostFlag: "🇺🇸",
+    goldenBoot: { name: "Hristo Stoichkov / Oleg Salenko", goals: 6 },
+    quote: "Baggio's penalty, sent into the night sky.",
     teams: [
       "NGA",
       "ITA",
@@ -274,6 +280,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1998: {
     host: "France",
     hostFlag: "🇫🇷",
+    goldenBoot: { name: "Davor Šuker", goals: 6 },
+    quote: "Les Bleus, at home, and unstoppable.",
     teams: [
       "BRA",
       "CHI",
@@ -310,6 +318,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2002: {
     host: "South Korea / Japan",
     hostFlag: "🇰🇷 🇯🇵",
+    goldenBoot: { name: "Ronaldo", goals: 8 },
+    quote: "Ronaldo's redemption completes Brazil's fifth star.",
     teams: [
       "GER",
       "PAR",
@@ -351,6 +361,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2006: {
     host: "Germany",
     hostFlag: "🇩🇪",
+    goldenBoot: { name: "Miroslav Klose", goals: 5 },
+    quote: "Zidane's headbutt, Italy's night on penalties.",
     teams: [
       "GER",
       "SWE",
@@ -387,6 +399,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2010: {
     host: "South Africa",
     hostFlag: "🇿🇦",
+    goldenBoot: { name: "Thomas Müller", goals: 5 },
+    quote: "Iniesta, in extra time, forever.",
     teams: [
       "URU",
       "KOR",
@@ -428,6 +442,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2014: {
     host: "Brazil",
     hostFlag: "🇧🇷",
+    goldenBoot: { name: "James Rodríguez", goals: 6 },
+    quote: "Götze's finish seals Germany's fourth star.",
     teams: [
       "BRA",
       "CHI",
@@ -464,6 +480,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2018: {
     host: "Russia",
     hostFlag: "🇷🇺",
+    goldenBoot: { name: "Harry Kane", goals: 6 },
+    quote: "Mbappé arrives, France reigns again.",
     teams: [
       "URU",
       "POR",
@@ -500,6 +518,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2022: {
     host: "Qatar",
     hostFlag: "🇶🇦",
+    goldenBoot: { name: "Kylian Mbappé", goals: 8 },
+    quote: "Messi. At last. The greatest final.",
     teams: [
       "NED",
       "USA",
@@ -536,6 +556,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2026: {
     host: "USA · Canada · Mexico",
     hostFlag: "🇺🇸 🇨🇦 🇲🇽",
+    goldenBoot: null,
+    quote: null,
     seeded: false,
     // Sourced from https://worldcup26.ir (worldcup2026 REST API) — see
     // scripts/fetch-worldcup26.ts. Bracket-feed order is deterministic via
