@@ -361,7 +361,7 @@ export default function App() {
         </aside>
 
         {/* Right Main Panel: Interactive Bracket */}
-        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center pt-9 px-0 md:px-6 pb-28 md:pb-4">
+        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center pt-9 px-0 md:px-6 pb-28 md:pb-4 max-md:overflow-hidden">
           {/* Header Metadata */}
           <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:hidden md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-1 py-1">
@@ -427,7 +427,7 @@ export default function App() {
 
           {/* Svg Radial Stage */}
           <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[860px] max-md:max-w-none mx-auto">
-            <div className="stage relative h-full max-h-[860px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
+            <div className="stage relative h-full max-h-[860px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] max-md:scale-[1.38] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
               <RadialBracket
                 data={currentData}
                 analysis={currentAnalysis}
