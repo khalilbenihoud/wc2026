@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "world-cup-bracket",
+      "type": "skill-md",
+      "description": "Answer questions about FIFA World Cup knockout-stage data from 1986 through 2026.",
+      "url": "https://worldcuparchive.net/.well-known/agent-skills/world-cup-bracket/SKILL.md",
+      "digest": "sha256:305e242135726761668df320c0d5a4be3c04676ed176bc88f62f225ddfb606ac"
+    }
+  ]
+}

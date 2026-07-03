@@ -1,0 +1,71 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "The Road to Glory — World Cup Bracket Site",
+    "version": "1.0.0",
+    "description": "Read-only, static publication of FIFA World Cup knockout-stage data and related machine-readable discovery documents."
+  },
+  "servers": [
+    {
+      "url": "https://worldcuparchive.net/",
+      "description": "Production site"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Homepage",
+        "description": "Interactive radial bracket SPA. Returns HTML by default; returns /llms.txt as text/markdown when Accept: text/markdown is requested.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/llms.txt": {
+      "get": {
+        "summary": "LLMs.txt summary",
+        "description": "Markdown summary of the site for LLM crawlers.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/.well-known/api-catalog": {
+      "get": {
+        "summary": "API catalog",
+        "description": "RFC 9727 API catalog in application/linkset+json format.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/.well-known/agent-skills/index.json": {
+      "get": {
+        "summary": "Agent skills discovery index",
+        "description": "Agent Skills Discovery RFC v0.2.0 index.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth.md": {
+      "get": {
+        "summary": "Agent authentication documentation",
+        "description": "Auth.md agent registration/authentication metadata.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

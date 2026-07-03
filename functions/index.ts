@@ -13,10 +13,22 @@ interface Env {
   ASSETS: { fetch: typeof fetch };
 }
 
+// Shared agent-discovery Link header for homepage responses (RFC 8288).
+const linkHeader =
+  '</.well-known/api-catalog>; rel="api-catalog", ' +
+  '</.well-known/agent-skills/index.json>; rel="agent-skills", ' +
+  '</auth.md>; rel="auth-md", ' +
+  '</llms.txt>; rel="llms.txt", ' +
+  '</openapi.json>; rel="service-desc", ' +
+  '</robots.txt>; rel="robots", ' +
+  '</sitemap.xml>; rel="sitemap"';
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const accept = context.request.headers.get("Accept") ?? "";
+  const url = new URL(context.request.url);
 
-  if (accept.includes("text/markdown")) {
+  // Only the homepage supports Markdown for Agents content negotiation.
+  if (url.pathname === "/" && accept.includes("text/markdown")) {
     const llmsUrl = new URL("/llms.txt", context.request.url);
     const res = await context.env.ASSETS.fetch(new Request(llmsUrl, context.request));
     const body = await res.text();
@@ -26,6 +38,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
+        Link: linkHeader,
       },
     });
   }

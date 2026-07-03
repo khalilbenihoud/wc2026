@@ -2,5 +2,17 @@
 # https://developers.cloudflare.com/pages/configuration/headers/
 
 /*
-  Link: </llms.txt>; rel="llms.txt", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
+  Link: </.well-known/api-catalog>; rel="api-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </auth.md>; rel="auth-md", </llms.txt>; rel="llms.txt", </openapi.json>; rel="service-desc", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
   X-Content-Type-Options: nosniff
+
+/.well-known/api-catalog
+  Content-Type: application/linkset+json
+
+/.well-known/agent-skills/index.json
+  Content-Type: application/json
+
+/auth.md
+  Content-Type: text/markdown; charset=utf-8
+
+/openapi.json
+  Content-Type: application/json

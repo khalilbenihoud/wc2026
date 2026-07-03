@@ -1,0 +1,12 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://worldcuparchive.net/",
+      "service-desc": ["https://worldcuparchive.net/openapi.json"],
+      "service-doc": ["https://worldcuparchive.net/llms.txt"],
+      "status": ["https://worldcuparchive.net/"],
+      "llms.txt": ["https://worldcuparchive.net/llms.txt"],
+      "auth-md": ["https://worldcuparchive.net/auth.md"]
+    }
+  ]
+}

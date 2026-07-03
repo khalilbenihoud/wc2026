@@ -10,6 +10,13 @@ A single page presenting one FIFA World Cup tournament's knockout bracket at a t
 - [Sitemap](https://worldcuparchive.net/sitemap.xml): canonical URL list.
 - [robots.txt](https://worldcuparchive.net/robots.txt): crawler access rules and content-usage signals.
 
+## Agent discovery
+
+- [/.well-known/api-catalog](https://worldcuparchive.net/.well-known/api-catalog): RFC 9727 API/resource catalog (JSON).
+- [/.well-known/agent-skills/index.json](https://worldcuparchive.net/.well-known/agent-skills/index.json): Agent Skills Discovery index.
+- [/auth.md](https://worldcuparchive.net/auth.md): agent authentication/registration metadata.
+- [/llms.txt](https://worldcuparchive.net/llms.txt): this file.
+
 ## Data provenance
 
 - [worldcup2026 API](https://worldcup26.ir): source for 2026 fixtures, scores, and explicit bracket-feed labels (e.g. "Winner Match 74") for the 48-team format. Matches not yet played show as pending; the bracket updates as results come in.
