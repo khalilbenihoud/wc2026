@@ -237,7 +237,7 @@ export default function ResultsPanel({
               )}
             </div>
           ) : (
-            <div className="flex items-start gap-3.5 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4">
+            <div className="flex items-start gap-3.5 bg-[rgba(var(--overlay-rgb),0.02)] border border-[rgba(var(--overlay-rgb),0.05)] rounded-xl p-4">
               <Info className="w-5 h-5 text-brand-gold/80 flex-none mt-0.5" />
               <p className="res-note-big text-brand-muted text-sm leading-relaxed">
                 The {data._year} bracket has not been drawn yet. Team fixtures and live match scores will populate this section once the tournament kicks off.
@@ -293,7 +293,7 @@ export default function ResultsPanel({
               className={`px-3.5 py-1.5 text-xs font-unbounded font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap ${
                 activeRound === "all"
                   ? "bg-brand-gold text-brand-bg shadow-sm font-semibold"
-                  : "text-brand-muted hover:text-brand-text hover:bg-white/5"
+                  : "text-brand-muted hover:text-brand-text hover:bg-[rgba(var(--overlay-rgb),0.05)]"
               }`}
             >
               All Phases
@@ -305,7 +305,7 @@ export default function ResultsPanel({
                 className={`px-3.5 py-1.5 text-xs font-unbounded font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap ${
                   activeRound === key
                     ? "bg-brand-gold text-brand-bg shadow-sm font-semibold"
-                    : "text-brand-muted hover:text-brand-text hover:bg-white/5"
+                    : "text-brand-muted hover:text-brand-text hover:bg-[rgba(var(--overlay-rgb),0.05)]"
                 }`}
               >
                 {label}
@@ -326,7 +326,7 @@ export default function ResultsPanel({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 text-brand-muted hover:text-brand-text transition-colors cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-[rgba(var(--overlay-rgb),0.1)] text-brand-muted hover:text-brand-text transition-colors cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -342,9 +342,9 @@ export default function ResultsPanel({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col items-center justify-center py-12 text-center bg-white/[0.01] border border-dashed border-brand-line rounded-2xl"
+              className="flex flex-col items-center justify-center py-12 text-center bg-[rgba(var(--overlay-rgb),0.01)] border border-dashed border-brand-line rounded-2xl"
             >
-              <div className="p-4 rounded-full bg-white/[0.02] border border-white/[0.04] mb-3 text-brand-muted">
+              <div className="p-4 rounded-full bg-[rgba(var(--overlay-rgb),0.02)] border border-[rgba(var(--overlay-rgb),0.04)] mb-3 text-brand-muted">
                 <Filter className="w-6 h-6 opacity-60" />
               </div>
               <h3 className="font-unbounded font-semibold text-brand-text text-sm mb-1">No Matches Found</h3>

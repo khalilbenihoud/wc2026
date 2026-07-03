@@ -35,6 +35,50 @@
   --muted: #71717a;
   --danger: #e11d48;
   --win: #22c55e;
+  /* RGB channels for subtle hover/shine tints — flips to black tint in light mode */
+  --overlay-rgb: 255, 255, 255;
+}
+
+/* ---- Light mode ---- */
+:root.light {
+  --bg: #f8f7f4;
+  --bg-2: #f0ede6;
+  --panel: #ffffff;
+  --gold: #b8790a;
+  --gold-hi: #8a5a06;
+  --gold-deep: #6b4304;
+  --steel: #c0bdb8;
+  --steel-dim: #e8e5e0;
+  --line: #e0ddd8;
+  --text: #1a1814;
+  --muted: #6b6660;
+  --danger: #c0192f;
+  --win: #187a43;
+  --overlay-rgb: 0, 0, 0;
+
+  --color-brand-bg: #f8f7f4;
+  --color-brand-bg-2: #f0ede6;
+  --color-brand-panel: #ffffff;
+  --color-brand-gold: #b8790a;
+  --color-brand-gold-hi: #8a5a06;
+  --color-brand-gold-deep: #6b4304;
+  --color-brand-steel: #c0bdb8;
+  --color-brand-steel-dim: #e8e5e0;
+  --color-brand-line: #e0ddd8;
+  --color-brand-text: #1a1814;
+  --color-brand-muted: #6b6660;
+  --color-brand-danger: #c0192f;
+  --color-brand-win: #187a43;
+}
+
+.light body {
+  background-image:
+    radial-gradient(1100px 820px at 50% 50%, rgba(184, 121, 10, 0.06), transparent 62%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 66%);
+}
+
+.light body::after {
+  opacity: 0.02;
 }
 
 body {
@@ -244,7 +288,7 @@ body::after {
 }
 
 .medallion .core {
-  fill: #0c111b;
+  fill: var(--bg);
   stroke: var(--gold-deep);
   stroke-width: 1.5;
 }

@@ -109,7 +109,7 @@ export default function MatchDetailsModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="card relative w-full max-w-[540px] bg-gradient-to-b from-[#18181b] to-[#09090b] border border-brand-line rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(246,196,83,0.06)] animate-[rise_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
+      <div className="card relative w-full max-w-[540px] bg-gradient-to-b from-brand-panel to-brand-bg border border-brand-line rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(246,196,83,0.06)] animate-[rise_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
         {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-brand-muted hover:text-brand-text text-xl cursor-pointer leading-none bg-none border-none transition-colors duration-200"
@@ -156,7 +156,7 @@ export default function MatchDetailsModal({
             )}
 
             {matchDate ? (
-              <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-white/[0.015] border-t border-brand-line/50">
+              <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-[rgba(var(--overlay-rgb),0.015)] border-t border-brand-line/50">
                 🗓️ Kickoff <span className="font-semibold">{matchDate}</span>
               </div>
             ) : (
@@ -229,7 +229,7 @@ export default function MatchDetailsModal({
 
             {/* Match Notes / Penalties */}
             {notes.length > 0 && (
-              <div className="note text-center text-brand-muted text-xs border-t border-brand-line py-3 px-4 bg-white/[0.015]">
+              <div className="note text-center text-brand-muted text-xs border-t border-brand-line py-3 px-4 bg-[rgba(var(--overlay-rgb),0.015)]">
                 {notes.map((n, i) => (
                   <span key={i}>
                     {i > 0 && <span className="mx-2 text-brand-steel">·</span>}
@@ -240,7 +240,7 @@ export default function MatchDetailsModal({
             )}
 
             {/* Winner footer declaration */}
-            <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-white/[0.015] border-t border-brand-line/50">
+            <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-[rgba(var(--overlay-rgb),0.015)] border-t border-brand-line/50">
               🏆{" "}
               <span className="font-semibold">{getTeamName(winnerCode)}</span>{" "}
               {round === "final" ? "lift the trophy" : "advance to the next round"}

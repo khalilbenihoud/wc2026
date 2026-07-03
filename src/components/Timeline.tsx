@@ -73,7 +73,7 @@ export default function Timeline({
             className={`tl-item relative flex items-center gap-3 py-2.5 px-3.5 pr-4 pl-3 my-1 rounded-xl cursor-pointer transition-all duration-300 w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 border ${
               isActive
                 ? "active bg-brand-gold/[0.08] border-brand-gold/30 shadow-[0_4px_20px_rgba(246,196,83,0.06)]"
-                : "border-transparent hover:bg-white/5 hover:border-white/[0.02]"
+                : "border-transparent hover:bg-[rgba(var(--overlay-rgb),0.05)] hover:border-[rgba(var(--overlay-rgb),0.02)]"
             } ${isFuture ? "future" : ""}`}
             style={
               {

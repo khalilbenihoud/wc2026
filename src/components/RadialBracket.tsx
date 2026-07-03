@@ -517,7 +517,7 @@ export default function RadialBracket({
             className="champ-name font-unbounded select-none text-brand-muted"
             x={CX}
             y={CY + 48}
-            style={{ fontSize: "15px", fill: "#71717a" }}
+            style={{ fontSize: "15px", fill: "var(--muted)" }}
           >
             TBD
           </text>
@@ -586,8 +586,8 @@ export default function RadialBracket({
           </feMerge>
         </filter>
         <radialGradient id={medFaceId} cx="0.5" cy="0.4" r="0.7">
-          <stop offset="0" stopColor="#27272a" />
-          <stop offset="1" stopColor="#09090b" />
+          <stop offset="0" style={{ stopColor: "var(--steel-dim)" }} />
+          <stop offset="1" style={{ stopColor: "var(--bg)" }} />
         </radialGradient>
       </defs>
 

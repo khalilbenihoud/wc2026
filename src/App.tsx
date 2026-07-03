@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName, getTeamColor } from "./data";
 import Timeline from "./components/Timeline";
@@ -61,6 +61,15 @@ function analyze(d: TournamentData): TournamentAnalysis {
 }
 
 export default function App() {
+  const [lightMode, setLightMode] = useState<boolean>(
+    () => localStorage.getItem("wc-classic-mode") === "light"
+  );
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("light", lightMode);
+    localStorage.setItem("wc-classic-mode", lightMode ? "light" : "dark");
+  }, [lightMode]);
+
   const [activeYear, setActiveYear] = useState<number>(2022);
   const [hoveredLeaf, setHoveredLeaf] = useState<number | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<{
@@ -215,13 +224,22 @@ export default function App() {
         />
 
         {/* Left Rail: Brand + Timeline */}
-        <aside className="rail relative z-20 flex flex-col md:min-h-0 p-4 pt-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-white/[0.016] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
-          <div className="brand mb-3 md:mb-6 max-md:text-center">
+        <aside className="rail relative z-20 flex flex-col md:min-h-0 p-4 pt-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
+          <div className="brand relative mb-3 md:mb-6 max-md:text-center">
+            {/* Light/dark toggle */}
+            <button
+              onClick={() => setLightMode((v) => !v)}
+              aria-label="Toggle light/dark mode"
+              className="absolute top-0 right-0 w-7 h-7 flex items-center justify-center rounded-full border border-brand-line bg-brand-panel/60 backdrop-blur-sm text-brand-muted hover:text-brand-text transition-colors cursor-pointer text-xs max-md:static max-md:mb-3 max-md:mx-auto"
+            >
+              {lightMode ? "🌙" : "☀️"}
+            </button>
+
             <div className="kicker inline-flex items-center gap-2.5 font-sans font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
               FIFA World Cup
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
-              <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-[#fff8ea] via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
+              <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-brand-gold-hi via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
                 The Road to Glory
               </span>
             </h1>
@@ -240,7 +258,7 @@ export default function App() {
         {/* Right Main Panel: Interactive Bracket */}
         <main className="main relative z-10 flex flex-col md:min-h-0 items-center justify-center pt-9 pb-4 px-4 md:pb-4 md:px-6">
           {/* Header Metadata */}
-          <div className="flex-none flex items-stretch w-fit max-w-full mb-4 relative z-10 rounded-xl border border-brand-line bg-white/[0.025] backdrop-blur-sm overflow-hidden divide-x divide-brand-line max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
+          <div className="flex-none flex items-stretch w-fit max-w-full mb-4 relative z-10 rounded-xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.025)] backdrop-blur-sm overflow-hidden divide-x divide-brand-line max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
             <div className="flex flex-col items-center justify-center py-3 px-5 gap-1.5">
               <span className="text-[9px] uppercase tracking-[0.28em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
               <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
@@ -296,7 +314,7 @@ export default function App() {
       {/* Floating Tooltip */}
       {tooltip.visible && getTooltipContent() && (
         <div
-          className="tip fixed z-50 pointer-events-none select-none -translate-x-1/2 -translate-y-[118%] bg-gradient-to-b from-[#182031] to-[#0c1019] border border-brand-line rounded-xl py-2 px-3.5 min-w-[180px] shadow-[0_16px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(246,196,83,0.05)] after:content-[''] after:absolute after:left-1/2 after:-bottom-1.5 after:-translate-x-1/2 after:rotate-45 after:w-2.5 after:h-2.5 after:bg-[#0c1019] after:border-r after:border-b after:border-brand-line transition-all duration-100 ease-out"
+          className="tip fixed z-50 pointer-events-none select-none -translate-x-1/2 -translate-y-[118%] bg-gradient-to-b from-brand-panel to-brand-bg border border-brand-line rounded-xl py-2 px-3.5 min-w-[180px] shadow-[0_16px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(246,196,83,0.05)] after:content-[''] after:absolute after:left-1/2 after:-bottom-1.5 after:-translate-x-1/2 after:rotate-45 after:w-2.5 after:h-2.5 after:bg-brand-bg after:border-r after:border-b after:border-brand-line transition-all duration-100 ease-out"
           style={{
             left: `${tooltip.x}px`,
             top: `${tooltip.y}px`,
