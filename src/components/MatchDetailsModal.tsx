@@ -19,14 +19,6 @@ const ROUND_NAME: Record<string, string> = {
   final: "Final",
 };
 
-const ROUND_SUB: Record<string, string> = {
-  r32: "Last 32",
-  r16: "Last 16",
-  qf: "Last 8",
-  sf: "Last 4",
-  final: "The Decider",
-};
-
 export default function MatchDetailsModal({
   isOpen,
   round,
@@ -35,7 +27,7 @@ export default function MatchDetailsModal({
   analysis,
   onClose,
 }: MatchDetailsModalProps) {
-  // ESC key to close modal
+  // ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -93,6 +85,7 @@ export default function MatchDetailsModal({
     [ta, tb] = getCompetitors();
   }
 
+  const knownTeams = ta && ta !== "TBD" && tb && tb !== "TBD";
   const winTop = m ? m.w === 0 : false;
   const winnerCode = winTop ? ta : tb;
 
@@ -102,134 +95,88 @@ export default function MatchDetailsModal({
     if (m.p) notes.push(`Penalties ${m.p.replace("-", "–")}`);
   }
 
+  const played = !isSeeded && !!m;
+
   return (
-    <div
-      className="overlay fixed inset-0 z-50 flex items-center justify-center p-5 bg-brand-bg/75 backdrop-blur-md animate-[fade_0.25s_ease]"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="card relative w-full max-w-[540px] bg-gradient-to-b from-brand-panel to-brand-bg border border-brand-line rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(246,196,83,0.06)] animate-[rise_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
-        {/* Close Button */}
-        <button
-          className="absolute top-4 right-4 text-brand-muted hover:text-brand-text text-xl cursor-pointer leading-none bg-none border-none transition-colors duration-200"
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          ✕
-        </button>
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease]"
+        onClick={onClose}
+      />
 
-        {isSeeded || !m ? (
-          /* Seeded / Not-Yet-Played Match View */
-          <>
-            <div className="round-tag font-unbounded tracking-[0.14em] text-base text-brand-gold text-center pt-8 pb-1">
-              {ROUND_NAME[round]}
+      {/* Side drawer */}
+      <div className="absolute top-0 right-0 h-full w-full max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-start justify-between px-6 pt-6 pb-4 bg-brand-panel border-b border-brand-line">
+          <div>
+            <div className="font-sans font-semibold text-[10px] tracking-[0.28em] uppercase text-brand-gold mb-1.5">
+              {data._year} · {ROUND_NAME[round]}
             </div>
-            <div className="stage-line text-center text-brand-muted text-xs tracking-wide pb-4">
-              {data._year} · {data.host}
-            </div>
+            <h2 className="font-unbounded font-bold text-xl text-brand-text tracking-tight">
+              Match {idx + 1}
+            </h2>
+          </div>
+          <button
+            className="text-brand-muted hover:text-brand-text text-xl cursor-pointer leading-none bg-none border-none transition-colors duration-200 mt-1"
+            onClick={onClose}
+            aria-label="Close match details"
+          >
+            ✕
+          </button>
+        </div>
 
-            {ta && ta !== "TBD" && tb && tb !== "TBD" ? (
-              <div className="teams grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 px-6 pb-6">
-                <div className="side text-center">
-                  <div className="fl text-[52px] leading-none">{getTeamFlag(ta)}</div>
-                  <div className="nm font-unbounded text-lg tracking-wide mt-1.5 text-brand-text max-w-[190px] mx-auto break-words line-clamp-2">
+        <div className="p-6 flex flex-col gap-5">
+          {/* Score card */}
+          <div className="rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6">
+            {knownTeams ? (
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                <div className="text-center">
+                  <div className="text-[44px] leading-none mb-2">{getTeamFlag(ta)}</div>
+                  <div
+                    className={`font-unbounded text-base tracking-wide break-words leading-snug ${
+                      winTop ? "text-brand-gold-hi" : "text-brand-text"
+                    }`}
+                  >
                     {getTeamName(ta)}
                   </div>
+                  <div className="inline-block mt-2 text-[9px] font-mono tracking-widest uppercase text-brand-muted bg-[rgba(var(--overlay-rgb),0.05)] border border-brand-line rounded px-1.5 py-0.5">
+                    {ta}
+                  </div>
                 </div>
-                <div className="score font-unbounded text-2xl text-brand-steel px-1.5 select-none">
-                  vs
-                </div>
-                <div className="side text-center">
-                  <div className="fl text-[52px] leading-none">{getTeamFlag(tb)}</div>
-                  <div className="nm font-unbounded text-lg tracking-wide mt-1.5 text-brand-text max-w-[190px] mx-auto break-words line-clamp-2">
+
+                {played ? (
+                  <div className="font-unbounded text-[32px] text-brand-text flex items-center gap-1.5 px-1 select-none">
+                    <span>{m!.s[0]}</span>
+                    <span className="text-brand-steel text-xl">:</span>
+                    <span>{m!.s[1]}</span>
+                  </div>
+                ) : (
+                  <div className="font-unbounded text-lg text-brand-steel px-1 select-none">vs</div>
+                )}
+
+                <div className="text-center">
+                  <div className="text-[44px] leading-none mb-2">{getTeamFlag(tb)}</div>
+                  <div
+                    className={`font-unbounded text-base tracking-wide break-words leading-snug ${
+                      !winTop && played ? "text-brand-gold-hi" : "text-brand-text"
+                    }`}
+                  >
                     {getTeamName(tb)}
+                  </div>
+                  <div className="inline-block mt-2 text-[9px] font-mono tracking-widest uppercase text-brand-muted bg-[rgba(var(--overlay-rgb),0.05)] border border-brand-line rounded px-1.5 py-0.5">
+                    {tb}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="teams grid grid-cols-1 justify-items-center gap-1.5 px-6 pb-6 pt-2">
-                <div className="nm font-unbounded text-lg tracking-wide text-brand-text">
-                  Not yet played
-                </div>
+              <div className="text-center font-unbounded text-base text-brand-text py-4">
+                Not yet played
               </div>
             )}
 
-            {matchDate ? (
-              <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-[rgba(var(--overlay-rgb),0.015)] border-t border-brand-line/50">
-                🗓️ Kickoff <span className="font-semibold">{matchDate}</span>
-              </div>
-            ) : (
-              <div className="stage-line text-xs text-brand-muted max-w-[280px] mx-auto pb-6 leading-relaxed text-center">
-                This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
-              </div>
-            )}
-          </>
-        ) : (
-          /* Real Match View */
-          <>
-            <div className="round-tag font-unbounded tracking-[0.14em] text-base text-brand-gold text-center pt-8 pb-1">
-              {ROUND_NAME[round]}
-            </div>
-            <div className="stage-line text-center text-brand-muted text-[11px] tracking-wider pb-4">
-              {data._year} · {data.host} · {ROUND_SUB[round]}
-              {matchDate ? ` · ${matchDate}` : ""}
-            </div>
-
-            <div className="teams grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 px-6 pb-6">
-              {/* Team A */}
-              <div className="side text-center">
-                <div className="fl text-[52px] leading-none">
-                  {getTeamFlag(ta)}
-                </div>
-                <div
-                  className={`nm font-unbounded text-lg tracking-wide mt-1.5 break-words max-w-[190px] mx-auto line-clamp-2 ${
-                    winTop ? "text-brand-gold-hi" : "text-brand-text"
-                  }`}
-                >
-                  {getTeamName(ta)}
-                </div>
-                <div
-                  className={`wintag inline-block mt-1.5 text-[9px] tracking-widest text-brand-gold border border-brand-gold/40 rounded-full px-2 py-0.5 transition-opacity duration-300 ${
-                    winTop ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  Advanced
-                </div>
-              </div>
-
-              {/* Score */}
-              <div className="score font-unbounded text-[40px] tracking-normal text-brand-text flex items-center gap-2 px-1.5 select-none">
-                <span>{m.s[0]}</span>
-                <span className="sep text-brand-steel text-2xl">–</span>
-                <span>{m.s[1]}</span>
-              </div>
-
-              {/* Team B */}
-              <div className="side text-center">
-                <div className="fl text-[52px] leading-none">
-                  {getTeamFlag(tb)}
-                </div>
-                <div
-                  className={`nm font-unbounded text-lg tracking-wide mt-1.5 break-words max-w-[190px] mx-auto line-clamp-2 ${
-                    !winTop ? "text-brand-gold-hi" : "text-brand-text"
-                  }`}
-                >
-                  {getTeamName(tb)}
-                </div>
-                <div
-                  className={`wintag inline-block mt-1.5 text-[9px] tracking-widest text-brand-gold border border-brand-gold/40 rounded-full px-2 py-0.5 transition-opacity duration-300 ${
-                    !winTop ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  Advanced
-                </div>
-              </div>
-            </div>
-
-            {/* Match Notes / Penalties */}
             {notes.length > 0 && (
-              <div className="note text-center text-brand-muted text-xs border-t border-brand-line py-3 px-4 bg-[rgba(var(--overlay-rgb),0.015)]">
+              <div className="mt-4 pt-4 border-t border-brand-line text-center text-xs text-brand-muted">
                 {notes.map((n, i) => (
                   <span key={i}>
                     {i > 0 && <span className="mx-2 text-brand-steel">·</span>}
@@ -239,14 +186,36 @@ export default function MatchDetailsModal({
               </div>
             )}
 
-            {/* Winner footer declaration */}
-            <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-[rgba(var(--overlay-rgb),0.015)] border-t border-brand-line/50">
-              🏆{" "}
-              <span className="font-semibold">{getTeamName(winnerCode)}</span>{" "}
-              {round === "final" ? "lift the trophy" : "advance to the next round"}
+            {played && (
+              <div className="mt-4 flex items-center justify-center gap-2 rounded-full border border-brand-gold/40 bg-brand-gold/10 py-2.5 px-4">
+                <span>🏆</span>
+                <span className="font-unbounded font-semibold text-sm text-brand-gold-hi">
+                  {round === "final" ? "Champion" : "Winner"}: {getTeamName(winnerCode)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-3 rounded-xl border border-brand-line px-4 py-3 text-sm text-brand-text">
+            <span className="text-brand-gold">📍</span>
+            {data.host}
+          </div>
+
+          {/* Date */}
+          {matchDate ? (
+            <div className="flex items-center gap-3 rounded-xl border border-brand-line px-4 py-3 text-sm text-brand-text">
+              <span className="text-brand-gold">📅</span>
+              {matchDate}
             </div>
-          </>
-        )}
+          ) : (
+            !played && (
+              <p className="text-xs text-brand-muted leading-relaxed px-1">
+                This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
+              </p>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

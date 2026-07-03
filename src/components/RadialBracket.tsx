@@ -309,8 +309,6 @@ function RadialBracket({
     return data.teams.map((code, i) => {
       const ang = nodeAngle(0, i);
       const [x, y] = polar(R[0], ang);
-      const [lx, ly] = polar(R[0] - 38, ang);
-      const isChamp = analysis.champ === i;
       const dl = introDelay(0, i, 16);
 
       const nodeId = `n0-${i}`;
@@ -354,13 +352,6 @@ function RadialBracket({
               {getTeamFlag(code)}
             </text>
           )}
-          <text
-            className="code font-unbounded select-none"
-            x={f2(lx)}
-            y={f2(ly + 4)}
-          >
-            {code}
-          </text>
           <circle
             className="hit fill-transparent cursor-pointer"
             cx={f2(x)}
@@ -516,14 +507,14 @@ function RadialBracket({
           <text
             className="champ-name font-unbounded select-none text-brand-muted"
             x={CX}
-            y={CY + 48}
-            style={{ fontSize: "15px", fill: "var(--muted)" }}
+            y={CY + 56}
+            style={{ fontSize: "14px", fill: "var(--muted)" }}
           >
             TBD
           </text>
         )}
 
-        <text className="champ-year select-none font-mono" x={CX} y={CY + 64}>
+        <text className="champ-year select-none font-mono" x={CX} y={CY + (champCode ? 64 : 72)}>
           {data._year}
         </text>
       </g>

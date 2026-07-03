@@ -1,0 +1,38 @@
+# The Road to Glory
+
+> An interactive radial bracket visualizing every FIFA World Cup knockout
+> stage from 1986 through 2026. Built as a client-rendered single-page app
+> (React + TypeScript); this file exists because the rendered page requires
+> JavaScript execution to show its content to a crawler.
+
+## What this site is
+
+A single page presenting one FIFA World Cup tournament's knockout bracket at
+a time, selectable via a year timeline (1986–2026). For each tournament it
+shows: host nation, champion, and the full knockout tree (Round of 16 through
+the Final, or Round of 32 through the Final for 2026's expanded 48-team
+format), with real historical scores, penalty-shootout results, and
+extra-time notes where applicable.
+
+## Data provenance
+
+- 1986–2022: real historical results, entered manually.
+- 2026: fetched from the free, public REST API at https://worldcup26.ir
+  (source: https://github.com/rezarahiminia/worldcup2026), which provides
+  fixtures, scores, and explicit bracket-feed labels (e.g. "Winner Match 74")
+  for the 48-team format. Matches not yet played show as pending; the bracket
+  updates as results come in.
+
+## Key facts an agent answering questions about this site should know
+
+- Format changed in 2026: 48 teams (up from 32), adding a Round of 32 before
+  the traditional Round of 16.
+- The bracket is circular/radial, not a traditional left-to-right tree:
+  16 outer leaves (Round of 16 participants) converge toward a central
+  trophy through Quarter-final and Semi-final rings.
+- Interactions (hovering a flag, clicking a match) are JavaScript-driven and
+  will not be visible to a crawler that does not execute JS.
+
+## Contact / source
+
+This is an independent hobby project, not an official FIFA product.

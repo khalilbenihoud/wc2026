@@ -208,8 +208,13 @@ export default function App() {
       ? currentData.teams[currentAnalysis.champ]
       : null;
 
+  useEffect(() => {
+    const champName = champCode ? getTeamName(champCode) : "TBD";
+    document.title = `${activeYear} World Cup Bracket — ${champName} · The Road to Glory`;
+  }, [activeYear, champCode]);
+
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
+    <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
       {/* Mobile notice — the radial bracket needs room to breathe */}
       <div className="flex-none md:hidden text-center text-[10px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
         For the best experience, view this on a larger screen.

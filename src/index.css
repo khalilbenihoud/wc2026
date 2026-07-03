@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+/* Google Fonts are loaded via <link> in index.html (preconnect + stylesheet),
+   not @import here — @import serializes behind this file's own fetch and
+   delays first paint. */
 @import "tailwindcss";
 
 @theme {
@@ -93,6 +95,23 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* pitch photo backdrop — low opacity, blended into the dark background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  filter: grayscale(0.7) brightness(0.6) contrast(0.9);
+  background-image:
+    radial-gradient(120% 90% at 50% 40%, transparent 0%, var(--bg) 88%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 18%, transparent 82%, var(--bg) 100%),
+    url("/pitch-bg.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
 /* grain overlay */
 body::after {
   content: "";
@@ -102,6 +121,17 @@ body::after {
   z-index: 99;
   opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- match detail drawer ---- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 /* ---- orchestrated entrance ---- */
@@ -146,6 +176,7 @@ body::after {
   stroke-width: 1;
   opacity: 0.16;
 }
+
 
 .conn {
   fill: none;
