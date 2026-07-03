@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "fetch:2026": "tsx scripts/fetch-2026.ts"
+    "fetch:2026": "tsx scripts/fetch-2026.ts",
+    "fetch:worldcup26": "tsx scripts/fetch-worldcup26.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

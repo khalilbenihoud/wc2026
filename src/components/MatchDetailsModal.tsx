@@ -12,6 +12,7 @@ interface MatchDetailsModalProps {
 }
 
 const ROUND_NAME: Record<string, string> = {
+  r32: "Round of 32",
   r16: "Round of 16",
   qf: "Quarter-final",
   sf: "Semi-final",
@@ -19,6 +20,7 @@ const ROUND_NAME: Record<string, string> = {
 };
 
 const ROUND_SUB: Record<string, string> = {
+  r32: "Last 32",
   r16: "Last 16",
   qf: "Last 8",
   sf: "Last 4",
@@ -50,6 +52,10 @@ export default function MatchDetailsModal({
 
   // Competitor resolution logic
   const getCompetitors = (): [string, string] => {
+    if (round === "r32") {
+      const rm = data.r32?.[idx];
+      return [rm?.ta ?? "TBD", rm?.tb ?? "TBD"];
+    }
     if (round === "r16") {
       return [data.teams[2 * idx], data.teams[2 * idx + 1]];
     }
@@ -68,13 +74,22 @@ export default function MatchDetailsModal({
     return [data.teams[analysis.w3[0]], data.teams[analysis.w3[1]]];
   };
 
+  const isR32 = round === "r32";
   const isSeeded = data.seeded;
-  const matches = data[round as "r16" | "qf" | "sf" | "final"];
-  const m = matches ? (round === "final" ? matches[0] : matches[idx]) : null;
+  const r32Match = isR32 ? data.r32?.[idx] ?? null : null;
+  const matchDate = r32Match?.date ?? null;
+  const matches = isR32 ? null : data[round as "r16" | "qf" | "sf" | "final"];
+  const m = isR32
+    ? r32Match && r32Match.s !== null && r32Match.w !== null
+      ? { s: r32Match.s, w: r32Match.w, p: r32Match.p, x: r32Match.x }
+      : null
+    : matches
+    ? (round === "final" ? matches[0] : matches[idx])
+    : null;
 
   let ta = "";
   let tb = "";
-  if (data.teams && data.teams.length) {
+  if (isR32 || (data.teams && data.teams.length)) {
     [ta, tb] = getCompetitors();
   }
 
@@ -94,7 +109,7 @@ export default function MatchDetailsModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="card relative w-full max-w-[440px] bg-gradient-to-b from-[#18181b] to-[#09090b] border border-brand-line rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(246,196,83,0.06)] animate-[rise_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
+      <div className="card relative w-full max-w-[540px] bg-gradient-to-b from-[#18181b] to-[#09090b] border border-brand-line rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(246,196,83,0.06)] animate-[rise_0.3s_cubic-bezier(0.2,0.8,0.2,1)]">
         {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-brand-muted hover:text-brand-text text-xl cursor-pointer leading-none bg-none border-none transition-colors duration-200"
@@ -105,7 +120,7 @@ export default function MatchDetailsModal({
         </button>
 
         {isSeeded || !m ? (
-          /* Seeded Match View */
+          /* Seeded / Not-Yet-Played Match View */
           <>
             <div className="round-tag font-unbounded tracking-[0.14em] text-base text-brand-gold text-center pt-8 pb-1">
               {ROUND_NAME[round]}
@@ -113,16 +128,42 @@ export default function MatchDetailsModal({
             <div className="stage-line text-center text-brand-muted text-xs tracking-wide pb-4">
               {data._year} · {data.host}
             </div>
-            <div className="teams grid grid-cols-1 justify-items-center gap-1.5 px-6 pb-8 pt-2">
-              <div className="side text-center">
-                <div className="nm font-unbounded text-lg tracking-wide text-brand-text mb-2">
-                  Not yet played
+
+            {ta && ta !== "TBD" && tb && tb !== "TBD" ? (
+              <div className="teams grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 px-6 pb-6">
+                <div className="side text-center">
+                  <div className="fl text-[52px] leading-none">{getTeamFlag(ta)}</div>
+                  <div className="nm font-unbounded text-lg tracking-wide mt-1.5 text-brand-text max-w-[190px] mx-auto break-words line-clamp-2">
+                    {getTeamName(ta)}
+                  </div>
                 </div>
-                <div className="stage-line text-xs text-brand-muted max-w-[280px] leading-relaxed">
-                  This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
+                <div className="score font-unbounded text-2xl text-brand-steel px-1.5 select-none">
+                  vs
+                </div>
+                <div className="side text-center">
+                  <div className="fl text-[52px] leading-none">{getTeamFlag(tb)}</div>
+                  <div className="nm font-unbounded text-lg tracking-wide mt-1.5 text-brand-text max-w-[190px] mx-auto break-words line-clamp-2">
+                    {getTeamName(tb)}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="teams grid grid-cols-1 justify-items-center gap-1.5 px-6 pb-6 pt-2">
+                <div className="nm font-unbounded text-lg tracking-wide text-brand-text">
+                  Not yet played
+                </div>
+              </div>
+            )}
+
+            {matchDate ? (
+              <div className="note text-center text-xs text-brand-gold py-3 px-4 bg-white/[0.015] border-t border-brand-line/50">
+                🗓️ Kickoff <span className="font-semibold">{matchDate}</span>
+              </div>
+            ) : (
+              <div className="stage-line text-xs text-brand-muted max-w-[280px] mx-auto pb-6 leading-relaxed text-center">
+                This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
+              </div>
+            )}
           </>
         ) : (
           /* Real Match View */
@@ -132,6 +173,7 @@ export default function MatchDetailsModal({
             </div>
             <div className="stage-line text-center text-brand-muted text-[11px] tracking-wider pb-4">
               {data._year} · {data.host} · {ROUND_SUB[round]}
+              {matchDate ? ` · ${matchDate}` : ""}
             </div>
 
             <div className="teams grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 px-6 pb-6">
@@ -141,7 +183,7 @@ export default function MatchDetailsModal({
                   {getTeamFlag(ta)}
                 </div>
                 <div
-                  className={`nm font-unbounded text-lg tracking-wide mt-1.5 break-words max-w-[120px] mx-auto line-clamp-2 ${
+                  className={`nm font-unbounded text-lg tracking-wide mt-1.5 break-words max-w-[190px] mx-auto line-clamp-2 ${
                     winTop ? "text-brand-gold-hi" : "text-brand-text"
                   }`}
                 >
@@ -169,7 +211,7 @@ export default function MatchDetailsModal({
                   {getTeamFlag(tb)}
                 </div>
                 <div
-                  className={`nm font-unbounded text-lg tracking-wide mt-1.5 break-words max-w-[120px] mx-auto line-clamp-2 ${
+                  className={`nm font-unbounded text-lg tracking-wide mt-1.5 break-words max-w-[190px] mx-auto line-clamp-2 ${
                     !winTop ? "text-brand-gold-hi" : "text-brand-text"
                   }`}
                 >

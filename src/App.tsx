@@ -256,8 +256,8 @@ export default function App() {
           </div>
 
           {/* Svg Radial Stage */}
-          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[760px] mx-auto">
-            <div className="stage relative h-full max-h-[760px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
+          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[860px] mx-auto">
+            <div className="stage relative h-full max-h-[860px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
               <RadialBracket
                 data={currentData}
                 analysis={currentAnalysis}
@@ -294,7 +294,7 @@ export default function App() {
       /> */}
 
       {/* Floating Tooltip */}
-      {tooltip.visible && (
+      {tooltip.visible && getTooltipContent() && (
         <div
           className="tip fixed z-50 pointer-events-none select-none -translate-x-1/2 -translate-y-[118%] bg-gradient-to-b from-[#182031] to-[#0c1019] border border-brand-line rounded-xl py-2 px-3.5 min-w-[180px] shadow-[0_16px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(246,196,83,0.05)] after:content-[''] after:absolute after:left-1/2 after:-bottom-1.5 after:-translate-x-1/2 after:rotate-45 after:w-2.5 after:h-2.5 after:bg-[#0c1019] after:border-r after:border-b after:border-brand-line transition-all duration-100 ease-out"
           style={{

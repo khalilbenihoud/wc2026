@@ -12,6 +12,7 @@ export interface MatchR32 {
   w: number | null; // 0 = ta wins, 1 = tb wins
   p?: string | null;
   x?: string | null;
+  date?: string | null; // kickoff, e.g. "Jul 3 · 18:00"
 }
 
 export interface TournamentData {

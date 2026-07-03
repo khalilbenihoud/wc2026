@@ -22,7 +22,7 @@ const CY = 450;
 const R = [368, 288, 202, 120];
 const TROPHY_R = 60;
 const CLEAR: Record<number, number> = { 0: 31, 1: 19, 2: 22, 3: 26 };
-const R32_RING = 428;
+const R32_RING = 422;
 const R32_SUBSPAN = 5.625; // half of the 22.5deg leaf spacing
 
 const nodeAngle = (level: number, index: number): number => {
@@ -235,22 +235,21 @@ export default function RadialBracket({
       for (let i = 0; i < count; i++) {
         const ang = nodeAngle(lvl, i);
         const [x, y] = polar(R[lvl], ang);
-        const winLeaf = winners ? winners[i] : null;
+        const winLeaf = winners?.[i] ?? null;
         const dl = introDelay(lvl, i, count);
 
         const nodeId = `n${lvl}-${i}`;
         const isLit = litNodes.has(nodeId);
         const isDim = hasFocus && !isLit;
+        const isEmpty = winLeaf === null;
 
         let className = "crest junc";
-        if (winLeaf === null) className += " empty";
+        if (isEmpty) className += " empty";
         if (isLit) className += " lit";
         if (isDim) className += " dim";
 
         const teamCode = winLeaf !== null ? data.teams[winLeaf] : null;
         const teamColor = teamCode ? getTeamColor(teamCode) : undefined;
-
-        const isEmpty = winLeaf == null;
         const qMarkSize: Record<number, number> = { 1: 11, 2: 13, 3: 15 };
 
         elements.push(
@@ -262,7 +261,7 @@ export default function RadialBracket({
             onMouseEnter={() => {
               if (winLeaf !== null) setHoveredLeaf(winLeaf);
             }}
-            onMouseMove={(e) => handleMouseMove(e, round, i)}
+            onMouseMove={!isEmpty ? (e) => handleMouseMove(e, round, i) : undefined}
             onMouseLeave={handleMouseLeave}
             style={
               {
@@ -408,21 +407,23 @@ export default function RadialBracket({
         <g
           key={`r32-${i}-${keySuffix}`}
           className={`crest r32node${!known ? " empty" : ""}`}
+          onClick={known ? () => onSelectMatch("r32", i) : undefined}
           style={
             {
               "--c": known ? getTeamColor(code) : undefined,
               "--d": `${dl}s`,
               opacity: known && played && !isWinner ? 0.55 : 1,
+              cursor: known ? "pointer" : "default",
               transformOrigin: `${f2(x)}px ${f2(y)}px`,
             } as React.CSSProperties
           }
         >
-          <circle className="disc" cx={f2(x)} cy={f2(y)} r={15} />
+          <circle className="disc" cx={f2(x)} cy={f2(y)} r={20} />
           {known ? (
             <>
               <text
                 className="flag font-sans select-none"
-                style={{ fontSize: "15px" }}
+                style={{ fontSize: "19px" }}
                 x={f2(x)}
                 y={f2(y + 1)}
               >
@@ -431,7 +432,7 @@ export default function RadialBracket({
               <title>{`${getTeamName(m.ta)} vs ${getTeamName(m.tb)} · ${scoreLabel}`}</title>
             </>
           ) : (
-            <circle cx={f2(x)} cy={f2(y)} r={4} fill="var(--steel)" className="select-none" />
+            <circle cx={f2(x)} cy={f2(y)} r={5} fill="var(--steel)" className="select-none" />
           )}
         </g>
       );
@@ -478,7 +479,7 @@ export default function RadialBracket({
         onMouseEnter={() => {
           if (analysis.champ !== null) setHoveredLeaf(analysis.champ);
         }}
-        onMouseMove={(e) => handleMouseMove(e, "final", 0)}
+        onMouseMove={analysis.champ !== null ? (e) => handleMouseMove(e, "final", 0) : undefined}
         onMouseLeave={handleMouseLeave}
         style={{ "--d": "0.24s" } as React.CSSProperties}
       >
