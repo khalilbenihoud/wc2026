@@ -5,6 +5,7 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Unbounded", sans-serif;
   --font-unbounded: "Unbounded", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
@@ -242,6 +243,21 @@ body::after {
   transition: stroke 0.28s ease, filter 0.28s ease, stroke-width 0.28s ease;
 }
 
+/* Keyboard focus indicator for interactive bracket nodes (mouse focus stays
+   unstyled via :focus-visible). */
+.crest:focus,
+.medallion:focus {
+  outline: none;
+}
+.crest:focus-visible .disc {
+  stroke: var(--gold);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px rgba(246, 196, 83, 0.75));
+}
+.medallion:focus-visible {
+  filter: drop-shadow(0 0 8px rgba(246, 196, 83, 0.85));
+}
+
 .crest .flag {
   font-size: 31px;
   text-anchor: middle;
@@ -421,3 +437,6 @@ body::after {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--steel);
 }
+
+
+

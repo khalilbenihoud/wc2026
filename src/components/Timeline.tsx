@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { TOURNAMENTS, getTeamFlag } from "../data";
 import { TournamentAnalysis } from "../types";
 
@@ -8,32 +8,28 @@ interface TimelineProps {
   analyses: Record<number, TournamentAnalysis>;
 }
 
+const YEARS: number[] = Object.keys(TOURNAMENTS)
+  .map(Number)
+  .sort((a, b) => a - b);
+
 export default function Timeline({
   activeYear,
   onSelectYear,
   analyses,
 }: TimelineProps) {
-  const years = Object.keys(TOURNAMENTS)
-    .map(Number)
-    .sort((a, b) => a - b);
-
   return (
-    <>
-      {/* Desktop: vertical timeline */}
-      <nav
-        className="timeline relative mt-2 pl-10 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar hidden md:block"
-        aria-label="Select tournament"
-      >
-        {/* Desktop Vertical Line */}
-        <div className="absolute left-[20px] top-4 bottom-4 w-[2px] rounded bg-gradient-to-b from-transparent via-brand-line to-transparent pointer-events-none" />
+    <nav
+      className="timeline relative mt-2 pl-10 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar hidden md:block"
+      aria-label="Select tournament"
+    >
+      <div className="absolute left-[20px] top-4 bottom-4 w-[2px] rounded bg-gradient-to-b from-transparent via-brand-line to-transparent pointer-events-none" />
 
-        {years.map((year, idx) => {
+      {YEARS.map((year, idx) => {
         const d = TOURNAMENTS[year];
         const analysis = analyses[year];
         const isActive = year === activeYear;
         const isFuture = d.seeded;
 
-        // Get champion flag
         let champFlag = "🔮";
         if (!isFuture && analysis && analysis.champ !== null) {
           const champCode = d.teams[analysis.champ];
@@ -51,13 +47,8 @@ export default function Timeline({
                 ? "active bg-brand-gold/[0.08] border-brand-gold/30 shadow-[0_4px_20px_rgba(246,196,83,0.06)]"
                 : "border-transparent hover:bg-[rgba(var(--overlay-rgb),0.05)] hover:border-[rgba(var(--overlay-rgb),0.02)]"
             } ${isFuture ? "future" : ""}`}
-            style={
-              {
-                "--d": `${delay}s`,
-              } as CSSProperties
-            }
+            style={{ "--d": `${delay}s` } as CSSProperties}
           >
-            {/* Dot indicator */}
             <div
               className={`tl-dot absolute left-[-24px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                 isActive
@@ -90,7 +81,6 @@ export default function Timeline({
           </button>
         );
       })}
-      </nav>
-    </>
+    </nav>
   );
 }

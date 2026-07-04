@@ -38,6 +38,23 @@ const polar = (r: number, angDeg: number): [number, number] => {
 
 const f2 = (n: number) => Math.round(n * 100) / 100;
 
+// Round display names, used for screen-reader labels on interactive nodes.
+const ROUND_LABEL: Record<string, string> = {
+  r32: "Round of 32",
+  r16: "Round of 16",
+  qf: "Quarter-final",
+  sf: "Semi-final",
+  final: "Final",
+};
+
+// Keyboard equivalent of a click for SVG nodes that act as buttons.
+const activateKey = (e: React.KeyboardEvent, fn: () => void) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    fn();
+  }
+};
+
 const INTRO_BASE = 0.34;
 const RING_STEP = 0.12;
 const introDelay = (level: number, idx: number, count: number) => {
@@ -252,12 +269,24 @@ function RadialBracket({
         const teamColor = teamCode ? getTeamColor(teamCode) : undefined;
         const qMarkSize: Record<number, number> = { 1: 11, 2: 13, 3: 15 };
 
+        const ariaLabel = teamCode
+          ? `${ROUND_LABEL[round]} winner ${getTeamName(teamCode)}. View match details.`
+          : `${ROUND_LABEL[round]} — not yet decided.`;
+
         elements.push(
           <g
             key={nodeId}
             id={nodeId}
             className={className}
+            role="button"
+            tabIndex={0}
+            aria-label={ariaLabel}
             onClick={() => onSelectMatch(round, i)}
+            onKeyDown={(e) => activateKey(e, () => onSelectMatch(round, i))}
+            onFocus={() => {
+              if (winLeaf !== null) setHoveredLeaf(winLeaf);
+            }}
+            onBlur={() => setHoveredLeaf(null)}
             onMouseEnter={() => {
               if (winLeaf !== null) setHoveredLeaf(winLeaf);
             }}
@@ -322,12 +351,22 @@ function RadialBracket({
       if (isLit) className += " lit";
       if (isDim) className += " dim";
 
+      const ariaLabel = isUnknown
+        ? "Round of 16 — team to be decided."
+        : `${getTeamName(code)}, Round of 16. View match details.`;
+
       return (
         <g
           key={nodeId}
           id={nodeId}
           className={className}
+          role="button"
+          tabIndex={0}
+          aria-label={ariaLabel}
           onClick={() => onSelectMatch("r16", i >> 1)}
+          onKeyDown={(e) => activateKey(e, () => onSelectMatch("r16", i >> 1))}
+          onFocus={() => setHoveredLeaf(i)}
+          onBlur={() => setHoveredLeaf(null)}
           onMouseEnter={() => setHoveredLeaf(i)}
           onMouseMove={(e) => handleMouseMove(e, "r16", i >> 1)}
           onMouseLeave={handleMouseLeave}
@@ -398,7 +437,15 @@ function RadialBracket({
         <g
           key={`r32-${i}-${keySuffix}`}
           className={`crest r32node${!known ? " empty" : ""}`}
+          role={known ? "button" : undefined}
+          tabIndex={known ? 0 : undefined}
+          aria-label={
+            known
+              ? `${getTeamName(m.ta)} versus ${getTeamName(m.tb)}, Round of 32. ${scoreLabel}. View match details.`
+              : undefined
+          }
           onClick={known ? () => onSelectMatch("r32", i) : undefined}
+          onKeyDown={known ? (e) => activateKey(e, () => onSelectMatch("r32", i)) : undefined}
           style={
             {
               "--c": known ? getTeamColor(code) : undefined,
@@ -451,8 +498,6 @@ function RadialBracket({
 
   // 6. Central Trophy Medallion
   const renderMedallionComponent = () => {
-    const champCode =
-      analysis.champ !== null ? data.teams[analysis.champ] : null;
     const nameStr = champCode ? getTeamName(champCode).toUpperCase() : "TBD";
 
     const getFontSize = (text: string): string => {
@@ -466,7 +511,19 @@ function RadialBracket({
       <g
         className="medallion cursor-pointer"
         id="medallion"
+        role="button"
+        tabIndex={0}
+        aria-label={
+          champCode
+            ? `Champion ${getTeamName(champCode)}. View final details.`
+            : "Champion to be decided. View final details."
+        }
         onClick={() => onSelectMatch("final", 0)}
+        onKeyDown={(e) => activateKey(e, () => onSelectMatch("final", 0))}
+        onFocus={() => {
+          if (analysis.champ !== null) setHoveredLeaf(analysis.champ);
+        }}
+        onBlur={() => setHoveredLeaf(null)}
         onMouseEnter={() => {
           if (analysis.champ !== null) setHoveredLeaf(analysis.champ);
         }}

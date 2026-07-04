@@ -3,10 +3,10 @@
 //  ╚══════════════════════════════════════╝
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
-import { TOURNAMENTS, getTeamFlag, getTeamName, getTeamColor } from "./data";
+import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
-// ResultsPanel is currently disabled (see below) — re-add this import if reactivating it.
+import Splash from "./components/Splash";
 import MatchDetailsModal from "./components/MatchDetailsModal";
 
 const ROUND_NAME: Record<string, string> = {
@@ -14,6 +14,36 @@ const ROUND_NAME: Record<string, string> = {
   qf: "Quarter-final",
   sf: "Semi-final",
   final: "Final",
+};
+
+// Sorted once at module load — mobile year-picker iterates this.
+const TOURNAMENT_YEARS: number[] = Object.keys(TOURNAMENTS)
+  .map(Number)
+  .sort((a, b) => a - b);
+
+// Reused sidebar divider style (avoids recreating a 5-line style object every render).
+const SIDEBAR_DIVIDER_STYLE: React.CSSProperties = {
+  background:
+    "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
+  backgroundSize: "100% 200%",
+};
+
+const CHEVRON_PATH =
+  "M8.48633 10.4004C8.73047 10.4004 8.97461 10.3027 9.14062 10.1172L16.6992 2.37305C16.8652 2.20703 16.9629 1.99219 16.9629 1.74805C16.9629 1.24023 16.582 0.849609 16.0742 0.849609C15.8301 0.849609 15.6055 0.947266 15.4395 1.10352L7.95898 8.75L9.00391 8.75L1.52344 1.10352C1.36719 0.947266 1.14258 0.849609 0.888672 0.849609C0.380859 0.849609 0 1.24023 0 1.74805C0 1.99219 0.0976562 2.20703 0.263672 2.38281L7.82227 10.1172C8.00781 10.3027 8.23242 10.4004 8.48633 10.4004Z";
+
+// Wikipedia "Golden Boot" → page slug override (special characters / split names).
+const WIKI_SLUG_OVERRIDE: Record<string, string> = {
+  "Ronaldo": "Ronaldo_Nazário",
+  "Oldřich Nejedlý": "Oldřich_Nejedlý",
+  "Leônidas": "Leônidas",
+  "Salvatore Schillaci": "Salvatore_Schillaci",
+  "Hristo Stoichkov / Oleg Salenko": "Hristo_Stoichkov",
+  "Davor Šuker": "Davor_Šuker",
+  "Miroslav Klose": "Miroslav_Klose",
+  "Thomas Müller": "Thomas_Müller",
+  "James Rodríguez": "James_Rodríguez",
+  "Harry Kane": "Harry_Kane",
+  "Kylian Mbappé": "Kylian_Mbappé",
 };
 
 // Tournament analysis calculator
@@ -75,6 +105,15 @@ export default function App() {
 
   const [activeYear, setActiveYear] = useState<number>(2026);
 
+  const [showSplash, setShowSplash] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem("wc-splash-seen") !== "1";
+  });
+  const handleEnterArchive = useCallback(() => {
+    sessionStorage.setItem("wc-splash-seen", "1");
+    setShowSplash(false);
+  }, []);
+
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
   // in the DOM lib yet), feature-detected so this is a no-op everywhere else.
@@ -130,34 +169,20 @@ export default function App() {
 
   const [gbHover, setGbHover] = useState(false);
   const [gbPhoto, setGbPhoto] = useState<string | null>(null);
-  const gbPos = useRef({ x: 0, y: 0 });
   const gbCache = useRef<Record<string, string>>({});
 
   const handleGbMouseEnter = useCallback((e: React.MouseEvent, name: string) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    gbPos.current = { x: rect.left + rect.width / 2, y: rect.top };
     setGbHover(true);
-
-    const page: Record<string, string> = {
-      "Ronaldo": "Ronaldo_Nazário",
-      "Oldřich Nejedlý": "Oldřich_Nejedlý",
-      "Leônidas": "Leônidas",
-      "Salvatore Schillaci": "Salvatore_Schillaci",
-      "Hristo Stoichkov / Oleg Salenko": "Hristo_Stoichkov",
-      "Davor Šuker": "Davor_Šuker",
-      "Miroslav Klose": "Miroslav_Klose",
-      "Thomas Müller": "Thomas_Müller",
-      "James Rodríguez": "James_Rodríguez",
-      "Harry Kane": "Harry_Kane",
-      "Kylian Mbappé": "Kylian_Mbappé",
-    };
-    const clean = page[name] || name.split("/")[0].split(" (")[0].trim();
+    const clean =
+      WIKI_SLUG_OVERRIDE[name] || name.split("/")[0].split(" (")[0].trim();
     if (gbCache.current[clean]) {
       setGbPhoto(gbCache.current[clean]);
       return;
     }
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`)
-      .then((r) => r.ok ? r.json() : null)
+    fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`
+    )
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.thumbnail?.source) {
           gbCache.current[clean] = data.thumbnail.source;
@@ -208,7 +233,10 @@ export default function App() {
     setTooltip({ round, idx, x, y, visible });
   }, []);
 
-  const getTooltipContent = () => {
+  const handleSelectYear = useCallback((year: number) => setActiveYear(year), []);
+  const handleCloseModal = useCallback(() => setSelectedMatch(null), []);
+
+  const getTooltipContent = useCallback(() => {
     if (!tooltip.visible || !tooltip.round) return null;
     const d = TOURNAMENTS[activeYear];
     const analysis = analyses[activeYear];
@@ -290,12 +318,26 @@ export default function App() {
         )}
       </div>
     );
-  };
+  }, [tooltip, activeYear, analyses]);
+
+  const tooltipContent = useMemo(
+    () => (tooltip.visible && tooltip.round ? getTooltipContent() : null),
+    [tooltip, activeYear, analyses, getTooltipContent]
+  );
 
   const champCode =
     currentAnalysis.champ !== null
       ? currentData.teams[currentAnalysis.champ]
       : null;
+
+  const gbName = currentData.goldenBoot?.name;
+  const gbGoals = currentData.goldenBoot?.goals;
+  const handleGbEnter = useCallback(
+    (e: React.MouseEvent) => {
+      if (gbName) handleGbMouseEnter(e, gbName);
+    },
+    [handleGbMouseEnter, gbName]
+  );
 
   // FIFA World Cup editions run every 4 years from 1930, skipping 1942/1946
   // (WWII). 1986 was the 13th edition, so this holds for every year on our
@@ -311,7 +353,7 @@ export default function App() {
     <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
       {/* Mobile notice — the radial bracket needs room to breathe */}
       <div className="flex-none md:hidden text-center text-[10px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
-        For the best experience, view this on a larger screen.
+        Best viewed on desktop
       </div>
 
       {/* Dynamic Background Layout Frame */}
@@ -319,10 +361,7 @@ export default function App() {
         {/* Sidebar divider — pinned to the full height of the app frame, gradient effect */}
         <div
           className="hidden md:block absolute top-0 bottom-0 left-[300px] w-px pointer-events-none opacity-30 animate-[shimmerDown_20s_linear_infinite]"
-          style={{
-            background: "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
-            backgroundSize: "100% 200%",
-          }}
+          style={SIDEBAR_DIVIDER_STYLE}
         />
 
         {/* Left Rail: Brand + Timeline */}
@@ -338,7 +377,7 @@ export default function App() {
             </button>
 
             <div className="kicker inline-flex items-center gap-2.5 font-sans font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
-              World Cup
+              FIFA World Cup Archive
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
               <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-brand-gold-hi via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
@@ -346,13 +385,39 @@ export default function App() {
               </span>
             </h1>
             <p className="sub text-brand-muted text-xs mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
-              Every knockout run since 1986, traced from first match to final whistle.
+              Every knockout bracket since 1934 — one radial map, from Round of 16 to final
             </p>
+          </div>
+
+          {/* Mobile summary — the desktop header chips are hidden on phones, so
+              surface host / champion / golden boot here instead. */}
+          <div className="md:hidden mb-1 grid grid-cols-3 gap-2 text-center">
+            <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line py-2.5 px-1.5">
+              <span className="text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Host</span>
+              <span className="text-brand-text font-bold text-[11px] leading-tight">
+                {currentData.hostFlag}
+              </span>
+              <span className="text-brand-muted text-[9px] leading-tight">{currentData.host}</span>
+            </div>
+            <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line bg-brand-gold/[0.05] py-2.5 px-1.5">
+              <span className="text-[8.5px] uppercase tracking-[0.18em] text-brand-gold/70 font-semibold">Champion</span>
+              <span className="text-brand-gold font-bold text-[11px] leading-tight">
+                {champCode ? getTeamFlag(champCode) : "—"}
+              </span>
+              <span className="text-brand-gold/80 text-[9px] leading-tight">
+                {champCode ? getTeamName(champCode) : "TBD"}
+              </span>
+            </div>
+            <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line py-2.5 px-1.5">
+              <span className="text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Golden Boot</span>
+              <span className="text-brand-text font-bold text-[11px] leading-tight">⚽ {gbName ? gbGoals : "—"}</span>
+              <span className="text-brand-muted text-[9px] leading-tight break-words">{gbName ?? "TBD"}</span>
+            </div>
           </div>
 
           <Timeline
             activeYear={activeYear}
-            onSelectYear={setActiveYear}
+            onSelectYear={handleSelectYear}
             analyses={analyses}
           />
         </aside>
@@ -365,7 +430,7 @@ export default function App() {
               {/* Edition + editorial quote */}
               <div className="text-center md:text-left min-w-0 max-md:hidden">
                 <div className="text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold mb-2">
-                  Edition · {activeYear}
+                  FIFA World Cup · {activeYear}
                 </div>
                 <p className="font-serif italic text-lg md:text-xl leading-snug max-w-[480px] mx-auto md:mx-0 text-brand-text whitespace-nowrap">
                   {currentData.quote ?? "The story is still being written."}
@@ -388,19 +453,17 @@ export default function App() {
                 </div>
                 <div
                   className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line relative shrink-0"
-                  onMouseEnter={(e) => currentData.goldenBoot && handleGbMouseEnter(e, currentData.goldenBoot.name)}
+                  onMouseEnter={handleGbEnter}
                   onMouseLeave={handleGbMouseLeave}
                 >
                   <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
                   <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                    {currentData.goldenBoot
-                      ? `⚽ ${currentData.goldenBoot.name} · ${currentData.goldenBoot.goals}`
-                      : "TBD"}
+                    {gbName ? `⚽ ${gbName} · ${gbGoals}` : "TBD"}
                   </span>
-                  {gbHover && gbPhoto && (
+                  {gbHover && gbPhoto && gbName && (
                     <img
                       src={gbPhoto}
-                      alt={currentData.goldenBoot!.name}
+                      alt={gbName}
                       className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-16 h-16 rounded-full object-cover border-2 border-brand-gold shadow-[0_0_16px_rgba(246,196,83,0.45)] animate-[crestPop_0.35s_cubic-bezier(0.34,1.4,0.5,1)_both]"
                     />
                   )}
@@ -423,8 +486,8 @@ export default function App() {
           </div>
 
           {/* Svg Radial Stage */}
-          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[860px] max-md:max-w-none mx-auto">
-            <div className="stage relative h-full max-h-[860px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] max-md:scale-[1.38] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
+          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto">
+            <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] max-md:scale-[1.15] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
               <RadialBracket
                 data={currentData}
                 analysis={currentAnalysis}
@@ -440,14 +503,14 @@ export default function App() {
           <div className="legend flex-none max-md:hidden flex gap-6 justify-center flex-wrap items-center text-brand-muted text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
             <div className="item flex items-center gap-2">
               <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
-              Hover a flag to trace its run
+              Hover flags to trace runs
             </div>
             <div className="item flex items-center gap-2">
               <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
-              Winners advance toward the center
+              Winners advance to center
             </div>
             <div className="item text-brand-gold/75 font-medium">
-              Click any match for the full score
+              Click match for score
             </div>
           </div>
         </main>
@@ -462,7 +525,7 @@ export default function App() {
             aria-label="Select tournament year"
             className="w-full appearance-none rounded-xl border border-brand-gold/30 bg-brand-gold/[0.08] text-brand-gold-hi font-unbounded font-semibold text-base py-3 pl-4 pr-10 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
           >
-            {Object.keys(TOURNAMENTS).map(Number).sort((a, b) => a - b).map((year) => {
+            {TOURNAMENT_YEARS.map((year) => {
               const d = TOURNAMENTS[year];
               const isFuture = d.seeded;
               return (
@@ -474,29 +537,21 @@ export default function App() {
             })}
           </select>
           <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-3" viewBox="0 0 17.3242 10.4004" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.48633 10.4004C8.73047 10.4004 8.97461 10.3027 9.14062 10.1172L16.6992 2.37305C16.8652 2.20703 16.9629 1.99219 16.9629 1.74805C16.9629 1.24023 16.582 0.849609 16.0742 0.849609C15.8301 0.849609 15.6055 0.947266 15.4395 1.10352L7.95898 8.75L9.00391 8.75L1.52344 1.10352C1.36719 0.947266 1.14258 0.849609 0.888672 0.849609C0.380859 0.849609 0 1.24023 0 1.74805C0 1.99219 0.0976562 2.20703 0.263672 2.38281L7.82227 10.1172C8.00781 10.3027 8.23242 10.4004 8.48633 10.4004Z" fill="currentColor" className="text-brand-gold/80"/>
+            <path d={CHEVRON_PATH} fill="currentColor" className="text-brand-gold/80" />
           </svg>
         </div>
       </div>
 
-      {/* Results details panel list — hidden for now, revisit later */}
-      {/* <ResultsPanel
-        data={currentData}
-        analysis={currentAnalysis}
-        onSelectMatch={handleSelectMatch}
-      /> */}
-
       {/* Floating Tooltip */}
-      {tooltip.visible && getTooltipContent() && (
+      {tooltip.visible && tooltipContent && (
         <div
           className="tip fixed z-50 pointer-events-none select-none -translate-x-1/2 -translate-y-[118%] bg-gradient-to-b from-brand-panel to-brand-bg border border-brand-line rounded-xl py-2 px-3.5 min-w-[180px] shadow-[0_16px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(246,196,83,0.05)] after:content-[''] after:absolute after:left-1/2 after:-bottom-1.5 after:-translate-x-1/2 after:rotate-45 after:w-2.5 after:h-2.5 after:bg-brand-bg after:border-r after:border-b after:border-brand-line transition-all duration-100 ease-out"
           style={{
             left: `${tooltip.x}px`,
             top: `${tooltip.y}px`,
-            opacity: tooltip.visible ? 1 : 0,
           }}
         >
-          {getTooltipContent()}
+          {tooltipContent}
         </div>
       )}
 
@@ -507,8 +562,11 @@ export default function App() {
         idx={selectedMatch?.idx ?? 0}
         data={currentData}
         analysis={currentAnalysis}
-        onClose={() => setSelectedMatch(null)}
+        onClose={handleCloseModal}
       />
+
+      {/* Floodlight splash — visible on first visit per session */}
+      {showSplash && <Splash onEnter={handleEnterArchive} />}
 
     </div>
   );
