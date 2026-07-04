@@ -1,14 +1,35 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'copy-splash-index',
+        closeBundle() {
+          const src = path.resolve(__dirname, 'index.html');
+          const dest = path.resolve(__dirname, 'dist', 'index.html');
+          if (fs.existsSync(src)) {
+            fs.copyFileSync(src, dest);
+          }
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        input: {
+          app: path.resolve(__dirname, 'app.html'),
+        },
       },
     },
     server: {
