@@ -1,9 +1,6 @@
-//    ___           _                _       ___           _     _       
-//   |_ _|_ __  ___(_)_ _ ___  ___  (_)__   / __| ___  ___(_)___| |_ ___ 
-//    | || '_ \/ -_) | '_/ _ \/ _ \ | / _|  \__ \/ _ \/ _ \ / -_)  _/ -_)
-//   |___| .__/\___|_|_| \___/\___/ |_\__|  |___/\___/\___/_\___|\__\___|
-//       |_|                                                              
-// Inspired by Emilio Sansolini
+//  ╔══════════════════════════════════════╗
+//  ║  Inspired by Emilio Sansolini        ║
+//  ╚══════════════════════════════════════╝
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName, getTeamColor } from "./data";
