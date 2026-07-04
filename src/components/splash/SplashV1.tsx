@@ -20,13 +20,14 @@ export default function SplashV1({ onEnter }: SplashProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  const FADE_MS = 600;
   const handleEnter = () => {
     if (step !== "ready") return;
     setStep("exiting");
-    setTimeout(() => onEnter(), 250);
+    setTimeout(() => onEnter(), FADE_MS);
   };
 
-  if (step === "exiting") return null;
+  const isExiting = step === "exiting";
 
   return (
     <div style={{
@@ -40,6 +41,10 @@ export default function SplashV1({ onEnter }: SplashProps) {
       backgroundPosition: "center",
       color: "#f3efe4",
       fontFamily: "'IBM Plex Mono', monospace",
+      opacity: isExiting ? 0 : 1,
+      transform: isExiting ? "scale(1.04)" : "scale(1)",
+      transition: `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`,
+      pointerEvents: isExiting ? "none" : "auto",
     }}>
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
