@@ -6,7 +6,6 @@ import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
-import Splash from "./components/Splash";
 import MatchDetailsModal from "./components/MatchDetailsModal";
 
 const ROUND_NAME: Record<string, string> = {
@@ -104,15 +103,6 @@ export default function App() {
   }, [lightMode]);
 
   const [activeYear, setActiveYear] = useState<number>(2026);
-
-  const [showSplash, setShowSplash] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("wc-splash-seen") !== "1";
-  });
-  const handleEnterArchive = useCallback(() => {
-    sessionStorage.setItem("wc-splash-seen", "1");
-    setShowSplash(false);
-  }, []);
 
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
@@ -564,9 +554,6 @@ export default function App() {
         analysis={currentAnalysis}
         onClose={handleCloseModal}
       />
-
-      {/* Floodlight splash — visible on first visit per session */}
-      {showSplash && <Splash onEnter={handleEnterArchive} />}
 
     </div>
   );
