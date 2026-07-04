@@ -79,17 +79,25 @@ function RadialBracket({
   // Helper to determine advancing team on a connector
   const getConnTeam = (lvl: number, idx: number): string | null => {
     if (!analysis.w1 || !analysis.w1.length) return null;
-    if (lvl === 0) return analysis.w1[idx >> 1] === idx ? data.teams[idx] : null;
+    if (lvl === 0) {
+      const w = analysis.w1[idx >> 1];
+      return w != null && w === idx ? data.teams[idx] : null;
+    }
     if (lvl === 1) {
       const t = analysis.w1[idx];
-      return analysis.w2[idx >> 1] === t ? data.teams[t] : null;
+      if (t == null) return null;
+      const w = analysis.w2[idx >> 1];
+      return w != null && w === t ? data.teams[t] : null;
     }
     if (lvl === 2) {
       const t = analysis.w2[idx];
-      return analysis.w3[idx >> 1] === t ? data.teams[t] : null;
+      if (t == null) return null;
+      const w = analysis.w3[idx >> 1];
+      return w != null && w === t ? data.teams[t] : null;
     }
     if (lvl === 3) {
       const t = analysis.w3[idx];
+      if (t == null) return null;
       return analysis.champ === t ? data.teams[t] : null;
     }
     return null;
@@ -238,7 +246,7 @@ function RadialBracket({
     const disc: Record<number, number> = { 1: 17, 2: 20, 3: 24 };
     const flagF: Record<number, number> = { 1: 19, 2: 23, 3: 27 };
 
-    const winArr: Record<number, number[] | null> = {
+    const winArr: Record<number, (number | null)[] | null> = {
       1: analysis.w1,
       2: analysis.w2,
       3: analysis.w3,
