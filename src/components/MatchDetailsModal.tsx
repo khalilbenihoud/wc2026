@@ -75,17 +75,20 @@ export default function MatchDetailsModal({
     }
     if (round === "qf") {
       return [
-        data.teams[analysis.w1[2 * idx]],
-        data.teams[analysis.w1[2 * idx + 1]],
+        analysis.w1[2 * idx] != null ? data.teams[analysis.w1[2 * idx]!] : "TBD",
+        analysis.w1[2 * idx + 1] != null ? data.teams[analysis.w1[2 * idx + 1]!] : "TBD",
       ];
     }
     if (round === "sf") {
       return [
-        data.teams[analysis.w2[2 * idx]],
-        data.teams[analysis.w2[2 * idx + 1]],
+        analysis.w2[2 * idx] != null ? data.teams[analysis.w2[2 * idx]!] : "TBD",
+        analysis.w2[2 * idx + 1] != null ? data.teams[analysis.w2[2 * idx + 1]!] : "TBD",
       ];
     }
-    return [data.teams[analysis.w3[0]], data.teams[analysis.w3[1]]];
+    return [
+      analysis.w3[0] != null ? data.teams[analysis.w3[0]!] : "TBD",
+      analysis.w3[1] != null ? data.teams[analysis.w3[1]!] : "TBD",
+    ];
   };
 
   const isR32 = round === "r32";
@@ -108,8 +111,8 @@ export default function MatchDetailsModal({
   }
 
   const knownTeams = ta && ta !== "TBD" && tb && tb !== "TBD";
-  const winTop = m ? m.w === 0 : false;
-  const winnerCode = winTop ? ta : tb;
+  const winTop = m && m.w !== null ? m.w === 0 : false;
+  const winnerCode = winTop ? ta : m && m.w === 1 ? tb : "";
 
   const notes: string[] = [];
   if (m) {
@@ -117,7 +120,7 @@ export default function MatchDetailsModal({
     if (m.p) notes.push(`Penalties ${m.p.replace("-", "–")}`);
   }
 
-  const played = !isSeeded && !!m;
+  const played = !isSeeded && !!m && m.w !== null;
 
   return (
     <div className="fixed inset-0 z-50">
@@ -213,6 +216,40 @@ export default function MatchDetailsModal({
                     <b className="text-brand-gold font-semibold">{n}</b>
                   </span>
                 ))}
+              </div>
+            )}
+
+            {m?.g && (m.g[0].length > 0 || m.g[1].length > 0) && (
+              <div className="mt-4 pt-4 border-t border-brand-line">
+                <div className="text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-2">
+                  Goals
+                </div>
+                {m.g[0].length > 0 && (
+                  <div className="mb-2">
+                    <div className="text-[9px] font-semibold tracking-wider uppercase text-brand-muted/60 mb-1">
+                      {getTeamName(ta)}
+                    </div>
+                    {m.g[0].map((goal, i) => (
+                      <div key={i} className="text-xs text-brand-text flex items-center gap-2 pl-1">
+                        <span className="text-brand-gold text-[10px]">⚽</span>
+                        {goal}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {m.g[1].length > 0 && (
+                  <div>
+                    <div className="text-[9px] font-semibold tracking-wider uppercase text-brand-muted/60 mb-1">
+                      {getTeamName(tb)}
+                    </div>
+                    {m.g[1].map((goal, i) => (
+                      <div key={i} className="text-xs text-brand-text flex items-center gap-2 pl-1">
+                        <span className="text-brand-gold text-[10px]">⚽</span>
+                        {goal}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

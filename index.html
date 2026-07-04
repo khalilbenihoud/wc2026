@@ -17,9 +17,10 @@ body{
   --ink: #f3efe4;
   --gold: #d9b45a;
   --gold-20: rgba(217,180,90,0.2);
+  --mx: 0.5; --my: 0.5;
   background-color:var(--bg);
   background-image:
-    radial-gradient(1100px 820px at 50% 50%, rgba(217,180,90,0.06), transparent 62%),
+    radial-gradient(1100px 820px at calc(var(--mx)*100%) calc(var(--my)*100%), rgba(217,180,90,0.08), transparent 62%),
     linear-gradient(180deg, #0c0c0e, var(--bg) 66%);
   color:var(--ink);
   font-family:"Inter",ui-sans-serif,system-ui,sans-serif;
@@ -88,7 +89,7 @@ body.exiting main{opacity:0}
 .title{
   font-family:"Unbounded",sans-serif;
   font-size:clamp(2rem,5.5vw,3.75rem);font-weight:600;
-  line-height:1.15;color:var(--ink);letter-spacing:0.04em;
+  line-height:1.15;color:var(--ink);letter-spacing:0.04em;word-spacing:0.2em;
   overflow:hidden;
 }
 .title .char{
@@ -114,10 +115,11 @@ body.exiting main{opacity:0}
 }
 .cta::before{
   content:"";position:absolute;inset:0;z-index:-1;
-  background:var(--gold);transform:translateX(-100%);
-  transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);
+  background:var(--gold);transform:translateX(-100%);opacity:0;
+  border-radius:inherit;
+  transition:transform 0.45s cubic-bezier(0.16,1,0.3,1),opacity 0.2s ease;
 }
-.cta:hover::before,.cta:focus-visible::before{transform:translateX(0)}
+.cta:hover::before,.cta:focus-visible::before{transform:translateX(0);opacity:1}
 .cta:hover,.cta:focus-visible{border-color:var(--gold);color:var(--bg)}
 .cta:focus-visible{box-shadow:0 0 0 3px var(--gold-20)}
 .cta .arrow{
@@ -206,7 +208,7 @@ body.exiting main{opacity:0}
     <p class="subline">Every knockout bracket since 1934, drawn as a single
       radial map — from the first round of sixteen to the final whistle.</p>
     <a class="cta" id="cta" href="/app.html" tabindex="-1">
-      ENTER THE ARCHIVE <span class="arrow">&rarr;</span>
+      ENTER THE ARCHIVE <span class="arrow"><svg width="14" height="11" viewBox="0 0 18.5 14.8"><path d="M10.7 14.8c.24 0 .44-.09.64-.27l6.5-6.48c.19-.19.29-.41.29-.66 0-.24-.1-.47-.29-.65L11.37.29A.85.85 0 0010.71 0a.83.83 0 00-.85.84c0 .23.08.46.24.61l2.18 2.23 4.08 3.72-4.08 3.72-2.18 2.23a.85.85 0 00-.24.61.83.83 0 00.85.84zM.86 8.27h12.35l3.15-.2c.4-.02.67-.27.67-.67 0-.4-.27-.64-.67-.67l-3.15-.2H.86A.8.8 0 000 7.4c0 .51.35.87.86.87z" fill="currentColor" opacity=".85"/></svg></span>
     </a>
   </div>
 </main>
@@ -220,6 +222,24 @@ body.exiting main{opacity:0}
 "use strict";
 
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ── Mouse parallax on background gradient ───────────── */
+if (!reducedMotion) {
+  var bodyEl = document.body;
+  var mx = 0.5, my = 0.5, tmx = 0.5, tmy = 0.5, parallaxActive = true;
+  document.addEventListener("mousemove", function(e) {
+    tmx = e.clientX / window.innerWidth;
+    tmy = e.clientY / window.innerHeight;
+  });
+  (function updateParallax() {
+    if (!parallaxActive) return;
+    mx += (tmx - mx) * 0.05;
+    my += (tmy - my) * 0.05;
+    bodyEl.style.setProperty("--mx", mx);
+    bodyEl.style.setProperty("--my", my);
+    requestAnimationFrame(updateParallax);
+  })();
+}
 
 /* ── Loader counter ─────────────────────────────────── */
 var years = [1934,1938,1950,1954,1958,1962,1966,1970,1974,1978,1982,
@@ -247,13 +267,14 @@ yearsStrip.innerHTML = stripHTML;
 var titleChars = "The Road to Glory".split("");
 var titleHTML = "";
 for (var i = 0; i < titleChars.length; i++) {
-  titleHTML += '<span class="char">' + titleChars[i] + '</span>';
+  titleHTML += '<span class="char">' + (titleChars[i] === " " ? "&nbsp;" : titleChars[i]) + '</span>';
 }
 titleEl.innerHTML = titleHTML;
 var charSpans = titleEl.querySelectorAll(".char");
 
 /* ── Skip link ──────────────────────────────────────── */
 function goToApp() {
+  parallaxActive = false;
   document.body.classList.add("exiting");
   setTimeout(function() { window.location.href = "/app.html"; }, 900);
 }

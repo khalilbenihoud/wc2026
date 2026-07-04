@@ -34,6 +34,8 @@ interface ApiGame {
   type: "group" | "r32" | "r16" | "qf" | "sf" | "third" | "final";
   home_team_label?: string;
   away_team_label?: string;
+  home_scorers?: string;
+  away_scorers?: string;
 }
 
 // Regional-indicator flag emoji from a 2-letter ISO code (e.g. "FR" -> 🇫🇷).
@@ -68,6 +70,27 @@ function winnerIndex(g: ApiGame): 0 | 1 | null {
   return hs > as ? 0 : 1;
 }
 
+function parseScorers(raw: string | undefined): string[] | null {
+  if (!raw || raw === "null" || raw.trim() === "{}") return null;
+  const s = raw.trim().replace(/^\{|\}$/g, "").trim();
+  if (!s) return null;
+  const items = s.match(/"([^"]+)"/g);
+  if (!items) return null;
+  return items.map((i) => i.replace(/^"|"$/g, ""));
+}
+
+function scorersSnippet(g: ApiGame): string {
+  const h = parseScorers(g.home_scorers);
+  const a = parseScorers(g.away_scorers);
+  if (!h && !a) return "";
+  const parts: string[] = [];
+  if (h) parts.push(`[${h.map((s) => `"${s}"`).join(", ")}]`);
+  else parts.push("[]");
+  if (a) parts.push(`[${a.map((s) => `"${s}"`).join(", ")}]`);
+  else parts.push("[]");
+  return `, g: [${parts.join(", ")}]`;
+}
+
 function formatMatch(homeCode: string, awayCode: string, g: ApiGame | undefined): string {
   if (!g || g.finished !== "TRUE") {
     return `{ ta: "${homeCode}", tb: "${awayCode}", s: null, w: null }`;
@@ -78,7 +101,8 @@ function formatMatch(homeCode: string, awayCode: string, g: ApiGame | undefined)
   const p = hasValue(g.home_penalty_score) && hasValue(g.away_penalty_score)
     ? `, p: "${g.home_penalty_score}-${g.away_penalty_score}"`
     : "";
-  return `{ ta: "${homeCode}", tb: "${awayCode}", s: [${hs}, ${as}], w: ${w}${p} }`;
+  const goals = scorersSnippet(g);
+  return `{ ta: "${homeCode}", tb: "${awayCode}", s: [${hs}, ${as}], w: ${w}${p}${goals} }`;
 }
 
 async function main() {
