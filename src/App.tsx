@@ -396,7 +396,7 @@ export default function App() {
               </span>
             </h1>
             <p className="sub text-brand-muted text-xs mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
-              Every knockout bracket since 1934 — one radial map, from Round of 16 to final
+              Every knockout bracket since 1934 one radial map, from Round of 16 to final
             </p>
           </div>
 
@@ -550,7 +550,7 @@ export default function App() {
               );
             })}
           </select>
-          <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-3" viewBox="0 0 17.3242 10.4004" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-3" viewBox="0 0 17.3242 10.4004" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d={CHEVRON_PATH} fill="currentColor" className="text-brand-gold/80" />
           </svg>
         </div>
