@@ -372,7 +372,7 @@ export default function MatchDetailsModal({
                                 </span>
                               )}
                               <span className="shrink-0 font-mono text-[11px] font-semibold text-brand-gold tabular-nums">
-                                {g.minute}
+                                {g.minute.replace("+", "\u2060+\u2060")}
                               </span>
                             </div>
                           ))}
