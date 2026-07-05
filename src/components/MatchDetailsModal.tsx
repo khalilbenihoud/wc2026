@@ -18,6 +18,9 @@ interface MatchDetailsModalProps {
 // our brand tokens). Left segment = home team (gold), right = away (steel).
 function StatBar({ label, a, b }: { label: string; a: number; b: number }) {
   const total = a + b || 1;
+  const pctA = (a / total) * 100;
+  const pctB = (b / total) * 100;
+  const tied = a === b;
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between items-center text-[11px] font-mono">
@@ -29,12 +32,12 @@ function StatBar({ label, a, b }: { label: string; a: number; b: number }) {
       </div>
       <div className="h-2 w-full bg-[rgba(var(--overlay-rgb),0.05)] rounded-full overflow-hidden flex">
         <div
-          className="h-full bg-brand-gold transition-all duration-500"
-          style={{ width: `${(a / total) * 100}%` }}
+          className={`h-full transition-all duration-500 ${tied || a > b ? "bg-brand-gold" : "bg-brand-steel"}`}
+          style={{ width: `${pctA}%` }}
         />
         <div
-          className="h-full bg-brand-steel transition-all duration-500"
-          style={{ width: `${(b / total) * 100}%` }}
+          className={`h-full transition-all duration-500 ${tied || b > a ? "bg-brand-gold" : "bg-brand-steel"}`}
+          style={{ width: `${pctB}%` }}
         />
       </div>
     </div>
