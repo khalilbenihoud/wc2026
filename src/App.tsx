@@ -549,7 +549,7 @@ export default function App() {
           <div className="legend flex-none max-md:hidden flex gap-6 justify-center flex-wrap items-center text-brand-muted font-mono text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
             <div className="item flex items-center gap-2">
               <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
-              Hover flags to trace runs
+              Hover or tap flags to trace runs
             </div>
             <div className="item flex items-center gap-2">
               <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
@@ -563,7 +563,7 @@ export default function App() {
       </div>
 
       {/* Mobile year picker — fixed to bottom on mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-to-t from-brand-bg via-brand-bg/95 to-transparent pt-6 pb-3 px-4 z-50">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-to-t from-brand-bg via-brand-bg/95 to-transparent pt-6 px-4 z-50" style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}>
         <div className="relative">
           <select
             value={activeYear}
@@ -593,8 +593,8 @@ export default function App() {
         <div
           className="tip fixed z-50 pointer-events-none select-none -translate-x-1/2 -translate-y-[118%] bg-gradient-to-b from-brand-panel to-brand-bg border border-brand-line rounded-xl py-2 px-3.5 min-w-[180px] shadow-[0_16px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(246,196,83,0.05)] after:content-[''] after:absolute after:left-1/2 after:-bottom-1.5 after:-translate-x-1/2 after:rotate-45 after:w-2.5 after:h-2.5 after:bg-brand-bg after:border-r after:border-b after:border-brand-line transition-all duration-100 ease-out"
           style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`,
+            left: `${Math.max(100, Math.min(tooltip.x, window.innerWidth - 100))}px`,
+            top: `${Math.max(60, Math.min(tooltip.y, window.innerHeight - 60))}px`,
           }}
         >
           {tooltipContent}

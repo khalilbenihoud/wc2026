@@ -247,11 +247,12 @@ export default function MatchDetailsModal({
 
       {/* Side drawer */}
       <div
-        className={`absolute top-0 right-0 h-full w-full max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
+        className={`absolute top-0 right-0 h-full w-full max-md:max-w-none max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
           isClosing
             ? "animate-[slideOutRight_0.25s_cubic-bezier(0.4,0,0.6,1)_forwards]"
             : "animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]"
         }`}
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between px-6 pt-6 pb-4 bg-brand-panel border-b border-brand-line">
@@ -440,6 +441,14 @@ export default function MatchDetailsModal({
             <span className="text-brand-gold">📍</span>
             {data.host}
           </div>
+
+          {/* Mobile close button — easier to reach than the corner X */}
+          <button
+            className="md:hidden w-full rounded-xl border border-brand-line bg-brand-gold/[0.08] text-brand-gold-hi font-unbounded font-semibold text-sm py-3.5 mt-2 tracking-wide"
+            onClick={onClose}
+          >
+            Close
+          </button>
 
           {/* Date */}
           {matchDate ? (

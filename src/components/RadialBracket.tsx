@@ -1,4 +1,4 @@
-import React, { useId, memo } from "react";
+import React, { useId, memo, useEffect, useRef } from "react";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamColor, getTeamFlag, getTeamName } from "../data";
 
@@ -135,6 +135,22 @@ function RadialBracket({
     setHoveredLeaf(null);
     onShowTooltip("", 0, 0, 0, false);
   };
+
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const clear = () => {
+      setHoveredLeaf(null);
+      onShowTooltip("", 0, 0, 0, false);
+    };
+    const handleGlobalTouch = (e: TouchEvent) => {
+      if (svgRef.current && !svgRef.current.contains(e.target as Node)) {
+        clear();
+      }
+    };
+    document.addEventListener("touchstart", handleGlobalTouch, { passive: true });
+    return () => document.removeEventListener("touchstart", handleGlobalTouch);
+  }, [setHoveredLeaf, onShowTooltip]);
 
   // 1. Defs, guidelines
   const goldGradId = `${bracketId}-goldgrad`;
@@ -300,6 +316,12 @@ function RadialBracket({
             }}
             onMouseMove={!isEmpty ? (e) => handleMouseMove(e, round, i) : undefined}
             onMouseLeave={handleMouseLeave}
+            onTouchStart={isEmpty ? undefined : (e) => {
+              e.stopPropagation();
+              if (winLeaf !== null) setHoveredLeaf(winLeaf);
+              const t = e.touches[0];
+              onShowTooltip(round, i, t.clientX, t.clientY, true);
+            }}
             style={
               {
                 "--c": teamColor,
@@ -332,7 +354,7 @@ function RadialBracket({
               className="hit fill-transparent cursor-pointer"
               cx={f2(x)}
               cy={f2(y)}
-              r={disc[lvl] + 6}
+              r={disc[lvl] + 14}
             />
           </g>
         );
@@ -378,6 +400,12 @@ function RadialBracket({
           onMouseEnter={() => setHoveredLeaf(i)}
           onMouseMove={(e) => handleMouseMove(e, "r16", i >> 1)}
           onMouseLeave={handleMouseLeave}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setHoveredLeaf(i);
+            const t = e.touches[0];
+            onShowTooltip("r16", i >> 1, t.clientX, t.clientY, true);
+          }}
           style={
             {
               "--c": getTeamColor(code),
@@ -403,7 +431,7 @@ function RadialBracket({
             className="hit fill-transparent cursor-pointer"
             cx={f2(x)}
             cy={f2(y)}
-            r="34"
+            r="44"
           />
         </g>
       );
@@ -537,6 +565,12 @@ function RadialBracket({
         }}
         onMouseMove={analysis.champ !== null ? (e) => handleMouseMove(e, "final", 0) : undefined}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          if (analysis.champ !== null) setHoveredLeaf(analysis.champ);
+          const t = e.touches[0];
+          onShowTooltip("final", 0, t.clientX, t.clientY, true);
+        }}
         style={{ "--d": "0.24s" } as React.CSSProperties}
       >
         {/* Invisible helper circle to expand bounding box and prevent browser clipping of glow/shadow effects */}
@@ -588,9 +622,11 @@ function RadialBracket({
 
   return (
     <svg
+      ref={svgRef}
       id="bracket"
       viewBox="0 0 900 900"
       className="w-full h-full block overflow-visible select-none relative z-10"
+      style={{ touchAction: "manipulation" }}
       role="img"
       aria-label="Radial knockout bracket"
     >
