@@ -855,7 +855,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       { ta: "GER", tb: "PAR", s: [1, 1], w: 1, p: "3-4", g: [["Kai Havertz 54'"], ["Khvliv Ansisv 42'"]], date: "Jun 29 · 16:30" },
       { ta: "FRA", tb: "SWE", s: [3, 0], w: 0, g: [["Kylian Mbappé 45'", "Bradley Barcola 53'", "Kylian Mbappé 74'"], []], date: "Jun 30 · 17:00" },
       { ta: "RSA", tb: "CAN", s: [0, 1], w: 1, g: [[], ["Astfan Avstakviv 90+2'"]], date: "Jun 28 · 12:00" },
-      { ta: "NED", tb: "MAR", s: [1, 1], w: 1, p: "2-3", g: [["Kvdi Khakpv 72'"], ["Issa Diop 90+1'"]], date: "Jun 29 · 19:00" },
+      { ta: "NED", tb: "MAR", s: [1, 1], w: 1, p: "2-3", g: [["Cody Gakpo 72'"], ["Issa Diop 90+1'"]], date: "Jun 29 · 19:00" },
       { ta: "BRA", tb: "JPN", s: [2, 1], w: 0, g: [["Casemiro 56'", "Gabriel Martinelli 90+5'"], ["Kaishū Sano 29'"]], date: "Jun 29 · 12:00" },
       { ta: "CIV", tb: "NOR", s: [1, 2], w: 1, g: [["Amad Diallo 74'"], ["Antonio Nusa 39'", "Erling Haaland 86'"]], date: "Jun 30 · 12:00" },
       { ta: "MEX", tb: "ECU", s: [2, 0], w: 0, g: [["Jvlian Kviinvnz 22'", "Raúl Jiménez 31'"], []], date: "Jun 30 · 19:00" },
@@ -872,7 +872,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: [
       // France 1–0 Paraguay (R16, Jul 4) — France advance
       M(0, 1, 1, null, null, [[], ["Kylian Mbappé 70' (pen.)"]]),
-      M(0, 3, 1, null, null, [[], ["Azdin Avnahi 50'", "Azdin Avnahi 82'", "Svfian Rhimi 90+8'"]]),
+      M(0, 3, 1, null, null, [[], ["Azzedine Ounahi 50'", "Azzedine Ounahi 82'", "Soufiane Rahimi 90+8'"]]),
       null, null, null, null, null, null,
     ],
     qf: null,
