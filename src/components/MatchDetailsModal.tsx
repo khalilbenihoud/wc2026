@@ -4,6 +4,7 @@ import { getTeamFlag, getTeamName } from "../data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "../constants";
 import { getScorers } from "../scorers";
 import { getStats } from "../stats";
+import { getDetailedStats } from "../detailed-stats";
 
 interface MatchDetailsModalProps {
   isOpen: boolean;
@@ -40,6 +41,38 @@ function StatBar({ label, a, b }: { label: string; a: number; b: number }) {
           style={{ width: `${pctB}%` }}
         />
       </div>
+    </div>
+  );
+}
+
+function DetailedStatRow({ label, a, b, pct }: { label: string; a: number | string | null; b: number | string | null; pct?: boolean }) {
+  const numA = typeof a === "number" ? a : (a != null && a !== "" ? parseFloat(String(a)) || 0 : 0);
+  const numB = typeof b === "number" ? b : (b != null && b !== "" ? parseFloat(String(b)) || 0 : 0);
+  const total = numA + numB || 1;
+  const pctA = (numA / total) * 100;
+  const pctB = (numB / total) * 100;
+  const tied = numA === numB;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between items-center text-[11px] font-mono">
+        <span className="text-brand-text tabular-nums w-8 font-bold">{a ?? "—"}</span>
+        <span className="text-brand-muted uppercase tracking-[0.18em] font-semibold text-[10px]">
+          {label}
+        </span>
+        <span className="text-brand-text tabular-nums w-8 text-right font-bold">{b ?? "—"}</span>
+      </div>
+      {total > 0 && (
+        <div className="h-2 w-full bg-[rgba(var(--overlay-rgb),0.05)] rounded-full overflow-hidden flex">
+          <div
+            className={`h-full transition-all duration-500 ${tied || numA > numB ? "bg-brand-gold" : "bg-brand-steel"}`}
+            style={{ width: `${pctA}%` }}
+          />
+          <div
+            className={`h-full transition-all duration-500 ${tied || numB > numA ? "bg-brand-gold" : "bg-brand-steel"}`}
+            style={{ width: `${pctB}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -172,6 +205,7 @@ export default function MatchDetailsModal({
 
   // Resolve match stats: cards, subs, pens
   const stats = getStats(data._year, ta, tb);
+  const detailedStats = getDetailedStats(data._year, ta, tb);
 
   const notes = getMatchNotes(m);
 
@@ -422,6 +456,33 @@ export default function MatchDetailsModal({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Detailed statistics — from api-football */}
+          {detailedStats && played && (
+            <div className="relative overflow-hidden rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6 mt-4">
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+              <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
+                Detailed Statistics
+              </div>
+
+              <div className="space-y-3.5">
+                <DetailedStatRow label="Possession" a={detailedStats.possession[0]} b={detailedStats.possession[1]} pct />
+                <DetailedStatRow label="Total Shots" a={detailedStats.totalShots[0]} b={detailedStats.totalShots[1]} />
+                <DetailedStatRow label="Shots on Goal" a={detailedStats.shotsOnGoal[0]} b={detailedStats.shotsOnGoal[1]} />
+                <DetailedStatRow label="Shots off Goal" a={detailedStats.shotsOffGoal[0]} b={detailedStats.shotsOffGoal[1]} />
+                <DetailedStatRow label="Blocked Shots" a={detailedStats.blockedShots[0]} b={detailedStats.blockedShots[1]} />
+                <DetailedStatRow label="Shots inside Box" a={detailedStats.shotsInsideBox[0]} b={detailedStats.shotsInsideBox[1]} />
+                <DetailedStatRow label="Shots outside Box" a={detailedStats.shotsOutsideBox[0]} b={detailedStats.shotsOutsideBox[1]} />
+                <DetailedStatRow label="Corner Kicks" a={detailedStats.cornerKicks[0]} b={detailedStats.cornerKicks[1]} />
+                <DetailedStatRow label="Fouls" a={detailedStats.fouls[0]} b={detailedStats.fouls[1]} />
+                <DetailedStatRow label="Offsides" a={detailedStats.offsides[0]} b={detailedStats.offsides[1]} />
+                <DetailedStatRow label="Goalkeeper Saves" a={detailedStats.goalkeeperSaves[0]} b={detailedStats.goalkeeperSaves[1]} />
+                <DetailedStatRow label="Total Passes" a={detailedStats.totalPasses[0]} b={detailedStats.totalPasses[1]} />
+                <DetailedStatRow label="Passes %" a={detailedStats.passesPct[0]} b={detailedStats.passesPct[1]} pct />
+                <DetailedStatRow label="Yellow Cards" a={detailedStats.yellowCards[0]} b={detailedStats.yellowCards[1]} />
+              </div>
             </div>
           )}
 

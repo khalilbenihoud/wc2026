@@ -3,9 +3,28 @@
 // Both orientations are emitted so lookups work in either team order.
 
 export interface MatchStats {
-  cards: [string[], string[]];  // [teamA, teamB]
+  cards: [string[], string[]];
   subs: [string[], string[]];
-  pens: [string[], string[]];  // penalty shootouts only
+  pens: [string[], string[]];
+}
+
+export interface DetailedMatchStats {
+  possession: [string, string];
+  shotsOnGoal: [number, number];
+  shotsOffGoal: [number, number];
+  totalShots: [number, number];
+  blockedShots: [number, number];
+  shotsInsideBox: [number, number];
+  shotsOutsideBox: [number, number];
+  fouls: [number, number];
+  cornerKicks: [number, number];
+  offsides: [number | null, number | null];
+  yellowCards: [number, number];
+  redCards: [number | null, number | null];
+  goalkeeperSaves: [number, number];
+  totalPasses: [number, number];
+  passesAccurate: [number, number];
+  passesPct: [string, string];
 }
 
 const STATS: Record<string, MatchStats> = {
