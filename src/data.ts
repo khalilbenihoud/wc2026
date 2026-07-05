@@ -660,7 +660,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     r16: [
       // France 1–0 Paraguay (R16, Jul 4) — France advance
-      M(0, 1, 1, null, null, [[], ["Kylian Mbappé 63'"]]),
+      M(0, 1, 1, null, null, [[], ["Kylian Mbappé 70' (pen.)"]]),
       M(0, 3, 1, null, null, [[], ["Azdin Avnahi 50'", "Azdin Avnahi 82'", "Svfian Rhimi 90+8'"]]),
       null, null, null, null, null, null,
     ],
