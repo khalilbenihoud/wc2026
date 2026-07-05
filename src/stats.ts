@@ -6,25 +6,9 @@ export interface MatchStats {
   cards: [string[], string[]];
   subs: [string[], string[]];
   pens: [string[], string[]];
-}
-
-export interface DetailedMatchStats {
-  possession: [string, string];
-  shotsOnGoal: [number, number];
-  shotsOffGoal: [number, number];
-  totalShots: [number, number];
-  blockedShots: [number, number];
-  shotsInsideBox: [number, number];
-  shotsOutsideBox: [number, number];
-  fouls: [number, number];
-  cornerKicks: [number, number];
-  offsides: [number | null, number | null];
-  yellowCards: [number, number];
-  redCards: [number | null, number | null];
-  goalkeeperSaves: [number, number];
-  totalPasses: [number, number];
-  passesAccurate: [number, number];
-  passesPct: [string, string];
+  possession?: [string, string];
+  totalShots?: [number, number];
+  fouls?: [number, number];
 }
 
 const STATS: Record<string, MatchStats> = {
@@ -1530,6 +1514,29 @@ const STATS: Record<string, MatchStats> = {
   },
 };
 
+const POSSESSION_STATS: Record<string, { possession: [string, string]; totalShots: [number, number]; fouls: [number, number] }> = {
+  "2022_NED_USA": { possession: ["42%", "58%"], totalShots: [11, 17], fouls: [10, 5] },
+  "2022_ARG_AUS": { possession: ["61%", "39%"], totalShots: [14, 5], fouls: [8, 15] },
+  "2022_FRA_POL": { possession: ["55%", "45%"], totalShots: [16, 12], fouls: [10, 8] },
+  "2022_ENG_SEN": { possession: ["61%", "39%"], totalShots: [8, 10], fouls: [16, 12] },
+  "2022_JPN_CRO": { possession: ["42%", "58%"], totalShots: [13, 17], fouls: [13, 16] },
+  "2022_BRA_KOR": { possession: ["53%", "47%"], totalShots: [18, 8], fouls: [8, 13] },
+  "2022_MAR_ESP": { possession: ["23%", "77%"], totalShots: [6, 13], fouls: [15, 14] },
+  "2022_POR_SUI": { possession: ["48%", "52%"], totalShots: [15, 10], fouls: [12, 10] },
+  "2022_CRO_BRA": { possession: ["51%", "49%"], totalShots: [9, 21], fouls: [22, 24] },
+  "2022_NED_ARG": { possession: ["52%", "48%"], totalShots: [6, 14], fouls: [30, 18] },
+  "2022_MAR_POR": { possession: ["27%", "73%"], totalShots: [9, 12], fouls: [15, 9] },
+  "2022_ENG_FRA": { possession: ["57%", "43%"], totalShots: [16, 8], fouls: [10, 14] },
+  "2022_ARG_CRO": { possession: ["39%", "61%"], totalShots: [9, 12], fouls: [15, 8] },
+  "2022_FRA_MAR": { possession: ["39%", "61%"], totalShots: [14, 13], fouls: [10, 11] },
+  "2022_CRO_MAR": { possession: ["51%", "49%"], totalShots: [12, 9], fouls: [13, 11] },
+  "2022_ARG_FRA": { possession: ["54%", "46%"], totalShots: [20, 10], fouls: [26, 19] },
+};
+
 export function getStats(year: number, teamA: string, teamB: string): MatchStats | null {
-  return STATS[`${year}_${teamA}_${teamB}`] ?? null;
+  const base = STATS[`${year}_${teamA}_${teamB}`];
+  if (!base) return null;
+  const extras = POSSESSION_STATS[`${year}_${teamA}_${teamB}`];
+  if (extras) return { ...base, ...extras };
+  return base;
 }
