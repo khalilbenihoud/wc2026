@@ -450,14 +450,14 @@ export default function App() {
           {/* Mobile summary — the desktop header chips are hidden on phones, so
               surface host / champion / golden boot here instead. */}
           <div className="md:hidden mb-1 grid grid-cols-3 gap-2 text-center">
-            <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line py-2.5 px-1.5">
+            <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-brand-line py-2.5 px-1.5 min-h-[72px]">
               <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Host</span>
               <span className="text-brand-text font-bold text-[11px] leading-tight">
                 {currentData.hostFlag}
               </span>
               <span className="text-brand-muted text-[9px] leading-tight">{currentData.host}</span>
             </div>
-            <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line bg-brand-gold/[0.05] py-2.5 px-1.5">
+            <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-brand-line bg-brand-gold/[0.05] py-2.5 px-1.5 min-h-[72px]">
               <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-gold/70 font-semibold">Champion</span>
               <span className="text-brand-gold font-bold text-[11px] leading-tight">
                 {champCode ? getTeamFlag(champCode) : "—"}
@@ -466,14 +466,14 @@ export default function App() {
                 {champCode ? getTeamName(champCode) : "TBD"}
               </span>
             </div>
-            <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line py-2.5 px-1.5">
+            <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-brand-line py-2.5 px-1.5 min-h-[72px]">
               <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Golden Boot</span>
               {gbName ? (
-                <>
-                  <GbAvatar photo={gbPhoto} name={gbName} className="w-8 h-8 text-xs my-0.5" />
-                  <span className="text-brand-text font-bold text-[11px] leading-tight">{gbGoals} goals</span>
-                  <span className="text-brand-muted text-[9px] leading-tight break-words">{gbName}</span>
-                </>
+                <div className="flex flex-col items-center gap-0.5">
+                  <GbAvatar photo={gbPhoto} name={gbName} className="w-7 h-7 text-[10px]" />
+                  <span className="text-brand-text font-bold text-[10px] leading-none">{gbGoals} goals</span>
+                  <span className="text-brand-muted text-[8px] leading-tight break-words">{gbName.split(" ").slice(0, 2).join(" ")}</span>
+                </div>
               ) : (
                 <span className="text-brand-muted text-[9px] leading-tight">TBD</span>
               )}
