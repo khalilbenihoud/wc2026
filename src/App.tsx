@@ -179,9 +179,7 @@ function analyzeNoR16(d: TournamentData): TournamentAnalysis {
 }
 
 export default function App() {
-  const [splashDone, setSplashDone] = useState(
-    () => sessionStorage.getItem("wc-splash-done") === "1"
-  );
+  const [splashDone, setSplashDone] = useState(true);
   const [splashExiting, setSplashExiting] = useState(false);
 
   const handleSplashEnter = useCallback(() => {
