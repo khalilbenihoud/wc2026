@@ -154,10 +154,13 @@ function RadialBracket({
   const trophyShineId = `${bracketId}-trophyshine`;
   const trophyGlowFilterId = `${bracketId}-trophyglowfilter`;
 
+  const hasR16 = !!data.r16;
+
   // 2. Render normal staples (levels 0, 1, 2)
   const renderStaplePaths = () => {
     const paths: React.ReactNode[] = [];
-    for (let L = 0; L <= 2; L++) {
+    const startLevel = hasR16 ? 0 : 1;
+    for (let L = startLevel; L <= 2; L++) {
       const count = 16 >> L;
       for (let ci = 0; ci < count; ci++) {
         const parLevel = L + 1;
@@ -358,7 +361,8 @@ function RadialBracket({
 
   // 5. Render outer leaves (level 0)
   const renderCrests = () => {
-    return data.teams.map((code, i) => {
+    const leafCount = hasR16 ? 16 : 8;
+    return data.teams.slice(0, leafCount).map((code, i) => {
       const ang = nodeAngle(0, i);
       const [x, y] = polar(R[0], ang);
       const dl = introDelay(0, i, 16);
