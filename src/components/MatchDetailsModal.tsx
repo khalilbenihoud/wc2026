@@ -234,7 +234,7 @@ export default function MatchDetailsModal({
         role="dialog"
         aria-modal="true"
         aria-label={`${data._year} ${ROUND_NAME[round]} — Match ${idx + 1}`}
-        className={`absolute top-0 right-0 h-full w-full max-md:max-w-none max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
+        className={`absolute top-0 right-0 h-full w-full max-md:max-w-none max-w-[520px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
           isClosing
             ? "animate-[slideOutRight_0.25s_cubic-bezier(0.4,0,0.6,1)_forwards]"
             : "animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]"
@@ -383,6 +383,7 @@ export default function MatchDetailsModal({
           {/* Match statistics — comparison bars (borrowed from scoreboard modal) */}
           {statRows.length > 0 && (
             <div className="relative overflow-hidden rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6">
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
               <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
                 Match Statistics
               </div>

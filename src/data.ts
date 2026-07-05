@@ -226,7 +226,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1938: {
     host: "France",
     hostFlag: "🇫🇷",
-    goldenBoot: { name: "Leônidas", goals: 7 },
+    goldenBoot: { name: "Leônidas", goals: 8 },
     quote: "Leônidas dazzles, Italy repeats.",
     teams: [
       "SWE", "AUT",
@@ -319,7 +319,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1962: {
     host: "Chile",
     hostFlag: "🇨🇱",
-    goldenBoot: { name: "Garrincha / Vavá", goals: 4 },
+    goldenBoot: { name: "Flórián Albert", goals: 4 },
     quote: "Garrincha carries Brazil.",
     teams: [
       "BRA", "ENG",
@@ -521,7 +521,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   1994: {
     host: "United States",
     hostFlag: "🇺🇸",
-    goldenBoot: { name: "Hristo Stoichkov / Oleg Salenko", goals: 6 },
+    goldenBoot: { name: "Oleg Salenko", goals: 6 },
     quote: "Baggio's penalty, into the sky.",
     teams: [
       "NGA",

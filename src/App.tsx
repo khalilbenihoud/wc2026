@@ -556,6 +556,7 @@ export default function App() {
                 hoveredLeaf={hoveredLeaf}
                 setHoveredLeaf={setHoveredLeaf}
                 onShowTooltip={handleShowTooltip}
+                variant="full"
               />
             </div>
           </div>

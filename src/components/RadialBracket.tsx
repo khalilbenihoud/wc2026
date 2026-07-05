@@ -16,6 +16,9 @@ interface RadialBracketProps {
     y: number,
     visible: boolean
   ) => void;
+  // "classic" = the original 16-slot wheel (8-team tournaments fill only half).
+  // "full" = a dedicated full-circle 8-team layout for the pre-1986 format.
+  variant?: "classic" | "full";
 }
 
 const CX = 450;
@@ -30,6 +33,16 @@ const nodeAngle = (level: number, index: number): number => {
   const span = 1 << level;
   const centerLeaf = index * span + (span - 1) / 2;
   return centerLeaf * 22.5;
+};
+
+// Full-circle 8-team geometry (pre-1986 format). Three rings — leaves, QF
+// winners, SF winners — spread across the whole 360deg at 45deg per leaf.
+const R_F = [368, 240, 120];
+const CLEAR_F: Record<number, number> = { 0: 31, 1: 22, 2: 26 };
+const nodeAngleF = (level: number, index: number): number => {
+  const span = 1 << level;
+  const centerLeaf = index * span + (span - 1) / 2;
+  return centerLeaf * 45;
 };
 
 const polar = (r: number, angDeg: number): [number, number] => {
@@ -62,6 +75,7 @@ function RadialBracket({
   hoveredLeaf,
   setHoveredLeaf,
   onShowTooltip,
+  variant = "classic",
 }: RadialBracketProps) {
   const bracketId = useId();
   const champCode =
@@ -155,6 +169,8 @@ function RadialBracket({
   const trophyGlowFilterId = `${bracketId}-trophyglowfilter`;
 
   const hasR16 = !!data.r16;
+  // Only the 8-team (no-R16) tournaments can use the full-circle layout.
+  const useFull = variant === "full" && !hasR16;
 
   // 2. Render normal staples (levels 0, 1, 2)
   const renderStaplePaths = () => {
@@ -435,6 +451,290 @@ function RadialBracket({
     });
   };
 
+  // ---------------------------------------------------------------------------
+  // Full-circle 8-team renderers (used only when `useFull` is true). These mirror
+  // the classic renderers but with 3 rings, 45deg leaf spacing, and the pre-1986
+  // round mapping: leaves = QF teams, level 1 = QF winners, level 2 = SF winners.
+  // ---------------------------------------------------------------------------
+
+  // Advancing team on a full-circle connector.
+  const getConnTeamFull = (lvl: number, idx: number): string | null => {
+    if (lvl === 0) {
+      const w = analysis.w1[idx >> 1];
+      return w != null && w === idx ? data.teams[idx] : null;
+    }
+    if (lvl === 1) {
+      const t = analysis.w1[idx];
+      if (t == null) return null;
+      const w = analysis.w2[idx >> 1];
+      return w != null && w === t ? data.teams[t] : null;
+    }
+    return null;
+  };
+
+  const renderStaplePathsFull = () => {
+    const paths: React.ReactNode[] = [];
+    for (let L = 0; L <= 1; L++) {
+      const count = 8 >> L;
+      for (let ci = 0; ci < count; ci++) {
+        const parLevel = L + 1;
+        const childEdge = R_F[L] - CLEAR_F[L];
+        const parentEdge = R_F[parLevel] + CLEAR_F[parLevel];
+        const Rb = (childEdge + parentEdge) / 2;
+        const thC = nodeAngleF(L, ci);
+        const thP = nodeAngleF(parLevel, ci >> 1);
+        const [dx, dy] = polar(childEdge, thC);
+        const [bx, by] = polar(Rb, thC);
+        const [px, py] = polar(Rb, thP);
+        const sweep = thP > thC ? 1 : 0;
+        const tm = getConnTeamFull(L, ci);
+
+        let dStr = `M ${f2(dx)} ${f2(dy)} L ${f2(bx)} ${f2(by)} A ${f2(Rb)} ${f2(Rb)} 0 0 ${sweep} ${f2(px)} ${f2(py)}`;
+        if (tm) {
+          const [sx, sy] = polar(parentEdge, thP);
+          dStr += ` L ${f2(sx)} ${f2(sy)}`;
+        }
+
+        const dl = introDelay(L, ci, count);
+        const connId = `c${L}-${ci}`;
+        const isLit = litConns.has(connId);
+        const isDim = hasFocus && !isLit;
+        const roundMissing = (L === 0 && !data.qf) || (L === 1 && !data.sf);
+
+        let className = "conn";
+        if (isLit) className += " lit";
+        else if (isDim) className += " dim";
+        else if (tm) className += " used";
+        else if (roundMissing) className += " tbd";
+
+        paths.push(
+          <path
+            key={connId}
+            id={connId}
+            pathLength="100"
+            d={dStr}
+            className={className}
+            style={
+              {
+                "--c": tm ? getTeamColor(tm) : undefined,
+                "--d": `${dl}s`,
+              } as React.CSSProperties
+            }
+          />
+        );
+      }
+    }
+    return paths;
+  };
+
+  const renderFinalSpokesFull = () => {
+    return [0, 1].map((ci) => {
+      const ang = nodeAngleF(2, ci);
+      const [x1, y1] = polar(R_F[2] - CLEAR_F[2], ang);
+      const [x2, y2] = polar(TROPHY_R + 3, ang);
+      const t = analysis.w2[ci];
+      const tm = t != null && analysis.champ === t ? data.teams[t] : null;
+      const dl = introDelay(2, ci, 2);
+
+      const connId = `c2-${ci}`;
+      const isLit = litConns.has(connId);
+      const isDim = hasFocus && !isLit;
+
+      let className = "conn";
+      if (isLit) className += " lit";
+      else if (isDim) className += " dim";
+      else if (tm) className += " used";
+      else if (!data.final) className += " tbd";
+
+      return (
+        <path
+          key={connId}
+          id={connId}
+          pathLength="100"
+          d={`M ${f2(x1)} ${f2(y1)} L ${f2(x2)} ${f2(y2)}`}
+          className={className}
+          style={
+            {
+              "--c": tm ? getTeamColor(tm) : undefined,
+              "--d": `${dl}s`,
+            } as React.CSSProperties
+          }
+        />
+      );
+    });
+  };
+
+  const renderJunctionsFull = () => {
+    const elements: React.ReactNode[] = [];
+    const disc: Record<number, number> = { 1: 20, 2: 24 };
+    const flagF: Record<number, number> = { 1: 22, 2: 27 };
+    const qMarkSize: Record<number, number> = { 1: 13, 2: 15 };
+    const winArr: Record<number, (number | null)[]> = {
+      1: analysis.w1,
+      2: analysis.w2,
+    };
+    const roundByLvl: Record<number, string> = { 1: "qf", 2: "sf" };
+
+    for (let lvl = 1; lvl <= 2; lvl++) {
+      const count = 8 >> lvl;
+      const round = roundByLvl[lvl];
+      const winners = winArr[lvl];
+
+      for (let i = 0; i < count; i++) {
+        const ang = nodeAngleF(lvl, i);
+        const [x, y] = polar(R_F[lvl], ang);
+        const winLeaf = winners?.[i] ?? null;
+        const dl = introDelay(lvl, i, count);
+
+        const nodeId = `n${lvl}-${i}`;
+        const isLit = litNodes.has(nodeId);
+        const isDim = hasFocus && !isLit;
+        const isEmpty = winLeaf === null;
+
+        let className = "crest junc";
+        if (isEmpty) className += " empty";
+        if (isLit) className += " lit";
+        if (isDim) className += " dim";
+
+        const teamCode = winLeaf !== null ? data.teams[winLeaf] : null;
+        const teamColor = teamCode ? getTeamColor(teamCode) : undefined;
+
+        const ariaLabel = teamCode
+          ? `${ROUND_NAME[round]} winner ${getTeamName(teamCode)}. View match details.`
+          : `${ROUND_NAME[round]} — not yet decided.`;
+
+        elements.push(
+          <g
+            key={nodeId}
+            id={nodeId}
+            className={className}
+            role="button"
+            tabIndex={0}
+            aria-label={ariaLabel}
+            onClick={() => onSelectMatch(round, i)}
+            onKeyDown={(e) => activateKey(e, () => onSelectMatch(round, i))}
+            onFocus={() => {
+              if (winLeaf !== null) setHoveredLeaf(winLeaf);
+            }}
+            onBlur={() => setHoveredLeaf(null)}
+            onMouseEnter={() => {
+              if (winLeaf !== null) setHoveredLeaf(winLeaf);
+            }}
+            onMouseMove={!isEmpty ? (e) => handleMouseMove(e, round, i) : undefined}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={isEmpty ? undefined : (e) => {
+              e.stopPropagation();
+              if (winLeaf !== null) setHoveredLeaf(winLeaf);
+              const t = e.touches[0];
+              onShowTooltip(round, i, t.clientX, t.clientY, true);
+            }}
+            style={{
+              "--c": teamColor,
+              "--d": `${dl}s`,
+              transformOrigin: `${f2(x)}px ${f2(y)}px`,
+            } as React.CSSProperties}
+          >
+            <circle className="disc" cx={f2(x)} cy={f2(y)} r={disc[lvl]} />
+            {teamCode && (
+              <text
+                className="flag font-sans select-none"
+                style={{ fontSize: `${flagF[lvl]}px` }}
+                x={f2(x)}
+                y={f2(y + 1)}
+              >
+                {getTeamFlag(teamCode)}
+              </text>
+            )}
+            {isEmpty && (
+              <circle
+                cx={f2(x)}
+                cy={f2(y)}
+                r={qMarkSize[lvl] / 3}
+                fill="var(--steel)"
+                className="select-none"
+              />
+            )}
+            <circle
+              className="hit fill-transparent cursor-pointer"
+              cx={f2(x)}
+              cy={f2(y)}
+              r={disc[lvl] + 14}
+            />
+          </g>
+        );
+      }
+    }
+    return elements;
+  };
+
+  const renderCrestsFull = () => {
+    return data.teams.slice(0, 8).map((code, i) => {
+      const ang = nodeAngleF(0, i);
+      const [x, y] = polar(R_F[0], ang);
+      const dl = introDelay(0, i, 8);
+
+      const nodeId = `n0-${i}`;
+      const isLit = litNodes.has(nodeId);
+      const isDim = hasFocus && !isLit;
+      const isUnknown = code === "TBD";
+
+      let className = "crest";
+      if (isUnknown) className += " junc empty";
+      if (isLit) className += " lit";
+      if (isDim) className += " dim";
+
+      const ariaLabel = isUnknown
+        ? "Quarter-final — team to be decided."
+        : `${getTeamName(code)}, Quarter-final. View match details.`;
+
+      return (
+        <g
+          key={nodeId}
+          id={nodeId}
+          className={className}
+          role="button"
+          tabIndex={0}
+          aria-label={ariaLabel}
+          onClick={() => onSelectMatch("qf", i >> 1)}
+          onKeyDown={(e) => activateKey(e, () => onSelectMatch("qf", i >> 1))}
+          onFocus={() => setHoveredLeaf(i)}
+          onBlur={() => setHoveredLeaf(null)}
+          onMouseEnter={() => setHoveredLeaf(i)}
+          onMouseMove={(e) => handleMouseMove(e, "qf", i >> 1)}
+          onMouseLeave={handleMouseLeave}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setHoveredLeaf(i);
+            const t = e.touches[0];
+            onShowTooltip("qf", i >> 1, t.clientX, t.clientY, true);
+          }}
+          style={
+            {
+              "--c": getTeamColor(code),
+              "--d": `${dl}s`,
+              transformOrigin: `${f2(x)}px ${f2(y)}px`,
+            } as React.CSSProperties
+          }
+        >
+          <circle className="disc" cx={f2(x)} cy={f2(y)} r="28" />
+          {isUnknown ? (
+            <circle cx={f2(x)} cy={f2(y)} r={5} fill="var(--steel)" />
+          ) : (
+            <text className="flag font-sans select-none" x={f2(x)} y={f2(y + 1)}>
+              {getTeamFlag(code)}
+            </text>
+          )}
+          <circle
+            className="hit fill-transparent cursor-pointer"
+            cx={f2(x)}
+            cy={f2(y)}
+            r="44"
+          />
+        </g>
+      );
+    });
+  };
+
   // 5b. Render Round-of-32 outer ring (only when data supplies one entry per leaf)
   const renderR32Ring = () => {
     if (!data.r32 || data.r32.length !== data.teams.length) return null;
@@ -683,21 +983,40 @@ function RadialBracket({
       {/* Guidelines */}
       <circle className="guide" cx={CX} cy={CY} r={R[0] + 14} />
 
-      {/* Connector lines (underneath) */}
-      {renderStaplePaths()}
-      {renderFinalSpokes()}
+      {useFull ? (
+        <>
+          {/* Connector lines (underneath) */}
+          {renderStaplePathsFull()}
+          {renderFinalSpokesFull()}
 
-      {/* Junction crests */}
-      {renderJunctions()}
+          {/* Junction crests */}
+          {renderJunctionsFull()}
 
-      {/* Central Trophy Medallion */}
-      {renderMedallionComponent()}
+          {/* Central Trophy Medallion */}
+          {renderMedallionComponent()}
 
-      {/* Outer team crests */}
-      {renderCrests()}
+          {/* Outer team crests */}
+          {renderCrestsFull()}
+        </>
+      ) : (
+        <>
+          {/* Connector lines (underneath) */}
+          {renderStaplePaths()}
+          {renderFinalSpokes()}
 
-      {/* Round of 32 outer ring (2026 in-progress bracket) */}
-      {renderR32Ring()}
+          {/* Junction crests */}
+          {renderJunctions()}
+
+          {/* Central Trophy Medallion */}
+          {renderMedallionComponent()}
+
+          {/* Outer team crests */}
+          {renderCrests()}
+
+          {/* Round of 32 outer ring (2026 in-progress bracket) */}
+          {renderR32Ring()}
+        </>
+      )}
     </svg>
   );
 }
