@@ -11,6 +11,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
   const [loaderDone, setLoaderDone] = useState(false);
   const [yearIdx, setYearIdx] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
+  const charsRef = useRef<HTMLSpanElement[]>([]);
   const splashRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef(0);
   const timerRef = useRef(0);
@@ -64,6 +65,22 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
     tick();
     return () => clearTimeout(timerRef.current);
   }, [reducedMotion]);
+
+  useEffect(() => {
+    if (!loaderDone) return;
+    const chars = charsRef.current;
+    const reveal = () => {
+      for (let i = 0; i < chars.length; i++) {
+        const span = chars[i];
+        if (span) {
+          if (!reducedMotion) span.style.transitionDelay = `${i * 0.045}s`;
+          span.classList.add("show");
+        }
+      }
+    };
+    if (reducedMotion) reveal();
+    else setTimeout(reveal, 100);
+  }, [loaderDone, reducedMotion]);
 
   return (
     <div
@@ -123,7 +140,12 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
         </div>
 
         <h1 style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2rem,5.5vw,3.75rem)", fontWeight: 600, lineHeight: 1.15, letterSpacing: "0.04em", overflow: "hidden" }}>
-          The Road to Glory
+          {"The Road to Glory".split("").map((char, i) => (
+            <span key={i} ref={(el) => { if (el) charsRef.current[i] = el; }} className="ch">
+              {char === " " ? "\u00A0" : char}
+              {i === 7 ? <span className="ch-br" /> : null}
+            </span>
+          ))}
         </h1>
 
         <p style={{ maxWidth: "36rem", fontSize: "0.9375rem", lineHeight: 1.6, opacity: 0.55 }}>
@@ -132,6 +154,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
 
         <button
           onClick={() => onEnter()}
+          className="splash-cta"
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -177,7 +200,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
         {YEARS.map((y) => (
           <span key={y} style={{ color: y === 2026 ? "#d9b45a" : "#f3efe4", opacity: y === 2026 ? 1 : 0.28 }}>
             {y === 2026 && (
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#d9b45a", display: "inline-block", marginRight: "0.375rem", verticalAlign: "middle" }} />
+              <span className="pd" style={{ width: 5, height: 5, borderRadius: "50%", background: "#d9b45a", display: "inline-block", marginRight: "0.375rem", verticalAlign: "middle" }} />
             )}
             {y}
           </span>
