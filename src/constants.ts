@@ -11,7 +11,7 @@ export const ROUND_NAME: Record<string, string> = {
 
 export const TOURNAMENT_YEARS: number[] = Object.keys(TOURNAMENTS)
   .map(Number)
-  .sort((a, b) => a - b);
+  .sort((a, b) => b - a);
 
 export function resolveCompetitors(
   data: TournamentData,
