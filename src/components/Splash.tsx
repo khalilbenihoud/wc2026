@@ -10,6 +10,7 @@ interface SplashProps {
 export default function Splash({ onEnter, exiting }: SplashProps) {
   const [loaderDone, setLoaderDone] = useState(false);
   const [yearIdx, setYearIdx] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const charsRef = useRef<HTMLSpanElement[]>([]);
   const splashRef = useRef<HTMLDivElement>(null);
@@ -24,6 +25,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
     if (reducedMotion) return;
     const el = splashRef.current;
     if (!el) return;
+    setMounted(true);
     let mx = 0.5, my = 0.5, tmx = 0.5, tmy = 0.5;
     const onMove = (e: MouseEvent) => {
       tmx = e.clientX / window.innerWidth;
@@ -96,8 +98,12 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
         background: "#09090b",
         fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
         color: "#f3efe4",
-        transition: exiting ? "opacity 0.9s ease, filter 0.9s ease" : "none",
-        opacity: exiting ? 0 : 1,
+        transition: exiting
+          ? "opacity 0.9s ease, filter 0.9s ease"
+          : mounted
+          ? "opacity 0.6s ease"
+          : "none",
+        opacity: exiting ? 0 : mounted ? 1 : 0,
         filter: exiting ? "blur(40px) brightness(0.3)" : "none",
         backgroundImage: "radial-gradient(1100px 820px at calc(var(--mx,0.5)*100%) calc(var(--my,0.5)*100%), rgba(217,180,90,0.08), transparent 62%), linear-gradient(180deg, #0c0c0e, #09090b 66%)",
         WebkitFontSmoothing: "antialiased",
