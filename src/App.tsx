@@ -45,6 +45,39 @@ const WIKI_SLUG_OVERRIDE: Record<string, string> = {
   "Kylian Mbappé": "Kylian_Mbappé",
 };
 
+// Wikipedia slug for a golden-boot name (handles "A / B" ties and "(disamb)").
+const gbSlug = (name: string) =>
+  WIKI_SLUG_OVERRIDE[name] || name.split("/")[0].split(" (")[0].trim();
+
+// Circular player avatar built into the golden-boot chip. Falls back to a gold
+// ⚽ ring while the photo is loading or when Wikipedia has no thumbnail, so the
+// slot is always filled — no blank flash, no floating pop-under.
+function GbAvatar({
+  photo,
+  name,
+  className = "",
+}: {
+  photo: string | null;
+  name: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`relative shrink-0 flex items-center justify-center rounded-full overflow-hidden border border-brand-gold/50 bg-brand-gold/10 shadow-[0_0_10px_rgba(246,196,83,0.25)] ${className}`}
+    >
+      {photo ? (
+        <img
+          src={photo}
+          alt={name}
+          className="w-full h-full object-cover object-top animate-[fadeIn_0.4s_ease]"
+        />
+      ) : (
+        <span className="text-[0.7em] leading-none select-none">⚽</span>
+      )}
+    </span>
+  );
+}
+
 // Tournament analysis calculator
 function analyze(d: TournamentData): TournamentAnalysis {
   if (!d.r16) {
@@ -173,37 +206,8 @@ export default function App() {
     visible: false,
   });
 
-  const [gbHover, setGbHover] = useState(false);
   const [gbPhoto, setGbPhoto] = useState<string | null>(null);
   const gbCache = useRef<Record<string, string>>({});
-
-  const handleGbMouseEnter = useCallback((e: React.MouseEvent, name: string) => {
-    setGbHover(true);
-    const clean =
-      WIKI_SLUG_OVERRIDE[name] || name.split("/")[0].split(" (")[0].trim();
-    if (gbCache.current[clean]) {
-      setGbPhoto(gbCache.current[clean]);
-      return;
-    }
-    fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`
-    )
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.thumbnail?.source) {
-          gbCache.current[clean] = data.thumbnail.source;
-          setGbPhoto(data.thumbnail.source);
-        } else {
-          setGbPhoto(null);
-        }
-      })
-      .catch(() => setGbPhoto(null));
-  }, []);
-
-  const handleGbMouseLeave = useCallback(() => {
-    setGbHover(false);
-    setGbPhoto(null);
-  }, []);
 
   // Pre-calculate tournament analyses
   const analyses = useMemo(() => {
@@ -282,7 +286,7 @@ export default function App() {
 
     return (
       <div className="text-center font-sans">
-        <div className="tt-round font-unbounded text-[10px] text-brand-gold tracking-widest uppercase mb-1.5 select-none font-medium">
+        <div className="tt-round font-mono text-[10px] text-brand-gold tracking-widest uppercase mb-1.5 select-none font-medium">
           {ROUND_NAME[round]}
         </div>
         <div className="tt-row flex items-center justify-center gap-2.5 whitespace-nowrap">
@@ -307,7 +311,7 @@ export default function App() {
           </span>
         </div>
         {notes.length > 0 ? (
-          <div className="tt-note mt-2 text-[9px] tracking-wider uppercase text-brand-muted select-none">
+          <div className="tt-note mt-2 font-mono text-[9px] tracking-wider uppercase text-brand-muted select-none">
             {notes.map((n, i) => (
               <span key={i}>
                 {i > 0 && <span className="mx-1 text-brand-steel">·</span>}
@@ -317,7 +321,7 @@ export default function App() {
           </div>
         ) : (
           !m && (
-            <div className="tt-note mt-1.5 text-[9px] tracking-wider uppercase text-brand-muted select-none font-medium">
+            <div className="tt-note mt-1.5 font-mono text-[9px] tracking-wider uppercase text-brand-muted select-none font-medium">
               not yet played
             </div>
           )
@@ -338,12 +342,45 @@ export default function App() {
 
   const gbName = currentData.goldenBoot?.name;
   const gbGoals = currentData.goldenBoot?.goals;
-  const handleGbEnter = useCallback(
-    (e: React.MouseEvent) => {
-      if (gbName) handleGbMouseEnter(e, gbName);
-    },
-    [handleGbMouseEnter, gbName]
-  );
+
+  // Prefetch the golden-boot photo as soon as the year changes (not on hover):
+  // check the in-memory + localStorage cache first, otherwise fetch once from
+  // Wikipedia, preload the image, and persist it so it's instant next time.
+  useEffect(() => {
+    if (!gbName) {
+      setGbPhoto(null);
+      return;
+    }
+    const slug = gbSlug(gbName);
+    const cached =
+      gbCache.current[slug] ??
+      (typeof localStorage !== "undefined" ? localStorage.getItem(`gb:${slug}`) : null);
+    if (cached) {
+      gbCache.current[slug] = cached;
+      setGbPhoto(cached);
+      return;
+    }
+    setGbPhoto(null);
+    let cancelled = false;
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const src: string | undefined = data?.thumbnail?.source;
+        if (!src || cancelled) return;
+        gbCache.current[slug] = src;
+        try {
+          localStorage.setItem(`gb:${slug}`, src);
+        } catch {
+          /* storage full / unavailable — in-memory cache still applies */
+        }
+        new Image().src = src; // warm the browser cache before render
+        setGbPhoto(src);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [gbName]);
 
   // FIFA World Cup editions run every 4 years from 1930, skipping 1942/1946
   // (WWII). 1986 was the 13th edition, so this holds for every year on our
@@ -382,7 +419,7 @@ export default function App() {
               {lightMode ? "🌙" : "☀️"}
             </button>
 
-            <div className="kicker inline-flex items-center gap-2.5 font-sans font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
+            <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
               FIFA World Cup Archive
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
@@ -399,14 +436,14 @@ export default function App() {
               surface host / champion / golden boot here instead. */}
           <div className="md:hidden mb-1 grid grid-cols-3 gap-2 text-center">
             <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line py-2.5 px-1.5">
-              <span className="text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Host</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Host</span>
               <span className="text-brand-text font-bold text-[11px] leading-tight">
                 {currentData.hostFlag}
               </span>
               <span className="text-brand-muted text-[9px] leading-tight">{currentData.host}</span>
             </div>
             <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line bg-brand-gold/[0.05] py-2.5 px-1.5">
-              <span className="text-[8.5px] uppercase tracking-[0.18em] text-brand-gold/70 font-semibold">Champion</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-gold/70 font-semibold">Champion</span>
               <span className="text-brand-gold font-bold text-[11px] leading-tight">
                 {champCode ? getTeamFlag(champCode) : "—"}
               </span>
@@ -415,9 +452,16 @@ export default function App() {
               </span>
             </div>
             <div className="flex flex-col items-center justify-start gap-1 rounded-xl border border-brand-line py-2.5 px-1.5">
-              <span className="text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Golden Boot</span>
-              <span className="text-brand-text font-bold text-[11px] leading-tight">⚽ {gbName ? gbGoals : "—"}</span>
-              <span className="text-brand-muted text-[9px] leading-tight break-words">{gbName ?? "TBD"}</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Golden Boot</span>
+              {gbName ? (
+                <>
+                  <GbAvatar photo={gbPhoto} name={gbName} className="w-8 h-8 text-xs my-0.5" />
+                  <span className="text-brand-text font-bold text-[11px] leading-tight">{gbGoals} goals</span>
+                  <span className="text-brand-muted text-[9px] leading-tight break-words">{gbName}</span>
+                </>
+              ) : (
+                <span className="text-brand-muted text-[9px] leading-tight">TBD</span>
+              )}
             </div>
           </div>
 
@@ -435,7 +479,7 @@ export default function App() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-1 py-1">
               {/* Edition + editorial quote */}
               <div className="text-center md:text-left min-w-0 max-md:hidden">
-                <div className="text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold mb-2">
+                <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold mb-2">
                   FIFA World Cup · {activeYear}
                 </div>
                 <p className="font-serif italic text-lg md:text-xl leading-snug max-w-[480px] mx-auto md:mx-0 text-brand-text whitespace-nowrap">
@@ -446,39 +490,35 @@ export default function App() {
               {/* Host / Champion / Golden Boot chips */}
               <div className="flex items-stretch justify-start md:justify-center gap-2 md:gap-3 flex-none mx-auto md:mx-0 overflow-x-auto md:overflow-visible max-md:hidden">
                 <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line shrink-0">
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
                   <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
                     {currentData.hostFlag} {currentData.host}
                   </span>
                 </div>
                 <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.04] shrink-0">
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
                   <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
                     {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
                   </span>
                 </div>
-                <div
-                  className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line relative shrink-0"
-                  onMouseEnter={handleGbEnter}
-                  onMouseLeave={handleGbMouseLeave}
-                >
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
-                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                    {gbName ? `⚽ ${gbName} · ${gbGoals}` : "TBD"}
-                  </span>
-                  {gbHover && gbPhoto && gbName && (
-                    <img
-                      src={gbPhoto}
-                      alt={gbName}
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-16 h-16 rounded-full object-cover border-2 border-brand-gold shadow-[0_0_16px_rgba(246,196,83,0.45)] animate-[crestPop_0.35s_cubic-bezier(0.34,1.4,0.5,1)_both]"
-                    />
+                <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.02] shrink-0">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
+                  {gbName ? (
+                    <span className="flex items-center gap-2 leading-none">
+                      <GbAvatar photo={gbPhoto} name={gbName} className="w-8 h-8 text-sm" />
+                      <span className="text-brand-text font-bold text-sm uppercase tracking-wide whitespace-nowrap">
+                        {gbName} · {gbGoals}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none">TBD</span>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Secondary stat strip */}
-            <div className="flex items-center justify-between px-1 pt-3 mt-3 text-[10px] tracking-[0.25em] uppercase text-brand-muted"
+            <div className="flex items-center justify-between px-1 pt-3 mt-3 font-mono text-[10px] tracking-[0.25em] uppercase text-brand-muted"
               style={{
                 backgroundImage: "linear-gradient(to right, transparent, var(--line) 20%, var(--line) 80%, transparent)",
                 backgroundPosition: "0 0",
@@ -506,7 +546,7 @@ export default function App() {
           </div>
 
           {/* Radial Legend / Interactive Hints */}
-          <div className="legend flex-none max-md:hidden flex gap-6 justify-center flex-wrap items-center text-brand-muted text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
+          <div className="legend flex-none max-md:hidden flex gap-6 justify-center flex-wrap items-center text-brand-muted font-mono text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
             <div className="item flex items-center gap-2">
               <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
               Hover flags to trace runs
