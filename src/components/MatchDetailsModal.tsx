@@ -69,7 +69,7 @@ function parseGoal(raw: string): ParsedGoal {
   const tagMatch = trimmed.match(/\s*\(([^)]+)\)\s*$/);
   const tag = goalTagLabel(tagMatch ? tagMatch[1] : null);
   const body = tagMatch ? trimmed.slice(0, tagMatch.index).trim() : trimmed;
-  const minMatch = body.match(/(\d+)'(?:\+(\d+)')?$/);
+  const minMatch = body.match(/(\d+)(?:\+(\d+))?'$/);
   if (!minMatch) return { name: body, minute: "", sort: 999, tag };
   const base = parseInt(minMatch[1], 10);
   const stoppage = minMatch[2] ? parseInt(minMatch[2], 10) : 0;
@@ -371,7 +371,7 @@ export default function MatchDetailsModal({
                                   {g.tag}
                                 </span>
                               )}
-                              <span className="shrink-0 inline-flex items-center font-mono text-[11px] font-semibold text-brand-gold tabular-nums">
+                              <span className="shrink-0 font-mono text-[11px] font-semibold text-brand-gold tabular-nums">
                                 {g.minute}
                               </span>
                             </div>
