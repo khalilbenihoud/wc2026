@@ -1,6 +1,7 @@
-import React, { useId, memo, useEffect, useRef } from "react";
+import React, { useId, memo, useEffect, useRef, useMemo } from "react";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamColor, getTeamFlag, getTeamName } from "../data";
+import { ROUND_NAME } from "../constants";
 
 interface RadialBracketProps {
   data: TournamentData & { _year: number };
@@ -37,15 +38,6 @@ const polar = (r: number, angDeg: number): [number, number] => {
 };
 
 const f2 = (n: number) => Math.round(n * 100) / 100;
-
-// Round display names, used for screen-reader labels on interactive nodes.
-const ROUND_LABEL: Record<string, string> = {
-  r32: "Round of 32",
-  r16: "Round of 16",
-  qf: "Quarter-final",
-  sf: "Semi-final",
-  final: "Final",
-};
 
 // Keyboard equivalent of a click for SVG nodes that act as buttons.
 const activateKey = (e: React.KeyboardEvent, fn: () => void) => {
@@ -120,7 +112,10 @@ function RadialBracket({
     return { conns, nodes };
   };
 
-  const { conns: litConns, nodes: litNodes } = getLitElements();
+  const { conns: litConns, nodes: litNodes } = useMemo(
+    () => getLitElements(),
+    [hoveredLeaf, analysis.adv]
+  );
   const hasFocus = hoveredLeaf !== null;
 
   const handleMouseMove = (
@@ -294,8 +289,8 @@ function RadialBracket({
         const qMarkSize: Record<number, number> = { 1: 11, 2: 13, 3: 15 };
 
         const ariaLabel = teamCode
-          ? `${ROUND_LABEL[round]} winner ${getTeamName(teamCode)}. View match details.`
-          : `${ROUND_LABEL[round]} — not yet decided.`;
+          ? `${ROUND_NAME[round]} winner ${getTeamName(teamCode)}. View match details.`
+          : `${ROUND_NAME[round]} — not yet decided.`;
 
         elements.push(
           <g
@@ -322,13 +317,11 @@ function RadialBracket({
               const t = e.touches[0];
               onShowTooltip(round, i, t.clientX, t.clientY, true);
             }}
-            style={
-              {
-                "--c": teamColor,
-                "--d": `${dl}s`,
-                transformOrigin: `${f2(x)}px ${f2(y)}px`,
-              } as React.CSSProperties
-            }
+            style={{
+              "--c": teamColor,
+              "--d": `${dl}s`,
+              transformOrigin: `${f2(x)}px ${f2(y)}px`,
+            } as React.CSSProperties}
           >
             <circle className="disc" cx={f2(x)} cy={f2(y)} r={disc[lvl]} />
             {teamCode && (
@@ -482,15 +475,15 @@ function RadialBracket({
           }
           onClick={known ? () => onSelectMatch("r32", i) : undefined}
           onKeyDown={known ? (e) => activateKey(e, () => onSelectMatch("r32", i)) : undefined}
-          style={
-            {
-              "--c": known ? getTeamColor(code) : undefined,
-              "--d": `${dl}s`,
-              opacity: known && played && !isWinner ? 0.55 : 1,
-              cursor: known ? "pointer" : "default",
-              transformOrigin: `${f2(x)}px ${f2(y)}px`,
-            } as React.CSSProperties
-          }
+            style={
+              {
+                "--c": known ? getTeamColor(code) : undefined,
+                "--d": `${dl}s`,
+                opacity: known && played && !isWinner ? 0.55 : 1,
+                cursor: known ? "pointer" : "default",
+                transformOrigin: `${f2(x)}px ${f2(y)}px`,
+              } as React.CSSProperties
+            }
         >
           <circle className="disc" cx={f2(x)} cy={f2(y)} r={20} />
           {known ? (
@@ -627,7 +620,7 @@ function RadialBracket({
       viewBox="0 0 900 900"
       className="w-full h-full block overflow-visible select-none relative z-10"
       style={{ touchAction: "manipulation" }}
-      role="img"
+      role="group"
       aria-label="Radial knockout bracket"
     >
       <defs>

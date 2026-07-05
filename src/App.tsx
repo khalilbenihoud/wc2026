@@ -1,27 +1,16 @@
 //  ╔══════════════════════════════════════╗
 //  ║  Inspired by Emilio Sansolini        ║
 //  ╚══════════════════════════════════════╝
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
+import { ROUND_NAME, TOURNAMENT_YEARS, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
 import MatchDetailsModal from "./components/MatchDetailsModal";
 
-const ROUND_NAME: Record<string, string> = {
-  r16: "Round of 16",
-  qf: "Quarter-final",
-  sf: "Semi-final",
-  final: "Final",
-};
-
-// Sorted once at module load — mobile year-picker iterates this.
-const TOURNAMENT_YEARS: number[] = Object.keys(TOURNAMENTS)
-  .map(Number)
-  .sort((a, b) => a - b);
-
 // Reused sidebar divider style (avoids recreating a 5-line style object every render).
-const SIDEBAR_DIVIDER_STYLE: React.CSSProperties = {
+const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
   background:
     "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
   backgroundSize: "100% 200%",
@@ -253,36 +242,15 @@ export default function App() {
     const round = tooltip.round;
     const idx = tooltip.idx;
 
-    let ta = "";
-    let tb = "";
+    if (round !== "r16" && !d[round as "qf" | "sf" | "final"]) return null;
 
-    if (round === "r16") {
-      ta = d.teams[2 * idx];
-      tb = d.teams[2 * idx + 1];
-    } else if (!d[round as "qf" | "sf" | "final"]) {
-      return null; // seeded tournament (e.g., 2026 QF/SF/Final unknown)
-    } else if (round === "qf") {
-      ta = analysis.w1[2 * idx] != null ? d.teams[analysis.w1[2 * idx]!] : "TBD";
-      tb = analysis.w1[2 * idx + 1] != null ? d.teams[analysis.w1[2 * idx + 1]!] : "TBD";
-    } else if (round === "sf") {
-      ta = analysis.w2[2 * idx] != null ? d.teams[analysis.w2[2 * idx]!] : "TBD";
-      tb = analysis.w2[2 * idx + 1] != null ? d.teams[analysis.w2[2 * idx + 1]!] : "TBD";
-    } else {
-      ta = analysis.w3[0] != null ? d.teams[analysis.w3[0]!] : "TBD";
-      tb = analysis.w3[1] != null ? d.teams[analysis.w3[1]!] : "TBD";
-    }
-
+    const [ta, tb] = resolveCompetitors(d, analysis, round, idx);
     const matches = d[round as "r16" | "qf" | "sf" | "final"];
     const m = matches ? (round === "final" ? matches[0] : matches[idx]) : null;
     const wA = m && m.w === 0;
     const wB = m && m.w === 1;
     const score = m ? `${m.s[0]}–${m.s[1]}` : "vs";
-
-    const notes: string[] = [];
-    if (m) {
-      if (m.x) notes.push(m.x.trim());
-      if (m.p) notes.push(`pens ${m.p.replace("-", "–")}`);
-    }
+    const notes = getMatchNotes(m);
 
     return (
       <div className="text-center font-sans">

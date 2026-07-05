@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamFlag, getTeamName } from "../data";
+import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "../constants";
 import { getScorers } from "../scorers";
 import { getStats } from "../stats";
 
@@ -12,14 +13,6 @@ interface MatchDetailsModalProps {
   analysis: TournamentAnalysis;
   onClose: () => void;
 }
-
-const ROUND_NAME: Record<string, string> = {
-  r32: "Round of 32",
-  r16: "Round of 16",
-  qf: "Quarter-final",
-  sf: "Semi-final",
-  final: "Final",
-};
 
 // Horizontal comparison bar (borrowed from the scoreboard modal, restyled to
 // our brand tokens). Left segment = home team (gold), right = away (steel).
@@ -97,6 +90,23 @@ export default function MatchDetailsModal({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "Tab" && isOpen) {
+        const drawer = document.getElementById("match-drawer");
+        if (!drawer) return;
+        const focusable = drawer.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
@@ -130,33 +140,6 @@ export default function MatchDetailsModal({
 
   if (!rendered) return null;
 
-  // Competitor resolution logic
-  const getCompetitors = (): [string, string] => {
-    if (round === "r32") {
-      const rm = data.r32?.[idx];
-      return [rm?.ta ?? "TBD", rm?.tb ?? "TBD"];
-    }
-    if (round === "r16") {
-      return [data.teams[2 * idx], data.teams[2 * idx + 1]];
-    }
-    if (round === "qf") {
-      return [
-        analysis.w1[2 * idx] != null ? data.teams[analysis.w1[2 * idx]!] : "TBD",
-        analysis.w1[2 * idx + 1] != null ? data.teams[analysis.w1[2 * idx + 1]!] : "TBD",
-      ];
-    }
-    if (round === "sf") {
-      return [
-        analysis.w2[2 * idx] != null ? data.teams[analysis.w2[2 * idx]!] : "TBD",
-        analysis.w2[2 * idx + 1] != null ? data.teams[analysis.w2[2 * idx + 1]!] : "TBD",
-      ];
-    }
-    return [
-      analysis.w3[0] != null ? data.teams[analysis.w3[0]!] : "TBD",
-      analysis.w3[1] != null ? data.teams[analysis.w3[1]!] : "TBD",
-    ];
-  };
-
   const isR32 = round === "r32";
   const isSeeded = data.seeded;
   const r32Match = isR32 ? data.r32?.[idx] ?? null : null;
@@ -173,7 +156,7 @@ export default function MatchDetailsModal({
   let ta = "";
   let tb = "";
   if (isR32 || (data.teams && data.teams.length)) {
-    [ta, tb] = getCompetitors();
+    [ta, tb] = resolveCompetitors(data, analysis, round, idx);
   }
 
   const knownTeams = ta && ta !== "TBD" && tb && tb !== "TBD";
@@ -187,11 +170,7 @@ export default function MatchDetailsModal({
   // Resolve match stats: cards, subs, pens
   const stats = getStats(data._year, ta, tb);
 
-  const notes: string[] = [];
-  if (m) {
-    if (m.x) notes.push(m.x.trim());
-    if (m.p) notes.push(`Penalties ${m.p.replace("-", "–")}`);
-  }
+  const notes = getMatchNotes(m);
 
   const played = !isSeeded && !!m && m.w !== null;
 
@@ -239,6 +218,7 @@ export default function MatchDetailsModal({
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
+        aria-hidden="true"
         className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${
           isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : "animate-[fadeIn_0.2s_ease]"
         }`}
@@ -247,6 +227,10 @@ export default function MatchDetailsModal({
 
       {/* Side drawer */}
       <div
+        id="match-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${data._year} ${ROUND_NAME[round]} — Match ${idx + 1}`}
         className={`absolute top-0 right-0 h-full w-full max-md:max-w-none max-w-[420px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
           isClosing
             ? "animate-[slideOutRight_0.25s_cubic-bezier(0.4,0,0.6,1)_forwards]"
