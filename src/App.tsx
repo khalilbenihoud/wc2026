@@ -443,7 +443,7 @@ export default function App() {
               </span>
             </h1>
             <p className="sub text-brand-muted text-xs mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
-              Every knockout bracket since 1934 one radial map, from Round of 16 to final
+              Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
           </div>
 

@@ -33,7 +33,7 @@ def load_matches():
             stage = STAGE_TO_ROUND.get(row.get("stage_name", "").lower())
             if not stage or stage == "third":
                 continue  # skip third place, our bracket doesn't track it
-            if year < 1934:
+            if year < 1930:
                 continue
             matches[row["match_id"]] = {
                 "year": year,

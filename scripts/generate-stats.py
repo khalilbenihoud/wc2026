@@ -113,7 +113,7 @@ def main():
             if not stage:
                 continue
             year = int(row["tournament_name"].split()[0])
-            if year < 1934:
+            if year < 1930:
                 continue
             match_info[row["match_id"]] = {"year": year, "stage": stage}
 

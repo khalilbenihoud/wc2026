@@ -337,6 +337,20 @@ const SCORERS: Record<string, [string[], string[]]> = {
   "2022_SEN_ENG": [[], ["Jordan Henderson 38'", "Harry Kane 45'+3'", "Bukayo Saka 57'"]],
   "2022_SUI_POR": [["Manuel Akanji 58'"], ["Gonçalo Ramos 17'", "Pepe 33'", "Gonçalo Ramos 51'", "Raphaël Guerreiro 55'", "Gonçalo Ramos 67'", "Rafael Leão 90'+2'"]],
   "2022_USA_NED": [["Haji Wright 76'"], ["Memphis Depay 10'", "Daley Blind 45'+1'", "Denzel Dumfries 81'"]],
+  "1930_ARG_CHI": [["Guillermo Stábile 12'", "Guillermo Stábile 13'", "Mario Evaristo 51'"], ["Guillermo Subiabre 15'"]],
+  "1930_ARG_URU": [["Carlos Peucelle 20'", "Guillermo Stábile 37'"], ["Pablo Dorado 12'", "Pedro Cea 57'", "Santos Iriarte 68'", "Héctor Castro 89'"]],
+  "1930_ARG_USA": [["Luis Monti 20'", "Alejandro Scopelli 56'", "Guillermo Stábile 69'", "Carlos Peucelle 80'", "Carlos Peucelle 85'", "Guillermo Stábile 87'"], ["Jim Brown 89'"]],
+  "1930_BEL_USA": [[], ["Bart McGhee 23'", "Tom Florie 45'", "Bert Patenaude 69'"]],
+  "1930_BOL_YUG": [[], ["Ivan Bek 60'", "Blagoje Marjanović 65'", "Ivan Bek 67'", "Đorđe Vujadinović 85'"]],
+  "1930_CHI_ARG": [["Guillermo Subiabre 15'"], ["Guillermo Stábile 12'", "Guillermo Stábile 13'", "Mario Evaristo 51'"]],
+  "1930_PER_URU": [[], ["Héctor Castro 65'"]],
+  "1930_URU_ARG": [["Pablo Dorado 12'", "Pedro Cea 57'", "Santos Iriarte 68'", "Héctor Castro 89'"], ["Carlos Peucelle 20'", "Guillermo Stábile 37'"]],
+  "1930_URU_PER": [["Héctor Castro 65'"], []],
+  "1930_URU_YUG": [["Pedro Cea 18'", "Peregrino Anselmo 20'", "Peregrino Anselmo 31'", "Santos Iriarte 61'", "Pedro Cea 67'", "Pedro Cea 72'"], ["Đorđe Vujadinović 4'"]],
+  "1930_USA_ARG": [["Jim Brown 89'"], ["Luis Monti 20'", "Alejandro Scopelli 56'", "Guillermo Stábile 69'", "Carlos Peucelle 80'", "Carlos Peucelle 85'", "Guillermo Stábile 87'"]],
+  "1930_USA_BEL": [["Bart McGhee 23'", "Tom Florie 45'", "Bert Patenaude 69'"], []],
+  "1930_YUG_BOL": [["Ivan Bek 60'", "Blagoje Marjanović 65'", "Ivan Bek 67'", "Đorđe Vujadinović 85'"], []],
+  "1930_YUG_URU": [["Đorđe Vujadinović 4'"], ["Pedro Cea 18'", "Peregrino Anselmo 20'", "Peregrino Anselmo 31'", "Santos Iriarte 61'", "Pedro Cea 67'", "Pedro Cea 72'"]],
 };
 
 export function getScorers(year: number, teamA: string, teamB: string): [string[], string[]] | null {

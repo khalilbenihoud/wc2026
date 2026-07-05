@@ -1,8 +1,8 @@
 # The Road to Glory
 
-> An interactive radial bracket visualizing every FIFA World Cup knockout stage from 1934 through 2026. Built as a client-rendered single-page app (React + TypeScript); this file exists because the rendered page requires JavaScript execution to show its content to a crawler.
+> An interactive radial bracket visualizing every FIFA World Cup knockout stage from 1930 through 2026. Built as a client-rendered single-page app (React + TypeScript); this file exists because the rendered page requires JavaScript execution to show its content to a crawler.
 
-A single page presenting one FIFA World Cup tournament's knockout bracket at a time, selectable via a year timeline (1934, 1938, then 1986–2026). For each tournament it shows host nation, champion, golden boot winner, and the full knockout tree (Round of 16 through the Final, or Round of 32 through the Final for 2026's expanded 48-team format), with real historical scores, penalty-shootout results, and extra-time notes where applicable.
+A single page presenting one FIFA World Cup tournament's knockout bracket at a time, selectable via a year timeline (1930, 1934, 1938, then 1950–2026). For each tournament it shows host nation, champion, golden boot winner, and the full knockout tree (Round of 16 through the Final, or Round of 32 through the Final for 2026's expanded 48-team format), with real historical scores, penalty-shootout results, and extra-time notes where applicable.
 
 ## Docs
 
@@ -25,14 +25,14 @@ A single page presenting one FIFA World Cup tournament's knockout bracket at a t
 
 - [worldcup2026 API](https://worldcup26.ir): source for 2026 fixtures, scores, and explicit bracket-feed labels (e.g. "Winner Match 74") for the 48-team format. Matches not yet played show as pending; the bracket updates as results come in.
 - [worldcup2026 API source code](https://github.com/rezarahiminia/worldcup2026): the open-source project behind that API.
-- 1934, 1938, and 1986–2022 results were entered manually from real historical records; no single API source for that range.
+- 1930–1938 and 1986–2022 results were entered manually from real historical records; no single API source for that range.
 
 ## Key facts an agent answering questions about this site should know
 
 - Format changed in 2026: 48 teams (up from 32), adding a Round of 32 before the traditional Round of 16.
 - The bracket is circular/radial, not a traditional left-to-right tree: 16 outer leaves (Round of 16 participants) converge toward a central trophy through Quarter-final and Semi-final rings.
 - Interactions (hovering a flag, clicking a match) are JavaScript-driven and will not be visible to a crawler that does not execute JS.
-- The timeline covers 1934, 1938, and every tournament from 1986 through 2026 (13 tournaments in total); 1942–1982 are not included.
+- The timeline covers 1930, 1934, 1938, and every tournament from 1950 through 2026 (22 tournaments in total); 1942 and 1946 are not included.
 
 ## Optional
 

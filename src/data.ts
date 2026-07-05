@@ -193,6 +193,23 @@ export const getTeamColor = (code: string): string =>
   COLORS[code] || "#3c4658";
 
 export const TOURNAMENTS: Record<number, TournamentData> = {
+  1930: {
+    host: "Uruguay",
+    hostFlag: "🇺🇾",
+    goldenBoot: { name: "Guillermo Stábile", goals: 8 },
+    quote: "Where it all began.",
+    teams: [
+      "ARG", "CHI",
+      "USA", "BEL",
+      "URU", "PER",
+      "YUG", "BOL",
+    ],
+    r16: null,
+    qf: [M(3, 1, 0), M(3, 0, 0), M(1, 0, 0), M(4, 0, 0)],
+    sf: [M(6, 1, 0), M(6, 1, 0)],
+    final: [M(2, 4, 1)],
+  },
+
   1934: {
     host: "Italy",
     hostFlag: "🇮🇹",
