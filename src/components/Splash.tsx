@@ -107,18 +107,15 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
         </div>
       )}
 
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "1rem",
-        textAlign: "center",
-        padding: "0 1.5rem",
-        transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
-        opacity: loaderDone ? 1 : 0,
-        transform: loaderDone ? "translateY(0)" : "translateY(8px)",
-        pointerEvents: loaderDone ? "auto" : "none",
-      }}>
+      {loaderDone && (
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "1rem",
+          textAlign: "center",
+          padding: "0 1.5rem",
+        }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", fontSize: "0.625rem", letterSpacing: "0.26em", fontWeight: 600, opacity: 0.5, whiteSpace: "nowrap" }}>
           <span style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem" }} />
           FIFA WORLD CUP KNOCKOUT ARCHIVE
@@ -159,6 +156,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
           </span>
         </button>
       </div>
+      )}
 
       <div style={{
         position: "fixed",
