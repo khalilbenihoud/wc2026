@@ -8,6 +8,7 @@ import { ROUND_NAME, TOURNAMENT_YEARS, resolveCompetitors, getMatchNotes } from 
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
 import MatchDetailsModal from "./components/MatchDetailsModal";
+import Splash from "./components/Splash";
 
 // Reused sidebar divider style (avoids recreating a 5-line style object every render).
 const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
@@ -178,6 +179,19 @@ function analyzeNoR16(d: TournamentData): TournamentAnalysis {
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(
+    () => sessionStorage.getItem("wc-splash-done") === "1"
+  );
+  const [splashExiting, setSplashExiting] = useState(false);
+
+  const handleSplashEnter = useCallback(() => {
+    setSplashExiting(true);
+    setTimeout(() => {
+      setSplashDone(true);
+      sessionStorage.setItem("wc-splash-done", "1");
+    }, 800);
+  }, []);
+
   const [lightMode, setLightMode] = useState<boolean>(
     () => localStorage.getItem("wc-classic-mode") === "light"
   );
@@ -408,8 +422,11 @@ export default function App() {
   }, [activeYear, champCode]);
 
   return (
-    <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
-      {/* Mobile notice — the radial bracket needs room to breathe */}
+    <>
+      {!splashDone && <Splash onEnter={handleSplashEnter} exiting={splashExiting} />}
+
+      <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
+        {/* Mobile notice — the radial bracket needs room to breathe */}
       <div className="flex-none md:hidden text-center text-[10px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
         Best viewed on desktop
       </div>
@@ -443,7 +460,7 @@ export default function App() {
               </span>
             </h1>
             <p className="sub text-brand-muted text-xs mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
-              Every knockout bracket since 1934 one radial map, from Round of 16 to final
+              Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
           </div>
 
@@ -556,6 +573,7 @@ export default function App() {
                 hoveredLeaf={hoveredLeaf}
                 setHoveredLeaf={setHoveredLeaf}
                 onShowTooltip={handleShowTooltip}
+                variant="full"
               />
             </div>
           </div>
@@ -626,6 +644,7 @@ export default function App() {
         onClose={handleCloseModal}
       />
 
-    </div>
+      </div>
+    </>
   );
 }
