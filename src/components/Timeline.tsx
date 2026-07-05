@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
 import { TOURNAMENTS, getTeamFlag } from "../data";
+import { TOURNAMENT_YEARS } from "../constants";
 import { TournamentAnalysis } from "../types";
 
 interface TimelineProps {
@@ -7,10 +7,6 @@ interface TimelineProps {
   onSelectYear: (year: number) => void;
   analyses: Record<number, TournamentAnalysis>;
 }
-
-const YEARS: number[] = Object.keys(TOURNAMENTS)
-  .map(Number)
-  .sort((a, b) => a - b);
 
 export default function Timeline({
   activeYear,
@@ -24,7 +20,7 @@ export default function Timeline({
     >
       <div className="absolute left-[20px] top-4 bottom-4 w-[2px] rounded bg-gradient-to-b from-transparent via-brand-line to-transparent pointer-events-none" />
 
-      {YEARS.map((year, idx) => {
+      {TOURNAMENT_YEARS.map((year, idx) => {
         const d = TOURNAMENTS[year];
         const analysis = analyses[year];
         const isActive = year === activeYear;
@@ -42,12 +38,13 @@ export default function Timeline({
           <button
             key={year}
             onClick={() => onSelectYear(year)}
-            className={`tl-item relative flex items-center gap-3 py-2.5 px-3.5 pr-4 pl-3 my-1 rounded-xl cursor-pointer transition-all duration-300 w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 border ${
+            aria-current={isActive ? "true" : undefined}
+            className={`tl-item relative flex items-center gap-3 py-2.5 px-3.5 pr-4 pl-3 my-1 rounded-xl cursor-pointer transition-colors duration-300 w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 border ${
               isActive
                 ? "active bg-brand-gold/[0.08] border-brand-gold/30 shadow-[0_4px_20px_rgba(246,196,83,0.06)]"
                 : "border-transparent hover:bg-[rgba(var(--overlay-rgb),0.05)] hover:border-[rgba(var(--overlay-rgb),0.02)]"
             } ${isFuture ? "future" : ""}`}
-            style={{ "--d": `${delay}s` } as CSSProperties}
+            style={{ "--d": `${delay}s` } as React.CSSProperties}
           >
             <div
               className={`tl-dot absolute left-[-24px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full transition-all duration-300 ${

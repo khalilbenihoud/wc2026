@@ -11,7 +11,7 @@
   "op_tos_uri": "https://worldcuparchive.net/",
   "agent_auth": {
     "register_uri": "https://worldcuparchive.net/auth.md",
-    "supported_identity_types": [],
-    "supported_credential_types": []
+    "supported_identity_types": ["none"],
+    "supported_credential_types": ["none"]
   }
 }

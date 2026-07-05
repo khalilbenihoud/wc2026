@@ -421,8 +421,8 @@ body::after {
   scrollbar-width: none;
 }
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -430,8 +430,13 @@ body::after {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--line);
+  background: transparent;
   border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: var(--line);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {

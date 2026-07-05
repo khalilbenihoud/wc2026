@@ -2,8 +2,12 @@
 # https://developers.cloudflare.com/pages/configuration/headers/
 
 /*
-  Link: </.well-known/api-catalog>; rel="api-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </.well-known/mcp/server-card.json>; rel="mcp-server-card", </.well-known/oauth-authorization-server>; rel="oauth-authorization-server", </.well-known/oauth-protected-resource>; rel="oauth-protected-resource", </.well-known/openid-configuration>; rel="openid-configuration", </auth.md>; rel="auth-md", </llms.txt>; rel="llms.txt", </openapi.json>; rel="service-desc", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://en.wikipedia.org https://eu.i.posthog.com; img-src 'self' data: https://upload.wikimedia.org; script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com; frame-ancestors 'none'; form-action 'none'; base-uri 'self'
   X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Link: </.well-known/api-catalog>; rel="api-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </.well-known/mcp/server-card.json>; rel="mcp-server-card", </.well-known/oauth-authorization-server>; rel="oauth-authorization-server", </.well-known/oauth-protected-resource>; rel="oauth-protected-resource", </.well-known/openid-configuration>; rel="openid-configuration", </auth.md>; rel="auth-md", </llms.txt>; rel="llms.txt", </openapi.json>; rel="service-desc", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
 
 /.well-known/api-catalog
   Content-Type: application/linkset+json

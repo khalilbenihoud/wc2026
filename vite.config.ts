@@ -30,6 +30,13 @@ export default defineConfig(() => {
         input: {
           app: path.resolve(__dirname, 'app.html'),
         },
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) return 'vendor-react';
+            if (id.includes('node_modules')) return 'vendor';
+            if (id.includes('/scorers') || id.includes('/stats')) return 'data';
+          },
+        },
       },
     },
     server: {

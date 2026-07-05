@@ -10,5 +10,6 @@
   "id_token_signing_alg_values_supported": [],
   "service_documentation": "https://worldcuparchive.net/auth.md",
   "op_policy_uri": "https://worldcuparchive.net/",
-  "op_tos_uri": "https://worldcuparchive.net/"
+  "op_tos_uri": "https://worldcuparchive.net/",
+  "registration_endpoint": "https://worldcuparchive.net/auth.md"
 }

@@ -1,6 +1,7 @@
-import React, { useId, memo } from "react";
+import React, { useId, memo, useEffect, useRef, useMemo } from "react";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamColor, getTeamFlag, getTeamName } from "../data";
+import { ROUND_NAME } from "../constants";
 
 interface RadialBracketProps {
   data: TournamentData & { _year: number };
@@ -37,15 +38,6 @@ const polar = (r: number, angDeg: number): [number, number] => {
 };
 
 const f2 = (n: number) => Math.round(n * 100) / 100;
-
-// Round display names, used for screen-reader labels on interactive nodes.
-const ROUND_LABEL: Record<string, string> = {
-  r32: "Round of 32",
-  r16: "Round of 16",
-  qf: "Quarter-final",
-  sf: "Semi-final",
-  final: "Final",
-};
 
 // Keyboard equivalent of a click for SVG nodes that act as buttons.
 const activateKey = (e: React.KeyboardEvent, fn: () => void) => {
@@ -120,7 +112,10 @@ function RadialBracket({
     return { conns, nodes };
   };
 
-  const { conns: litConns, nodes: litNodes } = getLitElements();
+  const { conns: litConns, nodes: litNodes } = useMemo(
+    () => getLitElements(),
+    [hoveredLeaf, analysis.adv]
+  );
   const hasFocus = hoveredLeaf !== null;
 
   const handleMouseMove = (
@@ -136,6 +131,22 @@ function RadialBracket({
     onShowTooltip("", 0, 0, 0, false);
   };
 
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const clear = () => {
+      setHoveredLeaf(null);
+      onShowTooltip("", 0, 0, 0, false);
+    };
+    const handleGlobalTouch = (e: TouchEvent) => {
+      if (svgRef.current && !svgRef.current.contains(e.target as Node)) {
+        clear();
+      }
+    };
+    document.addEventListener("touchstart", handleGlobalTouch, { passive: true });
+    return () => document.removeEventListener("touchstart", handleGlobalTouch);
+  }, [setHoveredLeaf, onShowTooltip]);
+
   // 1. Defs, guidelines
   const goldGradId = `${bracketId}-goldgrad`;
   const medGlowId = `${bracketId}-medglow`;
@@ -143,10 +154,13 @@ function RadialBracket({
   const trophyShineId = `${bracketId}-trophyshine`;
   const trophyGlowFilterId = `${bracketId}-trophyglowfilter`;
 
+  const hasR16 = !!data.r16;
+
   // 2. Render normal staples (levels 0, 1, 2)
   const renderStaplePaths = () => {
     const paths: React.ReactNode[] = [];
-    for (let L = 0; L <= 2; L++) {
+    const startLevel = hasR16 ? 0 : 1;
+    for (let L = startLevel; L <= 2; L++) {
       const count = 16 >> L;
       for (let ci = 0; ci < count; ci++) {
         const parLevel = L + 1;
@@ -278,8 +292,8 @@ function RadialBracket({
         const qMarkSize: Record<number, number> = { 1: 11, 2: 13, 3: 15 };
 
         const ariaLabel = teamCode
-          ? `${ROUND_LABEL[round]} winner ${getTeamName(teamCode)}. View match details.`
-          : `${ROUND_LABEL[round]} — not yet decided.`;
+          ? `${ROUND_NAME[round]} winner ${getTeamName(teamCode)}. View match details.`
+          : `${ROUND_NAME[round]} — not yet decided.`;
 
         elements.push(
           <g
@@ -300,13 +314,17 @@ function RadialBracket({
             }}
             onMouseMove={!isEmpty ? (e) => handleMouseMove(e, round, i) : undefined}
             onMouseLeave={handleMouseLeave}
-            style={
-              {
-                "--c": teamColor,
-                "--d": `${dl}s`,
-                transformOrigin: `${f2(x)}px ${f2(y)}px`,
-              } as React.CSSProperties
-            }
+            onTouchStart={isEmpty ? undefined : (e) => {
+              e.stopPropagation();
+              if (winLeaf !== null) setHoveredLeaf(winLeaf);
+              const t = e.touches[0];
+              onShowTooltip(round, i, t.clientX, t.clientY, true);
+            }}
+            style={{
+              "--c": teamColor,
+              "--d": `${dl}s`,
+              transformOrigin: `${f2(x)}px ${f2(y)}px`,
+            } as React.CSSProperties}
           >
             <circle className="disc" cx={f2(x)} cy={f2(y)} r={disc[lvl]} />
             {teamCode && (
@@ -332,7 +350,7 @@ function RadialBracket({
               className="hit fill-transparent cursor-pointer"
               cx={f2(x)}
               cy={f2(y)}
-              r={disc[lvl] + 6}
+              r={disc[lvl] + 14}
             />
           </g>
         );
@@ -343,7 +361,8 @@ function RadialBracket({
 
   // 5. Render outer leaves (level 0)
   const renderCrests = () => {
-    return data.teams.map((code, i) => {
+    const leafCount = hasR16 ? 16 : 8;
+    return data.teams.slice(0, leafCount).map((code, i) => {
       const ang = nodeAngle(0, i);
       const [x, y] = polar(R[0], ang);
       const dl = introDelay(0, i, 16);
@@ -378,6 +397,12 @@ function RadialBracket({
           onMouseEnter={() => setHoveredLeaf(i)}
           onMouseMove={(e) => handleMouseMove(e, "r16", i >> 1)}
           onMouseLeave={handleMouseLeave}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setHoveredLeaf(i);
+            const t = e.touches[0];
+            onShowTooltip("r16", i >> 1, t.clientX, t.clientY, true);
+          }}
           style={
             {
               "--c": getTeamColor(code),
@@ -403,7 +428,7 @@ function RadialBracket({
             className="hit fill-transparent cursor-pointer"
             cx={f2(x)}
             cy={f2(y)}
-            r="34"
+            r="44"
           />
         </g>
       );
@@ -454,15 +479,15 @@ function RadialBracket({
           }
           onClick={known ? () => onSelectMatch("r32", i) : undefined}
           onKeyDown={known ? (e) => activateKey(e, () => onSelectMatch("r32", i)) : undefined}
-          style={
-            {
-              "--c": known ? getTeamColor(code) : undefined,
-              "--d": `${dl}s`,
-              opacity: known && played && !isWinner ? 0.55 : 1,
-              cursor: known ? "pointer" : "default",
-              transformOrigin: `${f2(x)}px ${f2(y)}px`,
-            } as React.CSSProperties
-          }
+            style={
+              {
+                "--c": known ? getTeamColor(code) : undefined,
+                "--d": `${dl}s`,
+                opacity: known && played && !isWinner ? 0.55 : 1,
+                cursor: known ? "pointer" : "default",
+                transformOrigin: `${f2(x)}px ${f2(y)}px`,
+              } as React.CSSProperties
+            }
         >
           <circle className="disc" cx={f2(x)} cy={f2(y)} r={20} />
           {known ? (
@@ -537,6 +562,12 @@ function RadialBracket({
         }}
         onMouseMove={analysis.champ !== null ? (e) => handleMouseMove(e, "final", 0) : undefined}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          if (analysis.champ !== null) setHoveredLeaf(analysis.champ);
+          const t = e.touches[0];
+          onShowTooltip("final", 0, t.clientX, t.clientY, true);
+        }}
         style={{ "--d": "0.24s" } as React.CSSProperties}
       >
         {/* Invisible helper circle to expand bounding box and prevent browser clipping of glow/shadow effects */}
@@ -588,10 +619,12 @@ function RadialBracket({
 
   return (
     <svg
+      ref={svgRef}
       id="bracket"
       viewBox="0 0 900 900"
       className="w-full h-full block overflow-visible select-none relative z-10"
-      role="img"
+      style={{ touchAction: "manipulation" }}
+      role="group"
       aria-label="Radial knockout bracket"
     >
       <defs>
