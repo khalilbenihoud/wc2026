@@ -7,7 +7,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Link: </.well-known/api-catalog>; rel="api-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </.well-known/mcp/server-card.json>; rel="mcp-server-card", </llms.txt>; rel="llms.txt", </openapi.json>; rel="service-desc", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
+  Link: </.well-known/api-catalog>; rel="api-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </.well-known/mcp/server-card.json>; rel="mcp-server-card", </.well-known/oauth-authorization-server>; rel="oauth-authorization-server", </.well-known/oauth-protected-resource>; rel="oauth-protected-resource", </.well-known/openid-configuration>; rel="openid-configuration", </auth.md>; rel="auth-md", </llms.txt>; rel="llms.txt", </openapi.json>; rel="service-desc", </robots.txt>; rel="robots", </sitemap.xml>; rel="sitemap"
 
 /.well-known/api-catalog
   Content-Type: application/linkset+json
@@ -17,6 +17,18 @@
 
 /.well-known/mcp/server-card.json
   Content-Type: application/json
+
+/.well-known/oauth-authorization-server
+  Content-Type: application/json
+
+/.well-known/oauth-protected-resource
+  Content-Type: application/json
+
+/.well-known/openid-configuration
+  Content-Type: application/json
+
+/auth.md
+  Content-Type: text/markdown; charset=utf-8
 
 /openapi.json
   Content-Type: application/json
