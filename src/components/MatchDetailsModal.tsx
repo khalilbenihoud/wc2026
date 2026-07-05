@@ -245,6 +245,7 @@ export default function MatchDetailsModal({
         <div className="sticky top-0 z-10 flex items-start justify-between px-6 pt-6 pb-4 bg-brand-panel border-b border-brand-line">
           <div>
             <div className="font-mono font-semibold text-[10px] tracking-[0.28em] uppercase text-brand-gold mb-1.5">
+              {matchDate && `${matchDate.split("·")[0].trim()} `}
               {data._year} · {ROUND_NAME[round]}
             </div>
             <h2 className="font-unbounded font-bold text-xl text-brand-text tracking-tight">
@@ -423,12 +424,6 @@ export default function MatchDetailsModal({
             </div>
           )}
 
-          {/* Location */}
-          <div className="flex items-center gap-3 rounded-xl border border-brand-line px-4 py-3 text-sm text-brand-text">
-            <span className="text-brand-gold">📍</span>
-            {data.host}
-          </div>
-
           {/* Mobile close button — easier to reach than the corner X */}
           <button
             className="md:hidden w-full rounded-xl border border-brand-line bg-brand-gold/[0.08] text-brand-gold-hi font-unbounded font-semibold text-sm py-3.5 mt-2 tracking-wide"
@@ -437,18 +432,11 @@ export default function MatchDetailsModal({
             Close
           </button>
 
-          {/* Date */}
-          {matchDate ? (
-            <div className="flex items-center gap-3 rounded-xl border border-brand-line px-4 py-3 text-sm text-brand-text">
-              <span className="text-brand-gold">📅</span>
-              {matchDate}
-            </div>
-          ) : (
-            !played && (
-              <p className="text-xs text-brand-muted leading-relaxed px-1">
-                This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
-              </p>
-            )
+          {/* Fallback note when the fixture hasn't been decided yet */}
+          {!matchDate && !played && (
+            <p className="text-xs text-brand-muted leading-relaxed px-1">
+              This fixture hasn't been decided yet. Check back once the {data._year} tournament is underway.
+            </p>
           )}
         </div>
       </div>
