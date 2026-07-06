@@ -9,6 +9,9 @@ import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
 import MatchDetailsModal from "./components/MatchDetailsModal";
 import Splash from "./components/Splash";
+import PlayerAvatar from "./components/PlayerAvatar";
+import HeaderMeta from "./components/HeaderMeta";
+import HeaderMetaMobile from "./components/HeaderMetaMobile";
 
 // Reused sidebar divider style (avoids recreating a 5-line style object every render).
 const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
@@ -20,9 +23,11 @@ const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
 const CHEVRON_PATH =
   "M8.48633 10.4004C8.73047 10.4004 8.97461 10.3027 9.14062 10.1172L16.6992 2.37305C16.8652 2.20703 16.9629 1.99219 16.9629 1.74805C16.9629 1.24023 16.582 0.849609 16.0742 0.849609C15.8301 0.849609 15.6055 0.947266 15.4395 1.10352L7.95898 8.75L9.00391 8.75L1.52344 1.10352C1.36719 0.947266 1.14258 0.849609 0.888672 0.849609C0.380859 0.849609 0 1.24023 0 1.74805C0 1.99219 0.0976562 2.20703 0.263672 2.38281L7.82227 10.1172C8.00781 10.3027 8.23242 10.4004 8.48633 10.4004Z";
 
-// Wikipedia "Golden Boot" → page slug override (special characters / split names).
+// Wikipedia award-winner → page slug override (special characters / split names).
 const WIKI_SLUG_OVERRIDE: Record<string, string> = {
   "Ronaldo": "Ronaldo_Nazário",
+  "Michel Preud'homme": "Michel_Preud'homme",
+  "Emiliano Martínez": "Emiliano_Martínez",
   "Oldřich Nejedlý": "Oldřich_Nejedlý",
   "Leônidas": "Leônidas",
   "Salvatore Schillaci": "Salvatore_Schillaci",
@@ -35,37 +40,54 @@ const WIKI_SLUG_OVERRIDE: Record<string, string> = {
   "Kylian Mbappé": "Kylian_Mbappé",
 };
 
-// Wikipedia slug for a golden-boot name (handles "A / B" ties and "(disamb)").
+// Wikipedia slug for an award-winner name (handles "A / B" ties and "(disamb)").
 const gbSlug = (name: string) =>
   WIKI_SLUG_OVERRIDE[name] || name.split("/")[0].split(" (")[0].trim();
 
-// Circular player avatar built into the golden-boot chip. Falls back to a gold
-// ⚽ ring while the photo is loading or when Wikipedia has no thumbnail, so the
-// slot is always filled — no blank flash, no floating pop-under.
-function GbAvatar({
-  photo,
-  name,
-  className = "",
-}: {
-  photo: string | null;
-  name: string;
-  className?: string;
-}) {
-  return (
-    <span
-      className={`relative shrink-0 flex items-center justify-center rounded-full overflow-hidden border border-brand-gold/50 bg-brand-gold/10 shadow-[0_0_10px_rgba(246,196,83,0.25)] ${className}`}
-    >
-      {photo ? (
-        <img
-          src={photo}
-          alt={name}
-          className="w-full h-full object-cover object-top animate-[fadeIn_0.4s_ease]"
-        />
-      ) : (
-        <span className="text-[0.7em] leading-none select-none">⚽</span>
-      )}
-    </span>
-  );
+
+// Prefetch a winner's Wikipedia thumbnail as soon as the name changes (not on
+// hover): check the in-memory + localStorage cache first, otherwise fetch once,
+// preload the image, and persist it so it's instant next time. Returns the photo
+// URL, or null while loading / when Wikipedia has no thumbnail.
+function useWikiPhoto(name: string | null | undefined): string | null {
+  const [photo, setPhoto] = useState<string | null>(null);
+  const cache = useRef<Record<string, string>>({});
+  useEffect(() => {
+    if (!name) {
+      setPhoto(null);
+      return;
+    }
+    const slug = gbSlug(name);
+    const cached =
+      cache.current[slug] ??
+      (typeof localStorage !== "undefined" ? localStorage.getItem(`gb:${slug}`) : null);
+    if (cached) {
+      cache.current[slug] = cached;
+      setPhoto(cached);
+      return;
+    }
+    setPhoto(null);
+    let cancelled = false;
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const src: string | undefined = data?.thumbnail?.source;
+        if (!src || cancelled) return;
+        cache.current[slug] = src;
+        try {
+          localStorage.setItem(`gb:${slug}`, src);
+        } catch {
+          /* storage full / unavailable — in-memory cache still applies */
+        }
+        new Image().src = src; // warm the browser cache before render
+        setPhoto(src);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [name]);
+  return photo;
 }
 
 // Tournament analysis calculator
@@ -256,9 +278,6 @@ export default function App() {
     visible: false,
   });
 
-  const [gbPhoto, setGbPhoto] = useState<string | null>(null);
-  const gbCache = useRef<Record<string, string>>({});
-
   // Pre-calculate tournament analyses
   const analyses = useMemo(() => {
     const result: Record<number, TournamentAnalysis> = {};
@@ -371,45 +390,11 @@ export default function App() {
 
   const gbName = currentData.goldenBoot?.name;
   const gbGoals = currentData.goldenBoot?.goals;
+  const ggName = currentData.goldenGlove?.name;
 
-  // Prefetch the golden-boot photo as soon as the year changes (not on hover):
-  // check the in-memory + localStorage cache first, otherwise fetch once from
-  // Wikipedia, preload the image, and persist it so it's instant next time.
-  useEffect(() => {
-    if (!gbName) {
-      setGbPhoto(null);
-      return;
-    }
-    const slug = gbSlug(gbName);
-    const cached =
-      gbCache.current[slug] ??
-      (typeof localStorage !== "undefined" ? localStorage.getItem(`gb:${slug}`) : null);
-    if (cached) {
-      gbCache.current[slug] = cached;
-      setGbPhoto(cached);
-      return;
-    }
-    setGbPhoto(null);
-    let cancelled = false;
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        const src: string | undefined = data?.thumbnail?.source;
-        if (!src || cancelled) return;
-        gbCache.current[slug] = src;
-        try {
-          localStorage.setItem(`gb:${slug}`, src);
-        } catch {
-          /* storage full / unavailable — in-memory cache still applies */
-        }
-        new Image().src = src; // warm the browser cache before render
-        setGbPhoto(src);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [gbName]);
+  // Prefetch both award-winner photos as soon as the year changes (not on hover).
+  const gbPhoto = useWikiPhoto(gbName);
+  const ggPhoto = useWikiPhoto(ggName);
 
   // FIFA World Cup editions run every 4 years from 1930, skipping 1942/1946
   // (WWII). 1986 was the 13th edition, so this holds for every year on our
@@ -464,38 +449,21 @@ export default function App() {
             </p>
           </div>
 
-          {/* Mobile summary — the desktop header chips are hidden on phones, so
-              surface host / champion / golden boot here instead. */}
-          <div className="md:hidden mb-1 grid grid-cols-3 gap-2 text-center">
-            <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-brand-line py-2.5 px-1.5 min-h-[72px]">
-              <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Host</span>
-              <span className="text-brand-text font-bold text-[11px] leading-tight">
-                {currentData.hostFlag}
-              </span>
-              <span className="text-brand-muted text-[9px] leading-tight">{currentData.host}</span>
-            </div>
-            <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-brand-line bg-brand-gold/[0.05] py-2.5 px-1.5 min-h-[72px]">
-              <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-gold/70 font-semibold">Champion</span>
-              <span className="text-brand-gold font-bold text-[11px] leading-tight">
-                {champCode ? getTeamFlag(champCode) : "—"}
-              </span>
-              <span className="text-brand-gold/80 text-[9px] leading-tight">
-                {champCode ? getTeamName(champCode) : "TBD"}
-              </span>
-            </div>
-            <div className="flex flex-col items-center justify-center gap-1 rounded-xl border border-brand-line py-2.5 px-1.5 min-h-[72px]">
-              <span className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-brand-muted font-semibold">Golden Boot</span>
-              {gbName ? (
-                <div className="flex flex-col items-center gap-0.5">
-                  <GbAvatar photo={gbPhoto} name={gbName} className="w-7 h-7 text-[10px]" />
-                  <span className="text-brand-text font-bold text-[10px] leading-none">{gbGoals} goals</span>
-                  <span className="text-brand-muted text-[8px] leading-tight break-words">{gbName.split(" ").slice(0, 2).join(" ")}</span>
-                </div>
-              ) : (
-                <span className="text-brand-muted text-[9px] leading-tight">TBD</span>
-              )}
-            </div>
-          </div>
+          {/* Mobile summary — the desktop header is hidden on phones, so surface
+              the same host / champion / awards here, in the chosen variant. */}
+          <HeaderMetaMobile
+            year={activeYear}
+            host={currentData.host}
+            hostFlag={currentData.hostFlag}
+            quote={currentData.quote ?? null}
+            champFlag={champCode ? getTeamFlag(champCode) : null}
+            champName={champCode ? getTeamName(champCode) : null}
+            gbName={gbName}
+            gbGoals={gbGoals}
+            gbPhoto={gbPhoto}
+            ggName={ggName}
+            ggPhoto={ggPhoto}
+          />
 
           <Timeline
             activeYear={activeYear}
@@ -507,61 +475,20 @@ export default function App() {
         {/* Right Main Panel: Interactive Bracket */}
         <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center pt-9 px-0 md:px-6 pb-28 md:pb-4 max-md:overflow-hidden">
           {/* Header Metadata */}
-          <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:hidden md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-1 py-1">
-              {/* Edition + editorial quote */}
-              <div className="text-center md:text-left min-w-0 max-md:hidden">
-                <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold mb-2">
-                  FIFA World Cup · {activeYear}
-                </div>
-                <p className="font-serif italic text-lg md:text-xl leading-snug max-w-[480px] mx-auto md:mx-0 text-brand-text whitespace-nowrap">
-                  {currentData.quote ?? "The story is still being written."}
-                </p>
-              </div>
-
-              {/* Host / Champion / Golden Boot chips */}
-              <div className="flex items-stretch justify-start md:justify-center gap-2 md:gap-3 flex-none mx-auto md:mx-0 overflow-x-auto md:overflow-visible max-md:hidden">
-                <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line shrink-0">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Host Nation</span>
-                  <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                    {currentData.hostFlag} {currentData.host}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.04] shrink-0">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-gold/60 font-semibold whitespace-nowrap">Champion</span>
-                  <span className="text-brand-gold font-bold text-sm uppercase tracking-wide leading-none whitespace-nowrap">
-                    {champCode ? `${getTeamFlag(champCode)} ${getTeamName(champCode)}` : "To be crowned"}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center justify-center py-3 md:py-4 px-3 md:px-6 gap-2 rounded-xl border border-brand-line bg-brand-gold/[0.02] shrink-0">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap">Golden Boot</span>
-                  {gbName ? (
-                    <span className="flex items-center gap-2 leading-none">
-                      <GbAvatar photo={gbPhoto} name={gbName} className="w-8 h-8 text-sm" />
-                      <span className="text-brand-text font-bold text-sm uppercase tracking-wide whitespace-nowrap">
-                        {gbName} · {gbGoals}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="text-brand-text font-bold text-sm uppercase tracking-wide leading-none">TBD</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Secondary stat strip */}
-            <div className="flex items-center justify-between px-1 pt-3 mt-3 font-mono text-[10px] tracking-[0.25em] uppercase text-brand-muted"
-              style={{
-                backgroundImage: "linear-gradient(to right, transparent, var(--line) 20%, var(--line) 80%, transparent)",
-                backgroundPosition: "0 0",
-                backgroundSize: "100% 1px",
-                backgroundRepeat: "no-repeat",
-              }}
-            >
-              <span>Est. 1930</span>
-              <span className="text-brand-gold/80 font-semibold">{editionsCount} Editions</span>
-            </div>
-          </div>
+          <HeaderMeta
+            year={activeYear}
+            host={currentData.host}
+            hostFlag={currentData.hostFlag}
+            quote={currentData.quote ?? null}
+            champFlag={champCode ? getTeamFlag(champCode) : null}
+            champName={champCode ? getTeamName(champCode) : null}
+            gbName={gbName}
+            gbGoals={gbGoals}
+            gbPhoto={gbPhoto}
+            ggName={ggName}
+            ggPhoto={ggPhoto}
+            editionsCount={editionsCount}
+          />
 
           {/* Svg Radial Stage */}
           <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto">

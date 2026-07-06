@@ -167,7 +167,6 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
             fontSize: "0.75rem",
             fontWeight: 500,
             letterSpacing: "0.08em",
-            color: "#f3efe4",
             cursor: "pointer",
             background: "transparent",
             outline: "none",

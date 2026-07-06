@@ -539,6 +539,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "United States",
     hostFlag: "🇺🇸",
     goldenBoot: { name: "Oleg Salenko", goals: 6 },
+    goldenGlove: { name: "Michel Preud'homme" },
     quote: "Baggio's penalty, into the sky.",
     teams: [
       "NGA",
@@ -577,6 +578,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "France",
     hostFlag: "🇫🇷",
     goldenBoot: { name: "Davor Šuker", goals: 6 },
+    goldenGlove: { name: "Fabien Barthez" },
     quote: "Les Bleus, unstoppable at home.",
     teams: [
       "BRA",
@@ -615,6 +617,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "South Korea / Japan",
     hostFlag: "🇰🇷 🇯🇵",
     goldenBoot: { name: "Ronaldo", goals: 8 },
+    goldenGlove: { name: "Oliver Kahn" },
     quote: "Ronaldo's redemption.",
     teams: [
       "GER",
@@ -658,6 +661,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "Germany",
     hostFlag: "🇩🇪",
     goldenBoot: { name: "Miroslav Klose", goals: 5 },
+    goldenGlove: { name: "Gianluigi Buffon" },
     quote: "Zidane's headbutt.",
     teams: [
       "GER",
@@ -696,6 +700,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "South Africa",
     hostFlag: "🇿🇦",
     goldenBoot: { name: "Thomas Müller", goals: 5 },
+    goldenGlove: { name: "Iker Casillas" },
     quote: "Iniesta, forever.",
     teams: [
       "URU",
@@ -739,6 +744,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "Brazil",
     hostFlag: "🇧🇷",
     goldenBoot: { name: "James Rodríguez", goals: 6 },
+    goldenGlove: { name: "Manuel Neuer" },
     quote: "Götze seals the fourth star.",
     teams: [
       "BRA",
@@ -777,6 +783,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "Russia",
     hostFlag: "🇷🇺",
     goldenBoot: { name: "Harry Kane", goals: 6 },
+    goldenGlove: { name: "Thibaut Courtois" },
     quote: "Mbappé arrives.",
     teams: [
       "URU",
@@ -815,6 +822,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     host: "Qatar",
     hostFlag: "🇶🇦",
     goldenBoot: { name: "Kylian Mbappé", goals: 8 },
+    goldenGlove: { name: "Emiliano Martínez" },
     quote: "Messi. At last.",
     teams: [
       "NED",
@@ -891,7 +899,12 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       M(0, 1, 1, null, null, [[], ["Kylian Mbappé 70' (pen.)"]]),
       M(0, 3, 1, null, null, [[], ["Azzedine Ounahi 50'", "Azzedine Ounahi 82'", "Soufiane Rahimi 90+8'"]]),
       M(1, 2, 1, null, null, [["Neymar 90+10' (pen.)"], ["Erling Haaland 79'", "Erling Haaland 90'"]]),
-      null, null, null, null, null, null,
+      // Mexico 2–3 England (R16, Jul 5) — England advance. Note: source API
+      // only attributes 3 of the 5 goals, so this scorer list is incomplete.
+      M(2, 3, 1, null, null, [["Julián Quiñones 42'"], ["Jude Bellingham 36'", "Jude Bellingham 38'"]]),
+      // Portugal 0–1 Spain (R16, Jul 6) — Spain advance on Merino's stoppage-time winner
+      M(0, 1, 1, null, null, [[], ["Mikel Merino 90+1'"]]),
+      null, null, null, // USA·BEL, ARG·EGY, SUI·COL — not played yet
     ],
     qf: null,
     sf: null,

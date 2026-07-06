@@ -28,6 +28,7 @@ export interface TournamentData {
   final: (Match | null)[] | null;
   seeded?: boolean;
   goldenBoot?: { name: string; goals: number; photo?: string } | null;
+  goldenGlove?: { name: string; photo?: string } | null; // best goalkeeper (award exists 1994+)
   quote?: string | null; // short editorial line about the final, e.g. "Messi. At last."
 }
 
