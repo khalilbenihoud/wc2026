@@ -42,6 +42,12 @@ npm run build        # Production build to dist/
 
 Tournament results live in `src/data.ts`. Goal scorers and match stats are auto-generated from the [jfjelstul/worldcup](https://github.com/jfjelstul/worldcup) dataset via Python scripts in `scripts/`. The 2026 bracket pulls from a free REST API and is committed alongside historical data.
 
+## Credits
+
+Built by **Benihoud Khalil** — a personal project made for fun, by a football fan.
+
+The radial bracket design was inspired by **Emilio Sansolini**.
+
 ## License
 
 MIT
