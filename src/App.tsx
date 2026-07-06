@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
-import { ROUND_NAME, TOURNAMENT_YEARS, resolveCompetitors, getMatchNotes } from "./constants";
+import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
 import MatchDetailsModal from "./components/MatchDetailsModal";
@@ -12,6 +12,11 @@ import Splash from "./components/Splash";
 import PlayerAvatar from "./components/PlayerAvatar";
 import HeaderMeta from "./components/HeaderMeta";
 import HeaderMetaMobile from "./components/HeaderMetaMobile";
+import MobileTimeline from "./components/MobileTimeline";
+
+// Light/dark toggle is currently hidden on all breakpoints — flip to true to
+// bring the ☀️/🌙 button back (the theme logic underneath is left intact).
+const SHOW_THEME_TOGGLE = false;
 
 // Reused sidebar divider style (avoids recreating a 5-line style object every render).
 const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
@@ -19,9 +24,6 @@ const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
     "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
   backgroundSize: "100% 200%",
 };
-
-const CHEVRON_PATH =
-  "M8.48633 10.4004C8.73047 10.4004 8.97461 10.3027 9.14062 10.1172L16.6992 2.37305C16.8652 2.20703 16.9629 1.99219 16.9629 1.74805C16.9629 1.24023 16.582 0.849609 16.0742 0.849609C15.8301 0.849609 15.6055 0.947266 15.4395 1.10352L7.95898 8.75L9.00391 8.75L1.52344 1.10352C1.36719 0.947266 1.14258 0.849609 0.888672 0.849609C0.380859 0.849609 0 1.24023 0 1.74805C0 1.99219 0.0976562 2.20703 0.263672 2.38281L7.82227 10.1172C8.00781 10.3027 8.23242 10.4004 8.48633 10.4004Z";
 
 // Wikipedia award-winner → page slug override (special characters / split names).
 const WIKI_SLUG_OVERRIDE: Record<string, string> = {
@@ -427,14 +429,16 @@ export default function App() {
         {/* Left Rail: Brand + Timeline */}
         <aside className="rail relative z-20 flex flex-col md:min-h-0 p-4 pt-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
           <div className="brand relative mb-3 md:mb-6 max-md:text-center">
-            {/* Light/dark toggle */}
-            <button
-              onClick={() => setLightMode((v) => !v)}
-              aria-label="Toggle light/dark mode"
-              className="absolute top-0 right-0 w-7 h-7 flex items-center justify-center rounded-full border border-brand-line bg-brand-panel/60 backdrop-blur-sm text-brand-muted hover:text-brand-text transition-colors cursor-pointer text-xs max-md:static max-md:mb-3 max-md:mx-auto"
-            >
-              {lightMode ? "🌙" : "☀️"}
-            </button>
+            {/* Light/dark toggle — hidden via SHOW_THEME_TOGGLE, code kept intact */}
+            {SHOW_THEME_TOGGLE && (
+              <button
+                onClick={() => setLightMode((v) => !v)}
+                aria-label="Toggle light/dark mode"
+                className="absolute top-0 right-0 w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded-full border border-brand-line bg-brand-panel/60 backdrop-blur-sm text-brand-muted hover:text-brand-text transition-colors cursor-pointer text-sm md:text-xs"
+              >
+                {lightMode ? "🌙" : "☀️"}
+              </button>
+            )}
 
             <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
               FIFA World Cup Archive
@@ -522,31 +526,12 @@ export default function App() {
         </main>
       </div>
 
-      {/* Mobile year picker — fixed to bottom on mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-to-t from-brand-bg via-brand-bg/95 to-transparent pt-6 px-4 z-50" style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}>
-        <div className="relative">
-          <select
-            value={activeYear}
-            onChange={(e) => setActiveYear(Number(e.target.value))}
-            aria-label="Select tournament year"
-            className="w-full appearance-none rounded-xl border border-brand-gold/30 bg-brand-gold/[0.08] text-brand-gold-hi font-unbounded font-semibold text-base py-3 pl-4 pr-10 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
-          >
-            {TOURNAMENT_YEARS.map((year) => {
-              const d = TOURNAMENTS[year];
-              const isFuture = d.seeded;
-              return (
-                <option key={year} value={year} className="bg-brand-bg text-brand-text">
-                  {year} — {d.host}
-                  {isFuture ? " (upcoming)" : ""}
-                </option>
-              );
-            })}
-          </select>
-          <svg aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-3" viewBox="0 0 17.3242 10.4004" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d={CHEVRON_PATH} fill="currentColor" className="text-brand-gold/80" />
-          </svg>
-        </div>
-      </div>
+      {/* Mobile tournament picker — fixed to bottom on mobile */}
+      <MobileTimeline
+        activeYear={activeYear}
+        onSelectYear={handleSelectYear}
+        analyses={analyses}
+      />
 
       {/* Floating Tooltip */}
       {tooltip.visible && tooltipContent && (
