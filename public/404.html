@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>404 — Not Found · The Road to Glory</title>
+<title>404 — Offside · The Road to Glory</title>
 <meta name="robots" content="noindex" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Unbounded:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
     background: #09090b;
     color: #f4f4f5;
@@ -18,61 +19,219 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: radial-gradient(1100px 820px at 50% 50%, #f6c4530d, transparent 62%);
+    overflow: hidden;
+    position: relative;
   }
-  .card {
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1400px 900px at 50% 40%, rgba(246,196,83,0.06), transparent 65%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 1920 1080' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='g' width='80' height='80' patternUnits='userSpaceOnUse'%3E%3Cline x1='0' y1='80' x2='80' y2='0' stroke='%2327272a' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23g)' opacity='0.15'/%3E%3C/svg%3E");
+    background-size: 100% 100%, cover;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
     text-align: center;
-    padding: 3rem 2rem;
-    max-width: 420px;
+    padding: 2rem;
   }
+
+  .flag-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    animation: flagRaise 0.7s cubic-bezier(0.34,1.4,0.5,1) both;
+  }
+
+  .flag {
+    width: 56px;
+    height: 64px;
+    background: #f6c453;
+    position: relative;
+    clip-path: polygon(0 0, 100% 12%, 100% 88%, 0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 0 30px rgba(246,196,83,0.3);
+  }
+
+  .flag:nth-child(2) { animation-delay: 0.15s; animation: flagRaise 0.7s cubic-bezier(0.34,1.4,0.5,1) 0.15s both; }
+  .flag:nth-child(3) { animation-delay: 0.30s; animation: flagRaise 0.7s cubic-bezier(0.34,1.4,0.5,1) 0.30s both; }
+
+  .flag-pole {
+    width: 4px;
+    height: 120px;
+    background: linear-gradient(to bottom, #ffdf8e, #b8862f);
+    margin: 0 auto 0.5rem;
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(246,196,83,0.4);
+  }
+
+  .flag-stick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .code {
     font-family: "Unbounded", sans-serif;
-    font-size: 6rem;
-    font-weight: 700;
-    line-height: 1;
-    background: linear-gradient(to bottom, #ffdf8e, #f6c453, #b8862f);
+    font-size: clamp(7rem, 20vw, 18rem);
+    font-weight: 900;
+    line-height: 0.9;
+    background: linear-gradient(to bottom, #ffdf8e 10%, #f6c453 40%, #b8862f 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 6px 22px rgba(246,196,83,0.2));
+    filter: drop-shadow(0 8px 40px rgba(246,196,83,0.25));
+    animation: fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) both;
+    user-select: none;
   }
-  .sub {
+
+  .whistle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0 1rem;
+    animation: fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) 0.2s both;
+  }
+
+  .whistle-line {
+    height: 1.5px;
+    width: clamp(60px, 15vw, 160px);
+    background: linear-gradient(to right, transparent, rgba(246,196,83,0.5), transparent);
+  }
+
+  .whistle-emoji {
+    font-size: 1.5rem;
+  }
+
+  .offside {
     font-family: "Unbounded", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #f6c453;
-    margin: 1rem 0 1.5rem;
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 800;
+    color: #e11d48;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) 0.3s both;
   }
-  p {
+
+  .subtitle {
+    font-family: "Inter", sans-serif;
+    font-size: clamp(0.875rem, 1.5vw, 1.125rem);
     color: #71717a;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
+    margin: 1.5rem auto 2rem;
+    max-width: 520px;
+    line-height: 1.7;
+    animation: fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) 0.4s both;
   }
-  a {
+
+  .subtitle strong {
+    color: #f6c453;
+    font-weight: 600;
+  }
+
+  .btn {
     display: inline-block;
     font-family: "Unbounded", sans-serif;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: #ffdf8e;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #09090b;
     text-decoration: none;
-    padding: 0.75rem 2rem;
-    border: 1px solid rgba(246,196,83,0.3);
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #ffdf8e, #f6c453);
     border-radius: 9999px;
-    transition: all 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 0 30px rgba(246,196,83,0.2), 0 0 60px rgba(246,196,83,0.08);
+    letter-spacing: 0.02em;
+    animation: fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) 0.55s both;
   }
-  a:hover {
-    background: rgba(246,196,83,0.1);
-    border-color: rgba(246,196,83,0.6);
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(246,196,83,0.35), 0 0 80px rgba(246,196,83,0.12);
+  }
+
+  .var {
+    margin-top: 3rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    color: #3f3f46;
+    animation: fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) 0.7s both;
+  }
+
+  .var span {
+    display: inline-block;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    padding: 0.3rem 0.75rem;
+    background: rgba(24,24,27,0.8);
+  }
+
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: none; }
+  }
+
+  @keyframes flagRaise {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: none; }
   }
 </style>
 </head>
 <body>
-<div class="card">
+<main>
+  <!-- Linesman flags going up -->
+  <div class="flag-group">
+    <div class="flag-stick">
+      <div class="flag">🚩</div>
+      <div class="flag-pole"></div>
+    </div>
+    <div class="flag-stick" style="margin-top: -10px;">
+      <div class="flag">🚩</div>
+      <div class="flag-pole"></div>
+    </div>
+    <div class="flag-stick">
+      <div class="flag">🚩</div>
+      <div class="flag-pole"></div>
+    </div>
+  </div>
+
+  <!-- Big 404 -->
   <div class="code">404</div>
-  <div class="sub">Off the Pitch</div>
-  <p>This page has been sent off. It doesn't exist — maybe it never did. Head back to the bracket to explore every World Cup knockout stage since 1930.</p>
-  <a href="/">← Back to the Bracket</a>
-</div>
+
+  <!-- Whistle divider -->
+  <div class="whistle">
+    <div class="whistle-line"></div>
+    <span class="whistle-emoji">🔈</span>
+    <div class="whistle-line"></div>
+  </div>
+
+  <!-- Offside call -->
+  <div class="offside">Offside!</div>
+
+  <!-- Description -->
+  <p class="subtitle">
+    The assistant referee has raised the flag.<br>
+    This page was <strong>caught beyond the last defender</strong> — it doesn't exist,<br>
+    and VAR confirms the call.
+  </p>
+
+  <!-- CTA -->
+  <a href="/" class="btn">🏆 Return to the Bracket</a>
+
+  <!-- VAR badge -->
+  <div class="var">
+    <span>VAR CHECK: OFFSIDE · NO GOAL</span>
+  </div>
+</main>
 </body>
 </html>
