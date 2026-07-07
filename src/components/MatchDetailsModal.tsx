@@ -4,6 +4,7 @@ import { getTeamFlag, getTeamName } from "../data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "../constants";
 import { getScorers } from "../scorers";
 import { getStats } from "../stats";
+import { getStats2026 } from "../stats2026";
 import MatchGoals from "./MatchGoals";
 
 interface MatchDetailsModalProps {
@@ -137,8 +138,9 @@ export default function MatchDetailsModal({
   const goals: [string[], string[]] | null =
     (m as any)?.g ?? getScorers(data._year, ta, tb);
 
-  // Resolve match stats: cards, subs, pens
-  const stats = getStats(data._year, ta, tb);
+  // Resolve match stats: historical from the generated jfjelstul set, 2026 from
+  // the ESPN-sourced set.
+  const stats = getStats(data._year, ta, tb) ?? getStats2026(data._year, ta, tb);
 
   const notes = getMatchNotes(m);
 
