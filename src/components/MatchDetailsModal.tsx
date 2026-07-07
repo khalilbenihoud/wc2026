@@ -4,6 +4,7 @@ import { getTeamFlag, getTeamName } from "../data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "../constants";
 import { getScorers } from "../scorers";
 import { getStats } from "../stats";
+import MatchGoals from "./MatchGoals";
 
 interface MatchDetailsModalProps {
   isOpen: boolean;
@@ -46,40 +47,6 @@ function StatBar({ label, a, b }: { label: string; a: number; b: number }) {
 
 const countCard = (arr: string[], emoji: string) =>
   arr.filter((c) => c.includes(emoji)).length;
-
-// Split a raw goal string like "Zinedine Zidane 90'+2' (pen.)" into parts so we
-// can lay it out (name / minute badge / pen·og tag) instead of a flat line.
-interface ParsedGoal {
-  name: string;
-  minute: string; // display label, e.g. "90'+2'"
-  sort: number; // for chronological ordering
-  tag: string | null; // "PEN" | "OG" | null
-}
-
-function goalTagLabel(raw: string | null): string | null {
-  if (!raw) return null;
-  const low = raw.toLowerCase();
-  if (low.includes("pen")) return "PEN";
-  if (low.includes("o.g") || low.includes("og")) return "OG";
-  return raw.toUpperCase();
-}
-
-function parseGoal(raw: string): ParsedGoal {
-  const trimmed = raw.trim();
-  const tagMatch = trimmed.match(/\s*\(([^)]+)\)\s*$/);
-  const tag = goalTagLabel(tagMatch ? tagMatch[1] : null);
-  const body = tagMatch ? trimmed.slice(0, tagMatch.index).trim() : trimmed;
-  const minMatch = body.match(/(\d+)(?:\+(\d+))?'$/);
-  if (!minMatch) return { name: body, minute: "", sort: 999, tag };
-  const base = parseInt(minMatch[1], 10);
-  const stoppage = minMatch[2] ? parseInt(minMatch[2], 10) : 0;
-  return {
-    name: body.slice(0, minMatch.index).trim(),
-    minute: minMatch[0],
-    sort: base + stoppage / 100,
-    tag,
-  };
-}
 
 export default function MatchDetailsModal({
   isOpen,
@@ -217,12 +184,13 @@ export default function MatchDetailsModal({
     }
   }
 
-  // Goal data, parsed once for the three preview layouts below.
   const goalsA = goals?.[0] ?? [];
   const goalsB = goals?.[1] ?? [];
   const hasGoals = goalsA.length > 0 || goalsB.length > 0;
-  const parsedA = goalsA.map(parseGoal);
-  const parsedB = goalsB.map(parseGoal);
+
+  // Hide the stats card when goals are the only "stat" — it would just restate
+  // the scoreline already shown above. Show it only for richer data.
+  const showStatsCard = statRows.some((r) => r.label !== "Goals");
 
   const yellowA = countCard(cardsA, "🟨");
   const yellowB = countCard(cardsB, "🟨");
@@ -295,10 +263,10 @@ export default function MatchDetailsModal({
                 </div>
 
                 {played ? (
-                  <div className="font-unbounded text-[32px] text-brand-text flex items-center gap-1.5 px-1 select-none">
-                    <span>{m!.s[0]}</span>
+                  <div className="font-unbounded text-[32px] flex items-center gap-1.5 px-1 select-none">
+                    <span className={winTop ? "text-brand-gold-hi" : "text-brand-muted"}>{m!.s[0]}</span>
                     <span className="text-brand-steel text-xl">:</span>
-                    <span>{m!.s[1]}</span>
+                    <span className={!winTop ? "text-brand-gold-hi" : "text-brand-muted"}>{m!.s[1]}</span>
                   </div>
                 ) : (
                   <div className="font-unbounded text-lg text-brand-steel px-1 select-none">vs</div>
@@ -340,61 +308,23 @@ export default function MatchDetailsModal({
                 <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-3">
                   Goals
                 </div>
-                <div className="flex flex-col gap-3">
-                  {[
-                    { team: ta, list: parsedA },
-                    { team: tb, list: parsedB },
-                  ]
-                    .filter((grp) => grp.list.length > 0)
-                    .map((grp) => (
-                      <div key={grp.team}>
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm leading-none">{getTeamFlag(grp.team)}</span>
-                          <span className="font-mono text-[10px] font-semibold tracking-wider uppercase text-brand-muted">
-                            {getTeamName(grp.team)}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          {grp.list.map((g, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-[rgba(var(--overlay-rgb),0.03)] transition-colors"
-                            >
-                              <span className="flex items-center justify-center shrink-0 w-6 h-6 rounded-full bg-brand-gold/10 text-[11px]">
-                                ⚽
-                              </span>
-                              <span className="text-xs text-brand-text flex-1 min-w-0 truncate">
-                                {g.name}
-                              </span>
-                              {g.tag && (
-                                <span className="shrink-0 font-mono text-[8px] font-bold uppercase tracking-wider text-brand-gold/80 border border-brand-gold/30 rounded px-1 py-px">
-                                  {g.tag}
-                                </span>
-                              )}
-                              <span className="shrink-0 font-mono text-[11px] font-semibold text-brand-gold tabular-nums">
-                                {g.minute}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                <MatchGoals ta={ta} tb={tb} goalsA={goalsA} goalsB={goalsB} />
               </div>
             )}
 
-            {played && (
+            {played && round === "final" && (
               <div className="mt-4 flex items-center justify-center gap-2 rounded-full border border-brand-gold/40 bg-brand-gold/10 py-2.5 px-4">
                 <span>🏆</span>
                 <span className="font-unbounded font-semibold text-sm text-brand-gold-hi">
-                  {round === "final" ? "Champion" : "Winner"}: {getTeamName(winnerCode)}
+                  Champion: {getTeamName(winnerCode)}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Match statistics — comparison bars (borrowed from scoreboard modal) */}
-          {statRows.length > 0 && (
+          {/* Match statistics — comparison bars (borrowed from scoreboard modal).
+              Hidden when goals are the only stat, since that just restates the score. */}
+          {showStatsCard && (
             <div className="relative overflow-hidden rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6">
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
               <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
