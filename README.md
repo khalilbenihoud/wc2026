@@ -32,7 +32,6 @@ npm run build        # Production build to dist/
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run lint` | TypeScript type check |
-| `npm run fetch:worldcup26` | Refresh 2026 bracket data from API |
 
 ## Historical coverage
 
