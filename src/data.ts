@@ -904,7 +904,9 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       M(2, 3, 1, null, null, [["Julián Quiñones 42'"], ["Jude Bellingham 36'", "Jude Bellingham 38'"]]),
       // Portugal 0–1 Spain (R16, Jul 6) — Spain advance on Merino's stoppage-time winner
       M(0, 1, 1, null, null, [[], ["Mikel Merino 90+1'"]]),
-      null, null, null, // USA·BEL, ARG·EGY, SUI·COL — not played yet
+      // USA 1–4 Belgium (R16, Jul 6) — Belgium advance (De Ketelaere brace)
+      M(1, 4, 1, null, null, [["Malik Tillman 31'"], ["Charles De Ketelaere 9'", "Charles De Ketelaere 33'", "Hans Vanaken 57'", "Romelu Lukaku 90+3'"]]),
+      null, null, // ARG·EGY, SUI·COL — not played yet
     ],
     qf: null,
     sf: null,
