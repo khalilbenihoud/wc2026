@@ -863,9 +863,9 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     goldenBoot: null,
     quote: null,
     seeded: false,
-    // Sourced from https://worldcup26.ir (worldcup2026 REST API) — see
-    // scripts/fetch-worldcup26.ts. Bracket-feed order is deterministic via
-    // that API's "Winner Match N" labels, not just fixture date order.
+    // Sourced from openfootball (github.com/openfootball/world-cup,
+    // 2026--usa/cup_finals.txt) — hand-curated, clean names, complete scorers.
+    // Bracket-feed order follows the file's "W74 / W77" feeder labels.
     teams: [
       "PAR", "FRA",
       "CAN", "MAR",
@@ -883,31 +883,30 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       { ta: "NED", tb: "MAR", s: [1, 1], w: 1, p: "2-3", g: [["Cody Gakpo 72'"], ["Issa Diop 90+1'"]], date: "Jun 29 · 19:00" },
       { ta: "BRA", tb: "JPN", s: [2, 1], w: 0, g: [["Casemiro 56'", "Gabriel Martinelli 90+5'"], ["Kaishū Sano 29'"]], date: "Jun 29 · 12:00" },
       { ta: "CIV", tb: "NOR", s: [1, 2], w: 1, g: [["Amad Diallo 74'"], ["Antonio Nusa 39'", "Erling Haaland 86'"]], date: "Jun 30 · 12:00" },
-      { ta: "MEX", tb: "ECU", s: [2, 0], w: 0, g: [["Julián Quiñones 22'", "Raúl Jiménez 31'"], []], date: "Jun 30 · 19:00" },
-      { ta: "ENG", tb: "COD", s: [2, 1], w: 0, g: [["Harry Kane 75'", "Harry Kane 86'"], ["Braian Sipnga 7'"]], date: "Jul 1 · 12:00" },
-      { ta: "POR", tb: "CRO", s: [2, 1], w: 0, g: [["Gonçalo Ramos 90+4'"], ["Ivan Perišić 53'"]], date: "Jul 2 · 19:00" },
+      { ta: "MEX", tb: "ECU", s: [2, 0], w: 0, g: [["Julián Quiñones 31'", "Raúl Jiménez 45+1'"], []], date: "Jun 30 · 19:00" },
+      { ta: "ENG", tb: "COD", s: [2, 1], w: 0, g: [["Harry Kane 75'", "Harry Kane 86'"], ["Brian Cipenga 7'"]], date: "Jul 1 · 12:00" },
+      { ta: "POR", tb: "CRO", s: [2, 1], w: 0, g: [["Cristiano Ronaldo 68' (pen.)", "Gonçalo Ramos 90+4'"], ["Ivan Perišić 53'"]], date: "Jul 2 · 19:00" },
       { ta: "ESP", tb: "AUT", s: [3, 0], w: 0, g: [["Mikel Oyarzabal 36'", "Pedro Porro 66'", "Mikel Oyarzabal 89'"], []], date: "Jul 2 · 12:00" },
       { ta: "USA", tb: "BIH", s: [2, 0], w: 0, g: [["Folarin Balogun 45'", "Malik Tillman 82'"], []], date: "Jul 1 · 17:00" },
-      { ta: "BEL", tb: "SEN", s: [3, 2], w: 0, x: "a.e.t.", g: [["Romelu Lukaku 86'", "Youri Tielemans 89'", "Youri Tielemans 125(P)'"], ["Habib Diarra 25'", "Ismaïla Sarr 51'"]], date: "Jul 1 · 13:00" },
-      { ta: "ARG", tb: "CPV", s: [3, 2], w: 0, x: "a.e.t.", date: "Jul 3 · 18:00" },
-      { ta: "AUS", tb: "EGY", s: [1, 1], w: 1, p: "2-4", g: [["Mohamed Hany 55'"], ["Emam Ashour 13'"]], date: "Jul 3 · 13:00" },
+      { ta: "BEL", tb: "SEN", s: [3, 2], w: 0, x: "a.e.t.", g: [["Romelu Lukaku 86'", "Youri Tielemans 89'", "Youri Tielemans 120+5' (pen.)"], ["Habib Diarra 25'", "Ismaïla Sarr 51'"]], date: "Jul 1 · 13:00" },
+      { ta: "ARG", tb: "CPV", s: [3, 2], w: 0, x: "a.e.t.", g: [["Lionel Messi 29'", "Lisandro Martínez 92'", "Diney Borges 111' (o.g.)"], ["Deroy Duarte 59'", "Sidny Lopes Cabral 103'"]], date: "Jul 3 · 18:00" },
+      { ta: "AUS", tb: "EGY", s: [1, 1], w: 1, p: "2-4", g: [["Mohamed Hany 55' (o.g.)"], ["Emam Ashour 13'"]], date: "Jul 3 · 13:00" },
       { ta: "SUI", tb: "ALG", s: [2, 0], w: 0, g: [["Breel Embolo 10'", "Dan Ndoye 46'"], []], date: "Jul 2 · 20:00" },
-      { ta: "COL", tb: "GHA", s: [1, 0], w: 0, date: "Jul 3 · 20:30" },
+      { ta: "COL", tb: "GHA", s: [1, 0], w: 0, g: [["Jhon Arias 14'"], []], date: "Jul 3 · 20:30" },
     ],
     r16: [
       // France 1–0 Paraguay (R16, Jul 4) — France advance
       M(0, 1, 1, null, null, [[], ["Kylian Mbappé 70' (pen.)"]]),
       M(0, 3, 1, null, null, [[], ["Azzedine Ounahi 50'", "Azzedine Ounahi 82'", "Soufiane Rahimi 90+8'"]]),
       M(1, 2, 1, null, null, [["Neymar 90+10' (pen.)"], ["Erling Haaland 79'", "Erling Haaland 90'"]]),
-      // Mexico 2–3 England (R16, Jul 5) — England advance. Note: source API
-      // only attributes 3 of the 5 goals, so this scorer list is incomplete.
-      M(2, 3, 1, null, null, [["Julián Quiñones 42'"], ["Jude Bellingham 36'", "Jude Bellingham 38'"]]),
+      // Mexico 2–3 England (R16, Jul 5) — England advance
+      M(2, 3, 1, null, null, [["Julián Quiñones 42'", "Raúl Jiménez 69' (pen.)"], ["Jude Bellingham 36'", "Jude Bellingham 38'", "Harry Kane 60' (pen.)"]]),
       // Portugal 0–1 Spain (R16, Jul 6) — Spain advance on Merino's stoppage-time winner
       M(0, 1, 1, null, null, [[], ["Mikel Merino 90+1'"]]),
       // USA 1–4 Belgium (R16, Jul 6) — Belgium advance (De Ketelaere brace)
       M(1, 4, 1, null, null, [["Malik Tillman 31'"], ["Charles De Ketelaere 9'", "Charles De Ketelaere 33'", "Hans Vanaken 57'", "Romelu Lukaku 90+3'"]]),
       // Argentina 3–2 Egypt (R16, Jul 7) — Argentina advance after a 2-goal comeback
-      M(3, 2, 0, null, null, [["Cristian Romero 79'", "Lionel Messi 83'", "Enzo Fernández 90+2'"], ["Yasser Ibrahim 15'", "Mostafa Ziko 67'"]]),
+      M(3, 2, 0, null, null, [["Cristian Romero 79'", "Lionel Messi 83'", "Enzo Fernández 90+2'"], ["Yasser Ibrahim 15'", "Mostafa Zico 67'"]]),
       null, // SUI·COL — not played yet
     ],
     qf: null,
