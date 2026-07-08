@@ -6,6 +6,7 @@ import { getScorers } from "../scorers";
 import { getStats } from "../stats";
 import { getStats2026 } from "../stats2026";
 import { getHighlights } from "../highlights";
+import { getPlayerOfMatch } from "../motm";
 import MatchGoals from "./MatchGoals";
 
 interface MatchDetailsModalProps {
@@ -146,6 +147,9 @@ export default function MatchDetailsModal({
 
   // Highlights (YouTube embed — 2026 only for now).
   const highlight = getHighlights(data._year, ta, tb);
+
+  // Superior Player of the Match (2026 only for now).
+  const motm = getPlayerOfMatch(data._year, ta, tb);
 
   const notes = getMatchNotes(m);
 
@@ -310,6 +314,20 @@ export default function MatchDetailsModal({
               </div>
             )}
 
+            {played && motm && (
+              <div className="mt-4 pt-4 border-t border-brand-line">
+                <div className="flex items-center justify-center gap-3">
+                  <span className="font-mono text-[9px] font-semibold tracking-[0.15em] uppercase text-brand-muted">
+                    Superior Player
+                  </span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-gold/30 bg-brand-gold/5">
+                    <span className="text-lg leading-none">{getTeamFlag(motm.team)}</span>
+                    <span className="font-semibold text-sm text-brand-gold-hi">{motm.name}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {hasGoals && (
               <div className="mt-4 pt-4 border-t border-brand-line">
                 <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-3">
@@ -355,6 +373,7 @@ export default function MatchDetailsModal({
                     <img
                       src={highlight.thumbnail}
                       alt={highlight.title}
+                      referrerPolicy="no-referrer"
                       className="absolute inset-0 w-full h-full object-cover transition-opacity group-hover:opacity-80"
                     />
                   ) : (
