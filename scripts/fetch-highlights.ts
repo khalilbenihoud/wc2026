@@ -171,7 +171,6 @@ export function getHighlights(
 }
 `;
 
-  const outFile = resolve((import.meta as any).dirname ?? __dirname, "..", "src", "highlights.ts");
   writeFileSync(outFile, src, "utf-8");
 
   console.log(`\n---`);
