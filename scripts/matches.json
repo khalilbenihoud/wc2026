@@ -1,0 +1,1913 @@
+[
+  {
+    "year": 1930,
+    "round": "qf",
+    "key": "1930_ARG_CHI",
+    "teamA": "ARG",
+    "teamB": "CHI"
+  },
+  {
+    "year": 1930,
+    "round": "qf",
+    "key": "1930_USA_BEL",
+    "teamA": "USA",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1930,
+    "round": "qf",
+    "key": "1930_URU_PER",
+    "teamA": "URU",
+    "teamB": "PER"
+  },
+  {
+    "year": 1930,
+    "round": "qf",
+    "key": "1930_YUG_BOL",
+    "teamA": "YUG",
+    "teamB": "BOL"
+  },
+  {
+    "year": 1930,
+    "round": "sf",
+    "key": "1930_ARG_USA",
+    "teamA": "ARG",
+    "teamB": "USA"
+  },
+  {
+    "year": 1930,
+    "round": "sf",
+    "key": "1930_URU_YUG",
+    "teamA": "URU",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1930,
+    "round": "final",
+    "key": "1930_ARG_URU",
+    "teamA": "ARG",
+    "teamB": "URU"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_ITA_USA",
+    "teamA": "ITA",
+    "teamB": "USA"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_ESP_BRA",
+    "teamA": "ESP",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_AUT_FRA",
+    "teamA": "AUT",
+    "teamB": "FRA"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_HUN_EGY",
+    "teamA": "HUN",
+    "teamB": "EGY"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_TCH_SUI",
+    "teamA": "TCH",
+    "teamB": "SUI"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_GER_BEL",
+    "teamA": "GER",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_SWE_ARG",
+    "teamA": "SWE",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1934,
+    "round": "r16",
+    "key": "1934_NED_ROU",
+    "teamA": "NED",
+    "teamB": "ROU"
+  },
+  {
+    "year": 1934,
+    "round": "qf",
+    "key": "1934_ITA_ESP",
+    "teamA": "ITA",
+    "teamB": "ESP"
+  },
+  {
+    "year": 1934,
+    "round": "qf",
+    "key": "1934_AUT_HUN",
+    "teamA": "AUT",
+    "teamB": "HUN"
+  },
+  {
+    "year": 1934,
+    "round": "qf",
+    "key": "1934_TCH_GER",
+    "teamA": "TCH",
+    "teamB": "GER"
+  },
+  {
+    "year": 1934,
+    "round": "qf",
+    "key": "1934_SWE_NED",
+    "teamA": "SWE",
+    "teamB": "NED"
+  },
+  {
+    "year": 1934,
+    "round": "sf",
+    "key": "1934_ITA_AUT",
+    "teamA": "ITA",
+    "teamB": "AUT"
+  },
+  {
+    "year": 1934,
+    "round": "sf",
+    "key": "1934_TCH_SWE",
+    "teamA": "TCH",
+    "teamB": "SWE"
+  },
+  {
+    "year": 1934,
+    "round": "final",
+    "key": "1934_ITA_TCH",
+    "teamA": "ITA",
+    "teamB": "TCH"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_SWE_AUT",
+    "teamA": "SWE",
+    "teamB": "AUT"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_CUB_ROU",
+    "teamA": "CUB",
+    "teamB": "ROU"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_HUN_IDN",
+    "teamA": "HUN",
+    "teamB": "IDN"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_GER_SUI",
+    "teamA": "GER",
+    "teamB": "SUI"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_FRA_BEL",
+    "teamA": "FRA",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_ITA_NOR",
+    "teamA": "ITA",
+    "teamB": "NOR"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_BRA_POL",
+    "teamA": "BRA",
+    "teamB": "POL"
+  },
+  {
+    "year": 1938,
+    "round": "r16",
+    "key": "1938_TCH_NED",
+    "teamA": "TCH",
+    "teamB": "NED"
+  },
+  {
+    "year": 1938,
+    "round": "qf",
+    "key": "1938_SWE_CUB",
+    "teamA": "SWE",
+    "teamB": "CUB"
+  },
+  {
+    "year": 1938,
+    "round": "qf",
+    "key": "1938_HUN_SUI",
+    "teamA": "HUN",
+    "teamB": "SUI"
+  },
+  {
+    "year": 1938,
+    "round": "qf",
+    "key": "1938_FRA_ITA",
+    "teamA": "FRA",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1938,
+    "round": "qf",
+    "key": "1938_BRA_TCH",
+    "teamA": "BRA",
+    "teamB": "TCH"
+  },
+  {
+    "year": 1938,
+    "round": "sf",
+    "key": "1938_SWE_HUN",
+    "teamA": "SWE",
+    "teamB": "HUN"
+  },
+  {
+    "year": 1938,
+    "round": "sf",
+    "key": "1938_ITA_BRA",
+    "teamA": "ITA",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1938,
+    "round": "final",
+    "key": "1938_HUN_ITA",
+    "teamA": "HUN",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1950,
+    "round": "qf",
+    "key": "1950_URU_BOL",
+    "teamA": "URU",
+    "teamB": "BOL"
+  },
+  {
+    "year": 1950,
+    "round": "qf",
+    "key": "1950_SWE_ITA",
+    "teamA": "SWE",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1950,
+    "round": "qf",
+    "key": "1950_BRA_YUG",
+    "teamA": "BRA",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1950,
+    "round": "qf",
+    "key": "1950_ESP_ENG",
+    "teamA": "ESP",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1950,
+    "round": "sf",
+    "key": "1950_URU_SWE",
+    "teamA": "URU",
+    "teamB": "SWE"
+  },
+  {
+    "year": 1950,
+    "round": "sf",
+    "key": "1950_BRA_ESP",
+    "teamA": "BRA",
+    "teamB": "ESP"
+  },
+  {
+    "year": 1950,
+    "round": "final",
+    "key": "1950_URU_BRA",
+    "teamA": "URU",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1954,
+    "round": "qf",
+    "key": "1954_FRG_YUG",
+    "teamA": "FRG",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1954,
+    "round": "qf",
+    "key": "1954_AUT_SUI",
+    "teamA": "AUT",
+    "teamB": "SUI"
+  },
+  {
+    "year": 1954,
+    "round": "qf",
+    "key": "1954_HUN_BRA",
+    "teamA": "HUN",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1954,
+    "round": "qf",
+    "key": "1954_URU_ENG",
+    "teamA": "URU",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1954,
+    "round": "sf",
+    "key": "1954_FRG_AUT",
+    "teamA": "FRG",
+    "teamB": "AUT"
+  },
+  {
+    "year": 1954,
+    "round": "sf",
+    "key": "1954_HUN_URU",
+    "teamA": "HUN",
+    "teamB": "URU"
+  },
+  {
+    "year": 1954,
+    "round": "final",
+    "key": "1954_FRG_HUN",
+    "teamA": "FRG",
+    "teamB": "HUN"
+  },
+  {
+    "year": 1958,
+    "round": "qf",
+    "key": "1958_BRA_WAL",
+    "teamA": "BRA",
+    "teamB": "WAL"
+  },
+  {
+    "year": 1958,
+    "round": "qf",
+    "key": "1958_FRA_NIR",
+    "teamA": "FRA",
+    "teamB": "NIR"
+  },
+  {
+    "year": 1958,
+    "round": "qf",
+    "key": "1958_SWE_URS",
+    "teamA": "SWE",
+    "teamB": "URS"
+  },
+  {
+    "year": 1958,
+    "round": "qf",
+    "key": "1958_FRG_YUG",
+    "teamA": "FRG",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1958,
+    "round": "sf",
+    "key": "1958_BRA_FRA",
+    "teamA": "BRA",
+    "teamB": "FRA"
+  },
+  {
+    "year": 1958,
+    "round": "sf",
+    "key": "1958_SWE_FRG",
+    "teamA": "SWE",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1958,
+    "round": "final",
+    "key": "1958_BRA_SWE",
+    "teamA": "BRA",
+    "teamB": "SWE"
+  },
+  {
+    "year": 1962,
+    "round": "qf",
+    "key": "1962_BRA_ENG",
+    "teamA": "BRA",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1962,
+    "round": "qf",
+    "key": "1962_CHI_URS",
+    "teamA": "CHI",
+    "teamB": "URS"
+  },
+  {
+    "year": 1962,
+    "round": "qf",
+    "key": "1962_TCH_HUN",
+    "teamA": "TCH",
+    "teamB": "HUN"
+  },
+  {
+    "year": 1962,
+    "round": "qf",
+    "key": "1962_YUG_FRG",
+    "teamA": "YUG",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1962,
+    "round": "sf",
+    "key": "1962_BRA_CHI",
+    "teamA": "BRA",
+    "teamB": "CHI"
+  },
+  {
+    "year": 1962,
+    "round": "sf",
+    "key": "1962_TCH_YUG",
+    "teamA": "TCH",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1962,
+    "round": "final",
+    "key": "1962_BRA_TCH",
+    "teamA": "BRA",
+    "teamB": "TCH"
+  },
+  {
+    "year": 1966,
+    "round": "qf",
+    "key": "1966_ENG_ARG",
+    "teamA": "ENG",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1966,
+    "round": "qf",
+    "key": "1966_POR_PRK",
+    "teamA": "POR",
+    "teamB": "PRK"
+  },
+  {
+    "year": 1966,
+    "round": "qf",
+    "key": "1966_FRG_URU",
+    "teamA": "FRG",
+    "teamB": "URU"
+  },
+  {
+    "year": 1966,
+    "round": "qf",
+    "key": "1966_URS_HUN",
+    "teamA": "URS",
+    "teamB": "HUN"
+  },
+  {
+    "year": 1966,
+    "round": "sf",
+    "key": "1966_ENG_POR",
+    "teamA": "ENG",
+    "teamB": "POR"
+  },
+  {
+    "year": 1966,
+    "round": "sf",
+    "key": "1966_FRG_URS",
+    "teamA": "FRG",
+    "teamB": "URS"
+  },
+  {
+    "year": 1966,
+    "round": "final",
+    "key": "1966_ENG_FRG",
+    "teamA": "ENG",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1970,
+    "round": "qf",
+    "key": "1970_BRA_PER",
+    "teamA": "BRA",
+    "teamB": "PER"
+  },
+  {
+    "year": 1970,
+    "round": "qf",
+    "key": "1970_URU_URS",
+    "teamA": "URU",
+    "teamB": "URS"
+  },
+  {
+    "year": 1970,
+    "round": "qf",
+    "key": "1970_ITA_MEX",
+    "teamA": "ITA",
+    "teamB": "MEX"
+  },
+  {
+    "year": 1970,
+    "round": "qf",
+    "key": "1970_FRG_ENG",
+    "teamA": "FRG",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1970,
+    "round": "sf",
+    "key": "1970_BRA_URU",
+    "teamA": "BRA",
+    "teamB": "URU"
+  },
+  {
+    "year": 1970,
+    "round": "sf",
+    "key": "1970_ITA_FRG",
+    "teamA": "ITA",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1970,
+    "round": "final",
+    "key": "1970_BRA_ITA",
+    "teamA": "BRA",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1974,
+    "round": "qf",
+    "key": "1974_FRG_YUG",
+    "teamA": "FRG",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1974,
+    "round": "qf",
+    "key": "1974_POL_SWE",
+    "teamA": "POL",
+    "teamB": "SWE"
+  },
+  {
+    "year": 1974,
+    "round": "qf",
+    "key": "1974_NED_ARG",
+    "teamA": "NED",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1974,
+    "round": "qf",
+    "key": "1974_BRA_GDR",
+    "teamA": "BRA",
+    "teamB": "GDR"
+  },
+  {
+    "year": 1974,
+    "round": "sf",
+    "key": "1974_FRG_POL",
+    "teamA": "FRG",
+    "teamB": "POL"
+  },
+  {
+    "year": 1974,
+    "round": "sf",
+    "key": "1974_NED_BRA",
+    "teamA": "NED",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1974,
+    "round": "final",
+    "key": "1974_FRG_NED",
+    "teamA": "FRG",
+    "teamB": "NED"
+  },
+  {
+    "year": 1978,
+    "round": "qf",
+    "key": "1978_ARG_POL",
+    "teamA": "ARG",
+    "teamB": "POL"
+  },
+  {
+    "year": 1978,
+    "round": "qf",
+    "key": "1978_BRA_PER",
+    "teamA": "BRA",
+    "teamB": "PER"
+  },
+  {
+    "year": 1978,
+    "round": "qf",
+    "key": "1978_NED_AUT",
+    "teamA": "NED",
+    "teamB": "AUT"
+  },
+  {
+    "year": 1978,
+    "round": "qf",
+    "key": "1978_ITA_FRG",
+    "teamA": "ITA",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1978,
+    "round": "sf",
+    "key": "1978_ARG_BRA",
+    "teamA": "ARG",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1978,
+    "round": "sf",
+    "key": "1978_NED_ITA",
+    "teamA": "NED",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1978,
+    "round": "final",
+    "key": "1978_ARG_NED",
+    "teamA": "ARG",
+    "teamB": "NED"
+  },
+  {
+    "year": 1982,
+    "round": "qf",
+    "key": "1982_POL_BEL",
+    "teamA": "POL",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1982,
+    "round": "qf",
+    "key": "1982_ITA_ARG",
+    "teamA": "ITA",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1982,
+    "round": "qf",
+    "key": "1982_FRG_ESP",
+    "teamA": "FRG",
+    "teamB": "ESP"
+  },
+  {
+    "year": 1982,
+    "round": "qf",
+    "key": "1982_FRA_NIR",
+    "teamA": "FRA",
+    "teamB": "NIR"
+  },
+  {
+    "year": 1982,
+    "round": "sf",
+    "key": "1982_POL_ITA",
+    "teamA": "POL",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1982,
+    "round": "sf",
+    "key": "1982_FRG_FRA",
+    "teamA": "FRG",
+    "teamB": "FRA"
+  },
+  {
+    "year": 1982,
+    "round": "final",
+    "key": "1982_ITA_FRG",
+    "teamA": "ITA",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_FRA_ITA",
+    "teamA": "FRA",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_BRA_POL",
+    "teamA": "BRA",
+    "teamB": "POL"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_FRG_MAR",
+    "teamA": "FRG",
+    "teamB": "MAR"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_MEX_BUL",
+    "teamA": "MEX",
+    "teamB": "BUL"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_ARG_URU",
+    "teamA": "ARG",
+    "teamB": "URU"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_ENG_PAR",
+    "teamA": "ENG",
+    "teamB": "PAR"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_BEL_URS",
+    "teamA": "BEL",
+    "teamB": "URS"
+  },
+  {
+    "year": 1986,
+    "round": "r16",
+    "key": "1986_ESP_DEN",
+    "teamA": "ESP",
+    "teamB": "DEN"
+  },
+  {
+    "year": 1986,
+    "round": "qf",
+    "key": "1986_FRA_BRA",
+    "teamA": "FRA",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1986,
+    "round": "qf",
+    "key": "1986_FRG_MEX",
+    "teamA": "FRG",
+    "teamB": "MEX"
+  },
+  {
+    "year": 1986,
+    "round": "qf",
+    "key": "1986_ARG_ENG",
+    "teamA": "ARG",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1986,
+    "round": "qf",
+    "key": "1986_BEL_ESP",
+    "teamA": "BEL",
+    "teamB": "ESP"
+  },
+  {
+    "year": 1986,
+    "round": "sf",
+    "key": "1986_FRA_FRG",
+    "teamA": "FRA",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1986,
+    "round": "sf",
+    "key": "1986_ARG_BEL",
+    "teamA": "ARG",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1986,
+    "round": "final",
+    "key": "1986_FRG_ARG",
+    "teamA": "FRG",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_ARG_BRA",
+    "teamA": "ARG",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_YUG_ESP",
+    "teamA": "YUG",
+    "teamB": "ESP"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_ITA_URU",
+    "teamA": "ITA",
+    "teamB": "URU"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_IRL_ROU",
+    "teamA": "IRL",
+    "teamB": "ROU"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_FRG_NED",
+    "teamA": "FRG",
+    "teamB": "NED"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_TCH_CRC",
+    "teamA": "TCH",
+    "teamB": "CRC"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_ENG_BEL",
+    "teamA": "ENG",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1990,
+    "round": "r16",
+    "key": "1990_CMR_COL",
+    "teamA": "CMR",
+    "teamB": "COL"
+  },
+  {
+    "year": 1990,
+    "round": "qf",
+    "key": "1990_ARG_YUG",
+    "teamA": "ARG",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1990,
+    "round": "qf",
+    "key": "1990_ITA_IRL",
+    "teamA": "ITA",
+    "teamB": "IRL"
+  },
+  {
+    "year": 1990,
+    "round": "qf",
+    "key": "1990_FRG_TCH",
+    "teamA": "FRG",
+    "teamB": "TCH"
+  },
+  {
+    "year": 1990,
+    "round": "qf",
+    "key": "1990_ENG_CMR",
+    "teamA": "ENG",
+    "teamB": "CMR"
+  },
+  {
+    "year": 1990,
+    "round": "sf",
+    "key": "1990_ARG_ITA",
+    "teamA": "ARG",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1990,
+    "round": "sf",
+    "key": "1990_FRG_ENG",
+    "teamA": "FRG",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1990,
+    "round": "final",
+    "key": "1990_ARG_FRG",
+    "teamA": "ARG",
+    "teamB": "FRG"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_NGA_ITA",
+    "teamA": "NGA",
+    "teamB": "ITA"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_ESP_SUI",
+    "teamA": "ESP",
+    "teamB": "SUI"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_MEX_BUL",
+    "teamA": "MEX",
+    "teamB": "BUL"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_GER_BEL",
+    "teamA": "GER",
+    "teamB": "BEL"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_NED_IRL",
+    "teamA": "NED",
+    "teamB": "IRL"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_BRA_USA",
+    "teamA": "BRA",
+    "teamB": "USA"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_ROU_ARG",
+    "teamA": "ROU",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1994,
+    "round": "r16",
+    "key": "1994_SWE_KSA",
+    "teamA": "SWE",
+    "teamB": "KSA"
+  },
+  {
+    "year": 1994,
+    "round": "qf",
+    "key": "1994_ITA_ESP",
+    "teamA": "ITA",
+    "teamB": "ESP"
+  },
+  {
+    "year": 1994,
+    "round": "qf",
+    "key": "1994_BUL_GER",
+    "teamA": "BUL",
+    "teamB": "GER"
+  },
+  {
+    "year": 1994,
+    "round": "qf",
+    "key": "1994_NED_BRA",
+    "teamA": "NED",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1994,
+    "round": "qf",
+    "key": "1994_ROU_SWE",
+    "teamA": "ROU",
+    "teamB": "SWE"
+  },
+  {
+    "year": 1994,
+    "round": "sf",
+    "key": "1994_ITA_BUL",
+    "teamA": "ITA",
+    "teamB": "BUL"
+  },
+  {
+    "year": 1994,
+    "round": "sf",
+    "key": "1994_BRA_SWE",
+    "teamA": "BRA",
+    "teamB": "SWE"
+  },
+  {
+    "year": 1994,
+    "round": "final",
+    "key": "1994_ITA_BRA",
+    "teamA": "ITA",
+    "teamB": "BRA"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_BRA_CHI",
+    "teamA": "BRA",
+    "teamB": "CHI"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_DEN_NGA",
+    "teamA": "DEN",
+    "teamB": "NGA"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_NED_YUG",
+    "teamA": "NED",
+    "teamB": "YUG"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_ARG_ENG",
+    "teamA": "ARG",
+    "teamB": "ENG"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_ITA_NOR",
+    "teamA": "ITA",
+    "teamB": "NOR"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_FRA_PAR",
+    "teamA": "FRA",
+    "teamB": "PAR"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_GER_MEX",
+    "teamA": "GER",
+    "teamB": "MEX"
+  },
+  {
+    "year": 1998,
+    "round": "r16",
+    "key": "1998_ROU_CRO",
+    "teamA": "ROU",
+    "teamB": "CRO"
+  },
+  {
+    "year": 1998,
+    "round": "qf",
+    "key": "1998_BRA_DEN",
+    "teamA": "BRA",
+    "teamB": "DEN"
+  },
+  {
+    "year": 1998,
+    "round": "qf",
+    "key": "1998_NED_ARG",
+    "teamA": "NED",
+    "teamB": "ARG"
+  },
+  {
+    "year": 1998,
+    "round": "qf",
+    "key": "1998_ITA_FRA",
+    "teamA": "ITA",
+    "teamB": "FRA"
+  },
+  {
+    "year": 1998,
+    "round": "qf",
+    "key": "1998_GER_CRO",
+    "teamA": "GER",
+    "teamB": "CRO"
+  },
+  {
+    "year": 1998,
+    "round": "sf",
+    "key": "1998_BRA_NED",
+    "teamA": "BRA",
+    "teamB": "NED"
+  },
+  {
+    "year": 1998,
+    "round": "sf",
+    "key": "1998_FRA_CRO",
+    "teamA": "FRA",
+    "teamB": "CRO"
+  },
+  {
+    "year": 1998,
+    "round": "final",
+    "key": "1998_BRA_FRA",
+    "teamA": "BRA",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_GER_PAR",
+    "teamA": "GER",
+    "teamB": "PAR"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_USA_MEX",
+    "teamA": "USA",
+    "teamB": "MEX"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_ESP_IRL",
+    "teamA": "ESP",
+    "teamB": "IRL"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_KOR_ITA",
+    "teamA": "KOR",
+    "teamB": "ITA"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_ENG_DEN",
+    "teamA": "ENG",
+    "teamB": "DEN"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_BRA_BEL",
+    "teamA": "BRA",
+    "teamB": "BEL"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_SEN_SWE",
+    "teamA": "SEN",
+    "teamB": "SWE"
+  },
+  {
+    "year": 2002,
+    "round": "r16",
+    "key": "2002_TUR_JPN",
+    "teamA": "TUR",
+    "teamB": "JPN"
+  },
+  {
+    "year": 2002,
+    "round": "qf",
+    "key": "2002_GER_USA",
+    "teamA": "GER",
+    "teamB": "USA"
+  },
+  {
+    "year": 2002,
+    "round": "qf",
+    "key": "2002_ESP_KOR",
+    "teamA": "ESP",
+    "teamB": "KOR"
+  },
+  {
+    "year": 2002,
+    "round": "qf",
+    "key": "2002_ENG_BRA",
+    "teamA": "ENG",
+    "teamB": "BRA"
+  },
+  {
+    "year": 2002,
+    "round": "qf",
+    "key": "2002_SEN_TUR",
+    "teamA": "SEN",
+    "teamB": "TUR"
+  },
+  {
+    "year": 2002,
+    "round": "sf",
+    "key": "2002_GER_KOR",
+    "teamA": "GER",
+    "teamB": "KOR"
+  },
+  {
+    "year": 2002,
+    "round": "sf",
+    "key": "2002_BRA_TUR",
+    "teamA": "BRA",
+    "teamB": "TUR"
+  },
+  {
+    "year": 2002,
+    "round": "final",
+    "key": "2002_GER_BRA",
+    "teamA": "GER",
+    "teamB": "BRA"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_GER_SWE",
+    "teamA": "GER",
+    "teamB": "SWE"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_ARG_MEX",
+    "teamA": "ARG",
+    "teamB": "MEX"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_ITA_AUS",
+    "teamA": "ITA",
+    "teamB": "AUS"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_SUI_UKR",
+    "teamA": "SUI",
+    "teamB": "UKR"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_ENG_ECU",
+    "teamA": "ENG",
+    "teamB": "ECU"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_POR_NED",
+    "teamA": "POR",
+    "teamB": "NED"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_BRA_GHA",
+    "teamA": "BRA",
+    "teamB": "GHA"
+  },
+  {
+    "year": 2006,
+    "round": "r16",
+    "key": "2006_ESP_FRA",
+    "teamA": "ESP",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2006,
+    "round": "qf",
+    "key": "2006_GER_ARG",
+    "teamA": "GER",
+    "teamB": "ARG"
+  },
+  {
+    "year": 2006,
+    "round": "qf",
+    "key": "2006_ITA_UKR",
+    "teamA": "ITA",
+    "teamB": "UKR"
+  },
+  {
+    "year": 2006,
+    "round": "qf",
+    "key": "2006_ENG_POR",
+    "teamA": "ENG",
+    "teamB": "POR"
+  },
+  {
+    "year": 2006,
+    "round": "qf",
+    "key": "2006_BRA_FRA",
+    "teamA": "BRA",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2006,
+    "round": "sf",
+    "key": "2006_GER_ITA",
+    "teamA": "GER",
+    "teamB": "ITA"
+  },
+  {
+    "year": 2006,
+    "round": "sf",
+    "key": "2006_POR_FRA",
+    "teamA": "POR",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2006,
+    "round": "final",
+    "key": "2006_ITA_FRA",
+    "teamA": "ITA",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_URU_KOR",
+    "teamA": "URU",
+    "teamB": "KOR"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_USA_GHA",
+    "teamA": "USA",
+    "teamB": "GHA"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_NED_SVK",
+    "teamA": "NED",
+    "teamB": "SVK"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_BRA_CHI",
+    "teamA": "BRA",
+    "teamB": "CHI"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_GER_ENG",
+    "teamA": "GER",
+    "teamB": "ENG"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_ARG_MEX",
+    "teamA": "ARG",
+    "teamB": "MEX"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_PAR_JPN",
+    "teamA": "PAR",
+    "teamB": "JPN"
+  },
+  {
+    "year": 2010,
+    "round": "r16",
+    "key": "2010_ESP_POR",
+    "teamA": "ESP",
+    "teamB": "POR"
+  },
+  {
+    "year": 2010,
+    "round": "qf",
+    "key": "2010_URU_GHA",
+    "teamA": "URU",
+    "teamB": "GHA"
+  },
+  {
+    "year": 2010,
+    "round": "qf",
+    "key": "2010_NED_BRA",
+    "teamA": "NED",
+    "teamB": "BRA"
+  },
+  {
+    "year": 2010,
+    "round": "qf",
+    "key": "2010_GER_ARG",
+    "teamA": "GER",
+    "teamB": "ARG"
+  },
+  {
+    "year": 2010,
+    "round": "qf",
+    "key": "2010_PAR_ESP",
+    "teamA": "PAR",
+    "teamB": "ESP"
+  },
+  {
+    "year": 2010,
+    "round": "sf",
+    "key": "2010_URU_NED",
+    "teamA": "URU",
+    "teamB": "NED"
+  },
+  {
+    "year": 2010,
+    "round": "sf",
+    "key": "2010_GER_ESP",
+    "teamA": "GER",
+    "teamB": "ESP"
+  },
+  {
+    "year": 2010,
+    "round": "final",
+    "key": "2010_NED_ESP",
+    "teamA": "NED",
+    "teamB": "ESP"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_BRA_CHI",
+    "teamA": "BRA",
+    "teamB": "CHI"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_COL_URU",
+    "teamA": "COL",
+    "teamB": "URU"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_FRA_NGA",
+    "teamA": "FRA",
+    "teamB": "NGA"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_GER_ALG",
+    "teamA": "GER",
+    "teamB": "ALG"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_NED_MEX",
+    "teamA": "NED",
+    "teamB": "MEX"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_CRC_GRE",
+    "teamA": "CRC",
+    "teamB": "GRE"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_ARG_SUI",
+    "teamA": "ARG",
+    "teamB": "SUI"
+  },
+  {
+    "year": 2014,
+    "round": "r16",
+    "key": "2014_BEL_USA",
+    "teamA": "BEL",
+    "teamB": "USA"
+  },
+  {
+    "year": 2014,
+    "round": "qf",
+    "key": "2014_BRA_COL",
+    "teamA": "BRA",
+    "teamB": "COL"
+  },
+  {
+    "year": 2014,
+    "round": "qf",
+    "key": "2014_FRA_GER",
+    "teamA": "FRA",
+    "teamB": "GER"
+  },
+  {
+    "year": 2014,
+    "round": "qf",
+    "key": "2014_NED_CRC",
+    "teamA": "NED",
+    "teamB": "CRC"
+  },
+  {
+    "year": 2014,
+    "round": "qf",
+    "key": "2014_ARG_BEL",
+    "teamA": "ARG",
+    "teamB": "BEL"
+  },
+  {
+    "year": 2014,
+    "round": "sf",
+    "key": "2014_BRA_GER",
+    "teamA": "BRA",
+    "teamB": "GER"
+  },
+  {
+    "year": 2014,
+    "round": "sf",
+    "key": "2014_NED_ARG",
+    "teamA": "NED",
+    "teamB": "ARG"
+  },
+  {
+    "year": 2014,
+    "round": "final",
+    "key": "2014_GER_ARG",
+    "teamA": "GER",
+    "teamB": "ARG"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_URU_POR",
+    "teamA": "URU",
+    "teamB": "POR"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_FRA_ARG",
+    "teamA": "FRA",
+    "teamB": "ARG"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_BRA_MEX",
+    "teamA": "BRA",
+    "teamB": "MEX"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_BEL_JPN",
+    "teamA": "BEL",
+    "teamB": "JPN"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_SWE_SUI",
+    "teamA": "SWE",
+    "teamB": "SUI"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_COL_ENG",
+    "teamA": "COL",
+    "teamB": "ENG"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_ESP_RUS",
+    "teamA": "ESP",
+    "teamB": "RUS"
+  },
+  {
+    "year": 2018,
+    "round": "r16",
+    "key": "2018_CRO_DEN",
+    "teamA": "CRO",
+    "teamB": "DEN"
+  },
+  {
+    "year": 2018,
+    "round": "qf",
+    "key": "2018_URU_FRA",
+    "teamA": "URU",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2018,
+    "round": "qf",
+    "key": "2018_BRA_BEL",
+    "teamA": "BRA",
+    "teamB": "BEL"
+  },
+  {
+    "year": 2018,
+    "round": "qf",
+    "key": "2018_SWE_ENG",
+    "teamA": "SWE",
+    "teamB": "ENG"
+  },
+  {
+    "year": 2018,
+    "round": "qf",
+    "key": "2018_RUS_CRO",
+    "teamA": "RUS",
+    "teamB": "CRO"
+  },
+  {
+    "year": 2018,
+    "round": "sf",
+    "key": "2018_FRA_BEL",
+    "teamA": "FRA",
+    "teamB": "BEL"
+  },
+  {
+    "year": 2018,
+    "round": "sf",
+    "key": "2018_ENG_CRO",
+    "teamA": "ENG",
+    "teamB": "CRO"
+  },
+  {
+    "year": 2018,
+    "round": "final",
+    "key": "2018_FRA_CRO",
+    "teamA": "FRA",
+    "teamB": "CRO"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_NED_USA",
+    "teamA": "NED",
+    "teamB": "USA"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_ARG_AUS",
+    "teamA": "ARG",
+    "teamB": "AUS"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_JPN_CRO",
+    "teamA": "JPN",
+    "teamB": "CRO"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_BRA_KOR",
+    "teamA": "BRA",
+    "teamB": "KOR"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_MAR_ESP",
+    "teamA": "MAR",
+    "teamB": "ESP"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_POR_SUI",
+    "teamA": "POR",
+    "teamB": "SUI"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_ENG_SEN",
+    "teamA": "ENG",
+    "teamB": "SEN"
+  },
+  {
+    "year": 2022,
+    "round": "r16",
+    "key": "2022_FRA_POL",
+    "teamA": "FRA",
+    "teamB": "POL"
+  },
+  {
+    "year": 2022,
+    "round": "qf",
+    "key": "2022_NED_ARG",
+    "teamA": "NED",
+    "teamB": "ARG"
+  },
+  {
+    "year": 2022,
+    "round": "qf",
+    "key": "2022_CRO_BRA",
+    "teamA": "CRO",
+    "teamB": "BRA"
+  },
+  {
+    "year": 2022,
+    "round": "qf",
+    "key": "2022_MAR_POR",
+    "teamA": "MAR",
+    "teamB": "POR"
+  },
+  {
+    "year": 2022,
+    "round": "qf",
+    "key": "2022_ENG_FRA",
+    "teamA": "ENG",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2022,
+    "round": "sf",
+    "key": "2022_ARG_CRO",
+    "teamA": "ARG",
+    "teamB": "CRO"
+  },
+  {
+    "year": 2022,
+    "round": "sf",
+    "key": "2022_MAR_FRA",
+    "teamA": "MAR",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2022,
+    "round": "final",
+    "key": "2022_ARG_FRA",
+    "teamA": "ARG",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_GER_PAR",
+    "teamA": "GER",
+    "teamB": "PAR"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_FRA_SWE",
+    "teamA": "FRA",
+    "teamB": "SWE"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_RSA_CAN",
+    "teamA": "RSA",
+    "teamB": "CAN"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_NED_MAR",
+    "teamA": "NED",
+    "teamB": "MAR"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_BRA_JPN",
+    "teamA": "BRA",
+    "teamB": "JPN"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_CIV_NOR",
+    "teamA": "CIV",
+    "teamB": "NOR"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_MEX_ECU",
+    "teamA": "MEX",
+    "teamB": "ECU"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_ENG_COD",
+    "teamA": "ENG",
+    "teamB": "COD"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_POR_CRO",
+    "teamA": "POR",
+    "teamB": "CRO"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_ESP_AUT",
+    "teamA": "ESP",
+    "teamB": "AUT"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_USA_BIH",
+    "teamA": "USA",
+    "teamB": "BIH"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_BEL_SEN",
+    "teamA": "BEL",
+    "teamB": "SEN"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_ARG_CPV",
+    "teamA": "ARG",
+    "teamB": "CPV"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_AUS_EGY",
+    "teamA": "AUS",
+    "teamB": "EGY"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_SUI_ALG",
+    "teamA": "SUI",
+    "teamB": "ALG"
+  },
+  {
+    "year": 2026,
+    "round": "r32",
+    "key": "2026_COL_GHA",
+    "teamA": "COL",
+    "teamB": "GHA"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_PAR_FRA",
+    "teamA": "PAR",
+    "teamB": "FRA"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_CAN_MAR",
+    "teamA": "CAN",
+    "teamB": "MAR"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_BRA_NOR",
+    "teamA": "BRA",
+    "teamB": "NOR"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_MEX_ENG",
+    "teamA": "MEX",
+    "teamB": "ENG"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_POR_ESP",
+    "teamA": "POR",
+    "teamB": "ESP"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_USA_BEL",
+    "teamA": "USA",
+    "teamB": "BEL"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_ARG_EGY",
+    "teamA": "ARG",
+    "teamB": "EGY"
+  }
+]

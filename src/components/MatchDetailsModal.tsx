@@ -5,6 +5,7 @@ import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "../constants";
 import { getScorers } from "../scorers";
 import { getStats } from "../stats";
 import { getStats2026 } from "../stats2026";
+import { getHighlights } from "../highlights";
 import MatchGoals from "./MatchGoals";
 
 interface MatchDetailsModalProps {
@@ -92,6 +93,7 @@ export default function MatchDetailsModal({
   const CLOSE_MS = 250;
   const [rendered, setRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -141,6 +143,9 @@ export default function MatchDetailsModal({
   // Resolve match stats: historical from the generated jfjelstul set, 2026 from
   // the ESPN-sourced set.
   const stats = getStats(data._year, ta, tb) ?? getStats2026(data._year, ta, tb);
+
+  // Highlights (YouTube embed — 2026 only for now).
+  const highlight = getHighlights(data._year, ta, tb);
 
   const notes = getMatchNotes(m);
 
@@ -323,6 +328,61 @@ export default function MatchDetailsModal({
               </div>
             )}
           </div>
+
+          {/* Match highlights — YouTube embed (2026 only for now). */}
+          {played && highlight && (
+            <div className="relative overflow-hidden rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6">
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+              <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
+                Highlights
+              </div>
+              {showVideo ? (
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-brand-line bg-black">
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={`https://www.youtube.com/embed/${highlight.videoId}?autoplay=1&rel=0`}
+                    title={highlight.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowVideo(true)}
+                  className="relative w-full aspect-video rounded-xl overflow-hidden border border-brand-line bg-black cursor-pointer group"
+                >
+                  {highlight.thumbnail ? (
+                    <img
+                      src={highlight.thumbnail}
+                      alt={highlight.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity group-hover:opacity-80"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-brand-steel/20" />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-brand-danger/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <svg width="22" height="24" viewBox="0 0 22 24" fill="white">
+                        <path d="M0 0v24l22-12z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-2">
+                    <p className="text-white text-[11px] leading-snug line-clamp-2">{highlight.title}</p>
+                  </div>
+                </button>
+              )}
+              <a
+                href={`https://www.youtube.com/watch?v=${highlight.videoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-brand-muted hover:text-brand-gold transition-colors font-mono"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Watch on YouTube
+              </a>
+            </div>
+          )}
 
           {/* Match statistics — comparison bars (borrowed from scoreboard modal).
               Hidden when goals are the only stat, since that just restates the score. */}
