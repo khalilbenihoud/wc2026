@@ -907,7 +907,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       M(1, 4, 1, null, null, [["Malik Tillman 31'"], ["Charles De Ketelaere 9'", "Charles De Ketelaere 33'", "Hans Vanaken 57'", "Romelu Lukaku 90+3'"]]),
       // Argentina 3–2 Egypt (R16, Jul 7) — Argentina advance after a 2-goal comeback
       M(3, 2, 0, null, null, [["Cristian Romero 79'", "Lionel Messi 83'", "Enzo Fernández 90+2'"], ["Yasser Ibrahim 15'", "Mostafa Zico 67'"]]),
-      null, // SUI·COL — not played yet
+      // Switzerland 0–0 Colombia (R16, Jul 8) — SUI wins 4-3 on pens
+      M(0, 0, 0, "4-3", "a.e.t.", null),
     ],
     qf: null,
     sf: null,
