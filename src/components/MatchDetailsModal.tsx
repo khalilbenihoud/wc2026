@@ -355,6 +355,7 @@ export default function MatchDetailsModal({
                     <img
                       src={highlight.thumbnail}
                       alt={highlight.title}
+                      referrerPolicy="no-referrer"
                       className="absolute inset-0 w-full h-full object-cover transition-opacity group-hover:opacity-80"
                     />
                   ) : (
