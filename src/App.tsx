@@ -7,6 +7,7 @@ import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
+import BracketList from "./components/BracketList";
 import MatchDetailsModal from "./components/MatchDetailsModal";
 import Splash from "./components/Splash";
 import PlayerAvatar from "./components/PlayerAvatar";
@@ -14,7 +15,6 @@ import HeaderMeta from "./components/HeaderMeta";
 import HeaderMetaMobile from "./components/HeaderMetaMobile";
 import MobileTimeline from "./components/MobileTimeline";
 import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
-import BracketList from "./components/BracketList";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -228,6 +228,9 @@ export default function App() {
   }, [lightMode]);
 
   const [activeYear, setActiveYear] = useState<number>(2026);
+  const [viewMode, setViewMode] = useState<"radial" | "list">(
+    () => typeof window !== "undefined" && window.innerWidth < 768 ? "list" : "radial"
+  );
 
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
@@ -458,6 +461,8 @@ export default function App() {
             </p>
           </div>
 
+          {/* View toggle */}
+
           {/* Mobile summary — the desktop header is hidden on phones, so surface
               the same host / champion / awards here, in the chosen variant. */}
           <HeaderMetaMobile
@@ -503,41 +508,56 @@ export default function App() {
             editionsCount={editionsCount}
           />
 
-          {/* Bracket Stage — radial on desktop, list on mobile */}
-          <div className="hidden md:flex stage-wrap flex-1 min-h-0 justify-center items-center p-1 w-full max-w-[680px] mx-auto overflow-hidden">
-            <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
-              <RadialBracket
-                data={currentData}
-                analysis={currentAnalysis}
-                onSelectMatch={handleSelectMatch}
-                hoveredLeaf={hoveredLeaf}
-                setHoveredLeaf={setHoveredLeaf}
-                onShowTooltip={handleShowTooltip}
-                variant="full"
-              />
+          {/* Bracket Stage */}
+          {viewMode === "radial" ? (
+            <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto max-md:overflow-hidden">
+              <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
+                <RadialBracket
+                  data={currentData}
+                  analysis={currentAnalysis}
+                  onSelectMatch={handleSelectMatch}
+                  hoveredLeaf={hoveredLeaf}
+                  setHoveredLeaf={setHoveredLeaf}
+                  onShowTooltip={handleShowTooltip}
+                  variant="full"
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex md:hidden flex-1 w-full min-h-0 flex-col">
-            <div className="flex-1 min-h-0 overflow-hidden">
+          ) : (
+            <div className="flex-1 w-full min-h-0">
               <BracketList
                 data={currentData}
                 analysis={currentAnalysis}
                 onSelectMatch={handleSelectMatch}
               />
             </div>
-          </div>
+          )}
 
-          {/* Radial Legend / Interactive Hints */}
-          <div className="legend flex-none max-md:hidden flex gap-6 justify-center flex-wrap items-center text-brand-muted font-mono text-[11px] tracking-wider uppercase mt-1 mb-4 relative z-10 max-md:animate-none md:animate-[riseIn_0.8s_ease_0.5s_both]">
-            <div className="item flex items-center gap-2">
-              <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
-              Hover or tap flags to trace runs
+          {/* Bottom bar: view toggle + legend, gradient fade from bottom */}
+          <div className="flex-none w-full bg-gradient-to-b from-brand-bg via-brand-bg to-transparent pt-3 pb-6">
+            <div className="flex justify-center mb-1">
+              <button
+                onClick={() => setViewMode(viewMode === "radial" ? "list" : "radial")}
+                className="text-[10px] font-mono tracking-wider uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                {viewMode === "radial" ? "☰ List view" : "◉ Radial view"}
+              </button>
             </div>
-            <div className="item flex items-center gap-2">
-              <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
-              Winners advance to center
+            <div className="flex gap-6 justify-center flex-wrap items-center text-brand-muted font-mono text-[11px] tracking-wider uppercase relative z-10">
+              {viewMode === "radial" ? (
+                <>
+                  <div className="item flex items-center gap-2 max-md:hidden">
+                    <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
+                    Hover or tap flags to trace runs
+                  </div>
+                  <div className="item flex items-center gap-2 max-md:hidden">
+                    <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
+                    Winners advance to center
+                  </div>
+                </>
+              ) : null}
+              <ChampionsTrigger onClick={openChampions} />
             </div>
-            <ChampionsTrigger onClick={openChampions} />
           </div>
         </main>
       </div>

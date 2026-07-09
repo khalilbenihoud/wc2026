@@ -55,10 +55,10 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
   const current = rounds.find((r) => r.key === activeRound);
 
   return (
-    <div className="w-full h-full min-h-0 flex flex-col pb-24">
+    <div className="w-full h-full min-h-0 flex flex-col pb-24 relative">
       {/* Segmented control */}
       {rounds.length > 1 && (
-        <div className="flex-none px-4 pt-3 pb-3 overflow-x-auto">
+        <div className="flex-none px-4 pt-3 pb-3 overflow-x-auto md:px-0 md:mx-auto md:w-full md:max-w-[560px]">
           <div className="flex items-center gap-1 p-0.5 rounded-lg bg-brand-panel border border-brand-line/60 w-fit mx-auto">
             {rounds.map((r) => (
               <button
@@ -78,9 +78,11 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
       )}
 
       {/* Matches for the active round */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 max-md:px-4 md:px-0 md:mx-auto md:w-full md:max-w-[560px]"
+        style={{ maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)" }}
+      >
         {current && (
-          <div className="space-y-2 pb-6">
+          <div className="space-y-2 pb-12">
             {current.matches.map((m, i) => {
               const matchData = data[current.key as "r16" | "qf" | "sf" | "final"]?.[m.idx];
               const played = matchData?.s != null;
