@@ -533,8 +533,8 @@ export default function App() {
             </div>
           )}
 
-          {/* Bottom bar: view toggle + legend, gradient fade from bottom */}
-          <div className="flex-none w-full bg-gradient-to-b from-brand-bg via-brand-bg to-transparent pt-3 pb-6">
+          {/* View toggle + legend */}
+          <div className="flex-none w-full pt-3 pb-6">
             <div className="flex justify-center mb-1">
               <button
                 onClick={() => setViewMode(viewMode === "radial" ? "list" : "radial")}

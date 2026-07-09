@@ -78,9 +78,7 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
       )}
 
       {/* Matches for the active round */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 max-md:px-4 md:px-0 md:mx-auto md:w-full md:max-w-[560px]"
-        style={{ maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)" }}
-      >
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 max-md:px-4 md:px-0 md:mx-auto md:w-full md:max-w-[560px]">
         {current && (
           <div className="space-y-2 pb-12">
             {current.matches.map((m, i) => {
