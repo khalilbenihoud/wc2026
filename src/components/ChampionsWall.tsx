@@ -27,13 +27,77 @@ function StarRow({ n, max = 5 }: { n: number; max?: number }) {
   );
 }
 
+// Hero background image per nation — an editorial portrait sits behind the
+// winner block when one is available. The vendor in a Brasil kit already carries
+// five stars on his crest — the same total his nation has on the trophy.
+const HERO_IMAGE: Record<string, string> = {
+  BRA: "/brazil-hero.jpg",
+};
+
 // Editorial hall-of-fame: winner enshrined between gradient rules, rest as a
 // numbered ledger with gradient hairlines between rows.
 function Ledger({ list }: { list: Champion[] }) {
   const [first, ...rest] = list;
+  const heroSrc = first ? HERO_IMAGE[first.code] : undefined;
   return (
     <div>
-      {first && (
+      {first && heroSrc && (
+        <div className="relative overflow-hidden -mx-6 -mt-6 mb-5 min-h-[320px] md:min-h-[400px]">
+          <img
+            src={heroSrc}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover object-[75%_center] select-none pointer-events-none"
+          />
+          {/* Heavy dark scrim on the left where the text pools, fading right so
+              the subject's jersey and CBF crest stay luminous. */}
+          <span
+            aria-hidden
+            className="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/90 via-black/70 to-transparent"
+          />
+          {/* Vertical scrim so the top and bottom read as a framed spread. */}
+          <span
+            aria-hidden
+            className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-transparent to-black/50"
+          />
+          <span
+            aria-hidden
+            className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/60 to-transparent"
+          />
+          <span
+            aria-hidden
+            className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/60 to-transparent"
+          />
+          <div className="relative h-full flex items-end min-h-[320px] md:min-h-[400px] pt-12 pb-8 md:pb-10 pl-6 md:pl-10 pr-6">
+            <div className="max-w-[58%] text-left">
+              <div className="font-mono text-[10px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">
+                Champion of Champions
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl leading-none select-none">{first.flag}</span>
+                <span className="font-unbounded font-bold text-3xl md:text-4xl text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+                  {first.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StarRow n={first.stars} max={first.stars} />
+                <span className="font-mono text-[10px] tracking-widest uppercase text-white/75 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
+                  · Latest {first.latestWin}
+                </span>
+              </div>
+            </div>
+          </div>
+          <a
+            href="https://unsplash.com/photos/man-wearing-cap-and-jersey-aANIrjIFRKE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-2 right-3 font-mono text-[9px] tracking-[0.2em] uppercase text-white/50 hover:text-white/90 transition-colors drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]"
+          >
+            Photo · Unsplash
+          </a>
+        </div>
+      )}
+      {first && !heroSrc && (
         <div className="relative py-6 mb-5 text-center">
           <span
             aria-hidden
