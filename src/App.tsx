@@ -14,6 +14,7 @@ import HeaderMeta from "./components/HeaderMeta";
 import HeaderMetaMobile from "./components/HeaderMetaMobile";
 import MobileTimeline from "./components/MobileTimeline";
 import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
+import BracketList from "./components/BracketList";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -418,10 +419,7 @@ export default function App() {
       {!splashDone && <Splash onEnter={handleSplashEnter} exiting={splashExiting} />}
 
       <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
-        {/* Mobile notice — the radial bracket needs room to breathe */}
-      <div className="flex-none md:hidden text-center text-[10px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
-        Best viewed on desktop
-      </div>
+
 
       {/* Dynamic Background Layout Frame */}
       <div className="app relative grid grid-cols-1 md:grid-cols-[300px_1fr] md:min-h-0 md:flex-1 items-stretch">
@@ -432,8 +430,8 @@ export default function App() {
         />
 
         {/* Left Rail: Brand + Timeline */}
-        <aside className="rail relative z-20 flex flex-col md:min-h-0 p-4 pt-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
-          <div className="brand relative mb-3 md:mb-6 max-md:text-center">
+        <aside className="rail relative z-20 flex flex-col md:min-h-0 px-4 pt-4 pb-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both] max-md:border-b border-brand-line/40">
+          <div className="brand relative mb-4 md:mb-6 max-md:text-center">
             {/* Light/dark toggle — hidden via SHOW_THEME_TOGGLE, code kept intact */}
             {SHOW_THEME_TOGGLE && (
               <button
@@ -445,7 +443,7 @@ export default function App() {
               </button>
             )}
 
-            <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold mb-3.5">
+            <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold md:mb-3.5 max-md:mb-2">
               FIFA World Cup Archive
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
@@ -453,7 +451,7 @@ export default function App() {
                 The Road to Glory
               </span>
             </h1>
-            <p className="sub text-brand-muted text-xs mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
+            <p className="sub text-brand-muted text-xs mt-2 md:mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
               Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
           </div>
@@ -474,7 +472,7 @@ export default function App() {
             ggPhoto={ggPhoto}
           />
 
-          <div className="md:hidden flex justify-center mb-3">
+          <div className="md:hidden flex justify-center mb-2">
             <ChampionsTrigger onClick={openChampions} />
           </div>
 
@@ -486,7 +484,7 @@ export default function App() {
         </aside>
 
         {/* Right Main Panel: Interactive Bracket */}
-        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center pt-9 px-0 md:px-6 pb-28 md:pb-4 max-md:overflow-hidden">
+        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center md:pt-9 px-0 md:px-6 pb-28 md:pb-4">
           {/* Header Metadata */}
           <HeaderMeta
             year={activeYear}
@@ -503,9 +501,9 @@ export default function App() {
             editionsCount={editionsCount}
           />
 
-          {/* Svg Radial Stage */}
-          <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto">
-            <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] max-md:scale-[1.15] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
+          {/* Bracket Stage — radial on desktop, list on mobile */}
+          <div className="hidden md:flex stage-wrap flex-1 min-h-0 justify-center items-center p-1 w-full max-w-[680px] mx-auto overflow-hidden">
+            <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
               <RadialBracket
                 data={currentData}
                 analysis={currentAnalysis}
@@ -514,6 +512,15 @@ export default function App() {
                 setHoveredLeaf={setHoveredLeaf}
                 onShowTooltip={handleShowTooltip}
                 variant="full"
+              />
+            </div>
+          </div>
+          <div className="flex md:hidden flex-1 w-full min-h-0 flex-col">
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <BracketList
+                data={currentData}
+                analysis={currentAnalysis}
+                onSelectMatch={handleSelectMatch}
               />
             </div>
           </div>

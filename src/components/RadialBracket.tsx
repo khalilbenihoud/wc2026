@@ -19,6 +19,8 @@ interface RadialBracketProps {
   // "classic" = the original 16-slot wheel (8-team tournaments fill only half).
   // "full" = a dedicated full-circle 8-team layout for the pre-1986 format.
   variant?: "classic" | "full";
+  // When true, uses larger touch targets and a tighter viewBox for mobile.
+  compact?: boolean;
 }
 
 const CX = 450;
@@ -76,6 +78,7 @@ function RadialBracket({
   setHoveredLeaf,
   onShowTooltip,
   variant = "classic",
+  compact = false,
 }: RadialBracketProps) {
   const bracketId = useId();
   const champCode =
@@ -171,6 +174,7 @@ function RadialBracket({
   const hasR16 = !!data.r16;
   // Only the 8-team (no-R16) tournaments can use the full-circle layout.
   const useFull = variant === "full" && !hasR16;
+  const hitMult = compact ? 1.8 : 1;
 
   // 2. Render normal staples (levels 0, 1, 2)
   const renderStaplePaths = () => {
@@ -366,7 +370,7 @@ function RadialBracket({
               className="hit fill-transparent cursor-pointer"
               cx={f2(x)}
               cy={f2(y)}
-              r={disc[lvl] + 14}
+              r={(disc[lvl] + 14) * hitMult}
             />
           </g>
         );
@@ -444,7 +448,7 @@ function RadialBracket({
             className="hit fill-transparent cursor-pointer"
             cx={f2(x)}
             cy={f2(y)}
-            r="44"
+            r={44 * hitMult}
           />
         </g>
       );
@@ -658,7 +662,7 @@ function RadialBracket({
               className="hit fill-transparent cursor-pointer"
               cx={f2(x)}
               cy={f2(y)}
-              r={disc[lvl] + 14}
+              r={(disc[lvl] + 14) * hitMult}
             />
           </g>
         );
@@ -728,7 +732,7 @@ function RadialBracket({
             className="hit fill-transparent cursor-pointer"
             cx={f2(x)}
             cy={f2(y)}
-            r="44"
+            r={44 * hitMult}
           />
         </g>
       );
@@ -921,7 +925,7 @@ function RadialBracket({
     <svg
       ref={svgRef}
       id="bracket"
-      viewBox="0 0 900 900"
+      viewBox={compact ? "30 30 840 840" : "0 0 900 900"}
       className="w-full h-full block overflow-visible select-none relative z-10"
       style={{ touchAction: "manipulation" }}
       role="group"
