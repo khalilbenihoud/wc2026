@@ -892,6 +892,7 @@ function RadialBracket({
           width="92"
           height="118"
           preserveAspectRatio="xMidYMid meet"
+          loading="lazy"
         />
 
         {champCode ? (
