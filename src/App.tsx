@@ -420,7 +420,7 @@ export default function App() {
 
       <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
         {/* Mobile notice */}
-      <div className="flex-none md:hidden text-center text-[10px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
+      <div className="flex-none md:hidden text-center text-[11px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
         Best viewed on desktop
       </div>
       {/* Dynamic Background Layout Frame */}
@@ -445,7 +445,7 @@ export default function App() {
               </button>
             )}
 
-            <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[9.5px] text-brand-gold md:mb-3.5 max-md:mb-2">
+            <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[11px] text-brand-gold md:mb-3.5 max-md:mb-2">
               FIFA World Cup Archive
             </div>
             <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
@@ -453,7 +453,7 @@ export default function App() {
                 The Road to Glory
               </span>
             </h1>
-            <p className="sub text-brand-muted text-xs mt-2 md:mt-3 leading-relaxed max-w-[224px] max-md:mx-auto">
+            <p className="sub text-brand-muted text-sm mt-2 md:mt-3 leading-relaxed max-w-[280px] max-md:mx-auto">
               Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
           </div>

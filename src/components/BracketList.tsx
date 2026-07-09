@@ -64,7 +64,7 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
               <button
                 key={r.key}
                 onClick={() => setActiveRound(r.key)}
-                className={`px-2.5 py-1 text-[9px] font-mono tracking-wider uppercase rounded-md transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1 text-[11px] font-mono tracking-wider uppercase rounded-md transition-all cursor-pointer whitespace-nowrap ${
                   activeRound === r.key
                     ? "bg-brand-gold text-brand-bg font-bold shadow-sm"
                     : "text-brand-muted hover:text-brand-text"
@@ -96,20 +96,20 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0 flex-[1.2]">
                       <span className="text-sm leading-none shrink-0">{getTeamFlag(m.ta)}</span>
-                      <span className="text-xs font-semibold truncate">{getTeamName(m.ta)}</span>
+                      <span className="text-sm font-semibold truncate">{getTeamName(m.ta)}</span>
                     </div>
                     <div className="flex flex-col items-center shrink-0">
-                      <span className="font-unbounded text-xs tracking-wide text-brand-gold font-bold">
+                      <span className="font-unbounded text-sm tracking-wide text-brand-gold font-bold">
                         {score}
                       </span>
                       {notes.length > 0 && (
-                        <span className="font-mono text-[8px] tracking-wider uppercase text-brand-muted/70 leading-none mt-0.5">
+                        <span className="font-mono text-[10px] tracking-wider uppercase text-brand-muted/70 leading-none mt-0.5">
                           {notes.map((n) => n).join(" ")}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 min-w-0 flex-[1.2] justify-end">
-                      <span className="text-xs font-semibold truncate">{getTeamName(m.tb)}</span>
+                      <span className="text-sm font-semibold truncate">{getTeamName(m.tb)}</span>
                       <span className="text-sm leading-none shrink-0">{getTeamFlag(m.tb)}</span>
                     </div>
                   </div>

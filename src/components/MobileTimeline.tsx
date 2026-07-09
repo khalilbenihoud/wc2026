@@ -41,14 +41,14 @@ export default function MobileTimeline({ activeYear, onSelectYear, analyses }: P
               ref={active ? activeRef : undefined}
               onClick={() => onSelectYear(year)}
               aria-current={active ? "true" : undefined}
-              className={`snap-center shrink-0 flex items-center gap-2 rounded-2xl border min-h-[48px] px-4 py-3 transition-colors ${
+              className={`snap-center shrink-0 flex items-center gap-2 rounded-2xl border min-h-[48px] px-4 py-3 transition-colors backdrop-blur-xl ${
                 active
-                  ? "bg-brand-gold/[0.12] border-brand-gold/40 text-brand-gold-hi"
-                  : "border-brand-line text-brand-muted active:bg-[rgba(var(--overlay-rgb),0.06)]"
+                  ? "bg-brand-gold/[0.15] border-brand-gold/40 text-brand-gold-hi"
+                  : "bg-brand-panel/40 border-brand-line/50 text-brand-muted active:bg-[rgba(var(--overlay-rgb),0.06)]"
               }`}
             >
-              <span className="text-base leading-none">{champFlag(year, analyses)}</span>
-              <span className="font-unbounded font-semibold text-[15px] tracking-tight leading-none">{year}</span>
+              <span className="text-lg leading-none">{champFlag(year, analyses)}</span>
+              <span className="font-unbounded font-semibold text-[14px] tracking-tight leading-none">{year}</span>
             </button>
           );
         })}
