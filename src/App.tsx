@@ -13,6 +13,7 @@ import PlayerAvatar from "./components/PlayerAvatar";
 import HeaderMeta from "./components/HeaderMeta";
 import HeaderMetaMobile from "./components/HeaderMetaMobile";
 import MobileTimeline from "./components/MobileTimeline";
+import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -266,6 +267,10 @@ export default function App() {
     });
   }, []);
 
+  const [championsOpen, setChampionsOpen] = useState(false);
+  const openChampions = useCallback(() => setChampionsOpen(true), []);
+  const closeChampions = useCallback(() => setChampionsOpen(false), []);
+
   const [hoveredLeaf, setHoveredLeaf] = useState<number | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<{
     round: string;
@@ -469,6 +474,10 @@ export default function App() {
             ggPhoto={ggPhoto}
           />
 
+          <div className="md:hidden flex justify-center mb-3">
+            <ChampionsTrigger onClick={openChampions} />
+          </div>
+
           <Timeline
             activeYear={activeYear}
             onSelectYear={handleSelectYear}
@@ -519,9 +528,7 @@ export default function App() {
               <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
               Winners advance to center
             </div>
-            <div className="item text-brand-gold/75 font-medium">
-              Click match for score
-            </div>
+            <ChampionsTrigger onClick={openChampions} />
           </div>
         </main>
       </div>
@@ -557,6 +564,8 @@ export default function App() {
       />
 
       </div>
+
+      <ChampionsWall isOpen={championsOpen} onClose={closeChampions} />
     </>
   );
 }
