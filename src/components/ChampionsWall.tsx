@@ -30,8 +30,9 @@ function StarRow({ n, max = 5 }: { n: number; max?: number }) {
 // Hero background image per nation — an editorial portrait sits behind the
 // winner block when one is available. The vendor in a Brasil kit already carries
 // five stars on his crest — the same total his nation has on the trophy.
+// Served as WebP (~77 KB, universally supported).
 const HERO_IMAGE: Record<string, string> = {
-  BRA: "/brazil-hero.jpg",
+  BRA: "/brazil-hero.webp",
 };
 
 // Editorial hall-of-fame: winner enshrined between gradient rules, rest as a
@@ -47,6 +48,7 @@ function Ledger({ list }: { list: Champion[] }) {
             src={heroSrc}
             alt=""
             aria-hidden
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover object-[75%_center] select-none pointer-events-none"
           />
           {/* Heavy dark scrim on the left where the text pools, fading right so
