@@ -39,6 +39,9 @@ const MOTM: Record<string, PlayerOfMatch> = {
   "2026_ARG_EGY": { name: "Lionel Messi", team: "ARG" },
   "2026_SUI_COL": { name: "Gregor Kobel", team: "SUI" },
 
+  // Quarter-finals
+  "2026_FRA_MAR": { name: "Kylian Mbappé", team: "FRA" },
+
   // ─── 2022 ────────────────────────────────────────────────────────────────
   // Budweiser Player of the Match (Wikipedia)
 

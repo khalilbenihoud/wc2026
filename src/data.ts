@@ -910,7 +910,13 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       // Switzerland 0–0 Colombia (R16, Jul 8) — SUI wins 4-3 on pens
       M(0, 0, 0, "4-3", "a.e.t.", null),
     ],
-    qf: null,
+    qf: [
+      // France 2–0 Morocco (QF, Jul 10) — France advance (Mbappé, Dembélé)
+      M(2, 0, 0, null, null, [["Kylian Mbappé 60'", "Ousmane Dembélé 66'"], []]),
+      null,
+      null,
+      null,
+    ],
     sf: null,
     final: null,
   },
