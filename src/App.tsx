@@ -419,8 +419,10 @@ export default function App() {
       {!splashDone && <Splash onEnter={handleSplashEnter} exiting={splashExiting} />}
 
       <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
-
-
+        {/* Mobile notice */}
+      <div className="flex-none md:hidden text-center text-[10px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
+        Best viewed on desktop
+      </div>
       {/* Dynamic Background Layout Frame */}
       <div className="app relative grid grid-cols-1 md:grid-cols-[300px_1fr] md:min-h-0 md:flex-1 items-stretch">
         {/* Sidebar divider — pinned to the full height of the app frame, gradient effect */}
