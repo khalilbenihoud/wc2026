@@ -1,15 +1,17 @@
 # The Road to Glory
 
-Interactive radial bracket archive of every FIFA World Cup knockout stage since 1930. Explore the tournament history through a circular SVG visualization — from the Round of 16 to the Final, each tournament drawn as concentric rings with animated winning-team traces.
+Every FIFA World Cup knockout stage since 1930, visualized as a radial bracket.  
+Explore tournament history through an interactive SVG — from the Round of 16 to the Final, each edition drawn as concentric rings with animated winning-team traces.
 
 ## Features
 
-- **Radial bracket** — 16 knockout slots rendered as SVG concentric rings (R16, QF, SF, Final, center trophy)
+- **Radial bracket** — 16 knockout slots as SVG concentric rings (R16, QF, SF, Final, center trophy)
+- **List view** — Segmented round-by-round match list with smooth mask fade, default on mobile
+- **Responsive** — Radial bracket on desktop, segmented list on mobile; toggle anytime with a button below the bracket
 - **Timeline sidebar** — Scroll through every edition from 1930 to 2026 with champion flag and host
-- **Match details modal** — Scores, goal scorers, cards, substitutions, and penalty shootout details
+- **Match details modal** — Scores, goal scorers, cards, substitutions, penalty shootouts, and stats
 - **Live 2026 bracket** — Pulls current knockout data from an external REST API
 - **Splash screen** — Animated year counter with parallax and reduced-motion support
-- **Dark/light mode** — Theme toggle persisted to localStorage
 - **Agent-first design** — Serves `llms.txt` via content negotiation, exposes AI tool for year selection
 
 ## Stack
