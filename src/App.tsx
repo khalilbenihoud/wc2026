@@ -436,7 +436,12 @@ export default function App() {
     <>
       {!splashDone && <Splash onEnter={handleSplashEnter} exiting={splashExiting} />}
 
-      <div className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col">
+      {/* Background is inert while the match modal (portaled to <body>) is open,
+          so assistive tech and pointer focus stay within the dialog. */}
+      <div
+        inert={selectedMatch !== null}
+        className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col"
+      >
         {/* Mobile notice */}
       <div className="flex-none md:hidden text-center text-[11px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
         Best viewed on desktop
