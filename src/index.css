@@ -489,5 +489,37 @@ body::after {
   opacity: 1;
 }
 
+/* Splash entrance choreography. Elements are fully visible by default so
+   reduced-motion and no-JS users see the finished layout; the motion only
+   applies when the user hasn't asked to reduce it. Stagger is set per element
+   with an inline animation-delay. */
+@media (prefers-reduced-motion: no-preference) {
+  .splash-rise { animation: splashRise 0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .splash-line { animation: splashLine 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: center; }
+  .splash-fade { animation: splashFade 1.1s ease both; }
+  .splash-glow { animation: splashGlow 7s ease-in-out infinite; }
+  /* Arrow nudges forward on the CTA. */
+  .splash-cta svg { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .splash-cta:hover svg,
+  .splash-cta:focus-visible svg { transform: translateX(4px); }
+}
+
+/* Only the `from` is declared so each element settles at its own resting
+   opacity (some are intentionally dimmed) rather than being forced to 1. */
+@keyframes splashRise {
+  from { opacity: 0; transform: translateY(16px); }
+}
+@keyframes splashLine {
+  from { opacity: 0; transform: scaleX(0); }
+  to { opacity: 0.25; transform: scaleX(1); }
+}
+@keyframes splashFade {
+  from { opacity: 0; }
+}
+@keyframes splashGlow {
+  0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.12); }
+}
+
 
 
