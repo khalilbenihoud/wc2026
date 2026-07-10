@@ -228,9 +228,24 @@ export default function App() {
   }, [lightMode]);
 
   const [activeYear, setActiveYear] = useState<number>(2026);
-  const [viewMode, setViewMode] = useState<"radial" | "list">(
-    () => typeof window !== "undefined" && window.innerWidth < 768 ? "list" : "radial"
+  const [viewMode, setViewMode] = useState<"radial" | "list">("radial");
+
+  // The radial bracket is desktop-only; phones always get the list view. Track
+  // the viewport reactively so resizing across the breakpoint stays correct.
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches
   );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // On mobile we force the list view regardless of the stored preference.
+  const effectiveViewMode = isMobile ? "list" : viewMode;
 
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
@@ -509,7 +524,7 @@ export default function App() {
           />
 
           {/* Bracket Stage */}
-          {viewMode === "radial" ? (
+          {effectiveViewMode === "radial" ? (
             <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto max-md:overflow-hidden">
               <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
                 <RadialBracket
@@ -533,9 +548,9 @@ export default function App() {
             </div>
           )}
 
-          {/* View toggle + legend */}
-          <div className="flex-none w-full pt-3 pb-6">
-            <div className="flex justify-center mb-1">
+          {/* View toggle + legend — desktop only; phones are locked to list view */}
+          <div className="flex-none w-full pt-3 pb-6 max-md:hidden">
+            <div className="flex justify-center mb-1 max-md:hidden">
               <button
                 onClick={() => setViewMode(viewMode === "radial" ? "list" : "radial")}
                 className="text-[10px] font-mono tracking-wider uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer flex items-center gap-1.5"
@@ -544,7 +559,7 @@ export default function App() {
               </button>
             </div>
             <div className="flex gap-6 justify-center flex-wrap items-center text-brand-muted font-mono text-[11px] tracking-wider uppercase relative z-10">
-              {viewMode === "radial" ? (
+              {effectiveViewMode === "radial" ? (
                 <>
                   <div className="item flex items-center gap-2 max-md:hidden">
                     <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
@@ -556,7 +571,7 @@ export default function App() {
                   </div>
                 </>
               ) : null}
-              <ChampionsTrigger onClick={openChampions} />
+              <ChampionsTrigger onClick={openChampions} className="max-md:hidden" />
             </div>
           </div>
         </main>
