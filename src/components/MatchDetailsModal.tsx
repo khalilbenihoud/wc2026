@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { TournamentData, TournamentAnalysis } from "../types";
 import { getTeamFlag, getTeamName } from "../data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "../constants";
@@ -59,6 +60,19 @@ export default function MatchDetailsModal({
   analysis,
   onClose,
 }: MatchDetailsModalProps) {
+  const drawerRef = useRef<HTMLDivElement>(null);
+  // Remember what had focus before the dialog opened, so we can restore it on
+  // close (WCAG 2.4.3). Captured on open, focus returned in the cleanup.
+  const triggerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    return () => {
+      triggerRef.current?.focus?.();
+      triggerRef.current = null;
+    };
+  }, [isOpen]);
+
   // ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -94,7 +108,6 @@ export default function MatchDetailsModal({
   const CLOSE_MS = 250;
   const [rendered, setRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -110,6 +123,13 @@ export default function MatchDetailsModal({
       }, CLOSE_MS);
       return () => clearTimeout(t);
     }
+  }, [isOpen, rendered]);
+
+  // Move focus into the dialog once it has mounted, so keyboard and screen
+  // reader users land inside it (and the Tab trap has somewhere to cycle).
+  // Focusing the labelled container lets a screen reader announce the dialog.
+  useEffect(() => {
+    if (isOpen && rendered) drawerRef.current?.focus();
   }, [isOpen, rendered]);
 
   if (!rendered) return null;
@@ -209,7 +229,7 @@ export default function MatchDetailsModal({
   const redB = countCard(cardsB, "🟥");
   const hasCards = cardsA.length > 0 || cardsB.length > 0;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
@@ -222,11 +242,13 @@ export default function MatchDetailsModal({
 
       {/* Side drawer */}
       <div
+        ref={drawerRef}
         id="match-drawer"
         role="dialog"
         aria-modal="true"
+        tabIndex={-1}
         aria-label={`${data._year} ${ROUND_NAME[round]} — Match ${idx + 1}`}
-        className={`absolute top-0 right-0 h-full w-full max-md:max-w-none max-w-[520px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
+        className={`absolute top-0 right-0 h-full w-full max-md:max-w-none max-w-[520px] bg-brand-panel border-l border-brand-line shadow-[-30px_0_80px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar focus:outline-none ${
           isClosing
             ? "animate-[slideOutRight_0.25s_cubic-bezier(0.4,0,0.6,1)_forwards]"
             : "animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]"
@@ -354,43 +376,33 @@ export default function MatchDetailsModal({
               <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
                 Highlights
               </div>
-              {showVideo ? (
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-brand-line bg-black">
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${highlight.videoId}?autoplay=1&rel=0`}
-                    title={highlight.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
+              <a
+                href={`https://www.youtube.com/watch?v=${highlight.videoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative block w-full aspect-video rounded-xl overflow-hidden border border-brand-line bg-black cursor-pointer group"
+              >
+                {highlight.thumbnail ? (
+                  <img
+                    src={highlight.thumbnail}
+                    alt={highlight.title}
+                    referrerPolicy="no-referrer"
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity group-hover:opacity-80"
                   />
+                ) : (
+                  <div className="absolute inset-0 bg-brand-steel/20" />
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-brand-danger/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <svg width="22" height="24" viewBox="0 0 22 24" fill="white">
+                      <path d="M0 0v24l22-12z" />
+                    </svg>
+                  </div>
                 </div>
-              ) : (
-                <button
-                  onClick={() => setShowVideo(true)}
-                  className="relative w-full aspect-video rounded-xl overflow-hidden border border-brand-line bg-black cursor-pointer group"
-                >
-                  {highlight.thumbnail ? (
-                    <img
-                      src={highlight.thumbnail}
-                      alt={highlight.title}
-                      referrerPolicy="no-referrer"
-                      className="absolute inset-0 w-full h-full object-cover transition-opacity group-hover:opacity-80"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-brand-steel/20" />
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-14 h-14 rounded-full bg-brand-danger/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <svg width="22" height="24" viewBox="0 0 22 24" fill="white">
-                        <path d="M0 0v24l22-12z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-2">
-                    <p className="text-white text-[11px] leading-snug line-clamp-2">{highlight.title}</p>
-                  </div>
-                </button>
-              )}
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-2">
+                  <p className="text-white text-[11px] leading-snug line-clamp-2">{highlight.title}</p>
+                </div>
+              </a>
               <a
                 href={`https://www.youtube.com/watch?v=${highlight.videoId}`}
                 target="_blank"
@@ -465,6 +477,7 @@ export default function MatchDetailsModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
