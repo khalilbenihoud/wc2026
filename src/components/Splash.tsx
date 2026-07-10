@@ -103,15 +103,36 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
         WebkitFontSmoothing: "antialiased",
       }}
     >
-      <div style={{ position: "fixed", top: "2rem", left: "2rem", fontSize: "0.625rem", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 500, opacity: 0.45 }}>
+      {/* Ambient breathing glow behind the content. */}
+      <div
+        className="splash-glow"
+        aria-hidden
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          width: "42rem",
+          height: "42rem",
+          maxWidth: "90vw",
+          maxHeight: "90vw",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(217,180,90,0.16), transparent 68%)",
+          filter: "blur(30px)",
+          transform: "translate(-50%, -50%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      <div className="splash-fade" style={{ position: "fixed", top: "2rem", left: "2rem", fontSize: "0.625rem", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 500, opacity: 0.45, zIndex: 1 }}>
         Archive &middot; Est. 1930
       </div>
-      <div style={{ position: "fixed", top: "2rem", right: "2rem", fontSize: "0.625rem", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 500, opacity: 0.45 }}>
+      <div className="splash-fade" style={{ position: "fixed", top: "2rem", right: "2rem", fontSize: "0.625rem", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 500, opacity: 0.45, zIndex: 1 }}>
         2026 &mdash; Bracket Live
       </div>
 
       {!loaderDone && (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem" }}>
+        <div className="splash-fade" style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem" }}>
           <div style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2.5rem,6vw,4.5rem)", fontWeight: 600, color: "#d9b45a", lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>
             {YEARS[yearIdx]}
           </div>
@@ -126,6 +147,8 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
 
       {loaderDone && (
         <div style={{
+          position: "relative",
+          zIndex: 2,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -133,10 +156,10 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
           textAlign: "center",
           padding: "0 1.5rem",
         }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", fontSize: "0.625rem", letterSpacing: "0.26em", fontWeight: 600, opacity: 0.5, whiteSpace: "nowrap" }}>
-          <span style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem" }} />
+        <div className="splash-rise" style={{ display: "flex", alignItems: "center", gap: "1rem", fontSize: "0.625rem", letterSpacing: "0.26em", fontWeight: 600, opacity: 0.5, whiteSpace: "nowrap" }}>
+          <span className="splash-line" style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem", animationDelay: "0.15s" }} />
           FIFA WORLD CUP KNOCKOUT ARCHIVE
-          <span style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem" }} />
+          <span className="splash-line" style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem", animationDelay: "0.15s" }} />
         </div>
 
         <h1 style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2rem,5.5vw,3.75rem)", fontWeight: 600, lineHeight: 1.15, letterSpacing: "0.04em", overflow: "hidden" }}>
@@ -148,14 +171,15 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
           ))}
         </h1>
 
-        <p style={{ maxWidth: "36rem", fontSize: "0.9375rem", lineHeight: 1.6, opacity: 0.55 }}>
+        <p className="splash-rise" style={{ maxWidth: "36rem", fontSize: "0.9375rem", lineHeight: 1.6, opacity: 0.55, animationDelay: "0.9s" }}>
           Every knockout bracket since 1930, drawn as a single radial map from the first round of sixteen to the final whistle.
         </p>
 
         <button
           onClick={() => onEnter()}
-          className="splash-cta"
+          className="splash-cta splash-rise"
           style={{
+            animationDelay: "1.05s",
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
@@ -180,7 +204,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
       </div>
       )}
 
-      <div style={{
+      <div className="splash-fade" style={{
         position: "fixed",
         bottom: "1.75rem",
         left: "50%",
@@ -195,6 +219,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
         overflowX: "auto",
         whiteSpace: "nowrap",
         padding: "0 1rem",
+        zIndex: 1,
       }}>
         {YEARS.map((y) => (
           <span key={y} style={{ color: y === 2026 ? "#d9b45a" : "#f3efe4", opacity: y === 2026 ? 1 : 0.28 }}>
