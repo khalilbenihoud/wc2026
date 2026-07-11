@@ -56,6 +56,8 @@ const STATS_2026: Record<string, MatchStats> = {
   "2026_COL_SUI": { cards: [["🟨", "🟨"], ["🟨", "🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: undefined, totalShots: undefined, fouls: undefined },
   "2026_FRA_MAR": { cards: [[], ["🟨"]], subs: [[], []], pens: [[], []], possession: ["48%", "52%"], totalShots: [22, 5], fouls: [10, 13] },
   "2026_MAR_FRA": { cards: [["🟨"], []], subs: [[], []], pens: [[], []], possession: ["52%", "48%"], totalShots: [5, 22], fouls: [13, 10] },
+  "2026_ESP_BEL": { cards: [["🟨", "🟨"], ["🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["68%", "32%"], totalShots: [17, 5], fouls: [13, 18] },
+  "2026_BEL_ESP": { cards: [["🟨", "🟨"], ["🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["32%", "68%"], totalShots: [5, 17], fouls: [18, 13] },
 };
 
 export function getStats2026(year: number, teamA: string, teamB: string): MatchStats | null {

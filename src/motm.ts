@@ -41,6 +41,7 @@ const MOTM: Record<string, PlayerOfMatch> = {
 
   // Quarter-finals
   "2026_FRA_MAR": { name: "Kylian Mbappé", team: "FRA" },
+  "2026_ESP_BEL": { name: "Lamine Yamal", team: "ESP" },
 
   // ─── 2022 ────────────────────────────────────────────────────────────────
   // Budweiser Player of the Match (Wikipedia)

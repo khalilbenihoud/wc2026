@@ -155,6 +155,7 @@ const HIGHLIGHTS: Record<string, Highlight> = {
   "2026_ARG_EGY": { videoId: "Njg9l2VmzjY", title: "Argentina 🆚 Egypt #FIFAWorldCupOnYT", thumbnail: "https://i.ytimg.com/vi/Njg9l2VmzjY/hqdefault.jpg" },
 
   "2026_FRA_MAR": { videoId: "edZHheemSGg", title: "France 2-0 Morocco | FIFA World Cup 2026 Quarter-final Highlights", thumbnail: "https://i.ytimg.com/vi/edZHheemSGg/hqdefault.jpg" },
+  "2026_ESP_BEL": { videoId: "rc1FP_YB2AM", title: "Spain vs Belgium | Match Highlights | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/rc1FP_YB2AM/hqdefault.jpg" },
 };
 
 export function getHighlights(
