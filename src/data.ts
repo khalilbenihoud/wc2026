@@ -914,7 +914,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       // France 2–0 Morocco (QF, Jul 10) — France advance (Mbappé, Dembélé)
       M(2, 0, 0, null, null, [["Kylian Mbappé 60'", "Ousmane Dembélé 66'"], []]),
       null,
-      null,
+      // Spain 2–1 Belgium (QF, Jul 10) — Spain advance (Fabián Ruiz, Merino; De Ketelaere)
+      M(2, 1, 0, null, null, [["Fabián Ruiz 30'", "Mikel Merino 88'"], ["Charles De Ketelaere 41'"]]),
       null,
     ],
     sf: null,
