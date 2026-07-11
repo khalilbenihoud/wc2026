@@ -108,7 +108,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             </span>
           </h1>
           {t.quote && (
-            <p className="text-brand-muted text-lg italic mt-2">{t.quote}</p>
+            <p className="font-serif text-brand-muted text-lg italic mt-2">{t.quote}</p>
           )}
         </div>
 
