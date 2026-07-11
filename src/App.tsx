@@ -1,7 +1,7 @@
 //  ╔══════════════════════════════════════╗
 //  ║  Inspired by Emilio Sansolini        ║
 //  ╚══════════════════════════════════════╝
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { TournamentData, TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
@@ -11,10 +11,18 @@ import BracketList from "./components/BracketList";
 import MatchDetailsModal from "./components/MatchDetailsModal";
 import Splash from "./components/Splash";
 import PlayerAvatar from "./components/PlayerAvatar";
+import { useWikiPhoto } from "./wikiPhoto";
 import HeaderMeta from "./components/HeaderMeta";
 import HeaderMetaMobile from "./components/HeaderMetaMobile";
 import MobileTimeline from "./components/MobileTimeline";
 import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
+import CountryPage from "./components/CountryPage";
+import TournamentPage from "./components/TournamentPage";
+import { MOCK_COUNTRIES } from "./countries.mock";
+import { generateCountryProfiles } from "./countries.generated";
+import { useRouter, countryPath, tournamentPath } from "./router";
+import { useSeo } from "./seo";
+import { useSeoTracking } from "./seoTracking";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -26,73 +34,6 @@ const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
     "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
   backgroundSize: "100% 200%",
 };
-
-// Wikipedia award-winner → page slug override (special characters / split names).
-const WIKI_SLUG_OVERRIDE: Record<string, string> = {
-  "Ronaldo": "Ronaldo_Nazário",
-  "Michel Preud'homme": "Michel_Preud'homme",
-  "Emiliano Martínez": "Emiliano_Martínez",
-  "Oldřich Nejedlý": "Oldřich_Nejedlý",
-  "Leônidas": "Leônidas",
-  "Salvatore Schillaci": "Salvatore_Schillaci",
-  "Hristo Stoichkov / Oleg Salenko": "Hristo_Stoichkov",
-  "Davor Šuker": "Davor_Šuker",
-  "Miroslav Klose": "Miroslav_Klose",
-  "Thomas Müller": "Thomas_Müller",
-  "James Rodríguez": "James_Rodríguez",
-  "Harry Kane": "Harry_Kane",
-  "Kylian Mbappé": "Kylian_Mbappé",
-};
-
-// Wikipedia slug for an award-winner name (handles "A / B" ties and "(disamb)").
-const gbSlug = (name: string) =>
-  WIKI_SLUG_OVERRIDE[name] || name.split("/")[0].split(" (")[0].trim();
-
-
-// Prefetch a winner's Wikipedia thumbnail as soon as the name changes (not on
-// hover): check the in-memory + localStorage cache first, otherwise fetch once,
-// preload the image, and persist it so it's instant next time. Returns the photo
-// URL, or null while loading / when Wikipedia has no thumbnail.
-function useWikiPhoto(name: string | null | undefined): string | null {
-  const [photo, setPhoto] = useState<string | null>(null);
-  const cache = useRef<Record<string, string>>({});
-  useEffect(() => {
-    if (!name) {
-      setPhoto(null);
-      return;
-    }
-    const slug = gbSlug(name);
-    const cached =
-      cache.current[slug] ??
-      (typeof localStorage !== "undefined" ? localStorage.getItem(`gb:${slug}`) : null);
-    if (cached) {
-      cache.current[slug] = cached;
-      setPhoto(cached);
-      return;
-    }
-    setPhoto(null);
-    let cancelled = false;
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        const src: string | undefined = data?.thumbnail?.source;
-        if (!src || cancelled) return;
-        cache.current[slug] = src;
-        try {
-          localStorage.setItem(`gb:${slug}`, src);
-        } catch {
-          /* storage full / unavailable — in-memory cache still applies */
-        }
-        new Image().src = src; // warm the browser cache before render
-        setPhoto(src);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [name]);
-  return photo;
-}
 
 // Tournament analysis calculator
 function analyze(d: TournamentData): TournamentAnalysis {
@@ -205,8 +146,21 @@ function analyzeNoR16(d: TournamentData): TournamentAnalysis {
 }
 
 export default function App() {
+  const { route, navigate } = useRouter();
+  useSeoTracking();
+
+  useEffect(() => {
+    const m = window.location.hash.match(/^#\/country\/([A-Za-z]{3})$/);
+    if (m) {
+      window.history.replaceState(null, "", countryPath(m[1]));
+      navigate(countryPath(m[1]));
+    }
+  }, []);
+
   const [splashDone, setSplashDone] = useState(
-    () => sessionStorage.getItem("wc-splash-done") === "1"
+    () =>
+      sessionStorage.getItem("wc-splash-done") === "1" ||
+      route.path !== "home"
   );
   const [splashExiting, setSplashExiting] = useState(false);
 
@@ -246,6 +200,16 @@ export default function App() {
 
   // On mobile we force the list view regardless of the stored preference.
   const effectiveViewMode = isMobile ? "list" : viewMode;
+
+  const allCountries = useMemo(() => {
+    const generated = generateCountryProfiles();
+    return { ...generated, ...MOCK_COUNTRIES };
+  }, []);
+
+  const countryCode = route.path === "country" ? route.params.code : null;
+  const countryProfile = countryCode ? allCountries[countryCode] : undefined;
+
+  const tournamentYear = route.path === "tournament" ? Number(route.params.year) : null;
 
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
@@ -327,6 +291,10 @@ export default function App() {
   const handleSelectMatch = useCallback((round: string, idx: number) => {
     setSelectedMatch({ round, idx });
   }, []);
+
+  const handleNavigateCountry = useCallback((code: string) => {
+    navigate(countryPath(code));
+  }, [navigate]);
 
   const handleShowTooltip = useCallback((
     round: string,
@@ -414,6 +382,13 @@ export default function App() {
       ? currentData.teams[currentAnalysis.champ]
       : null;
 
+  function getChampionForYear(year: number): string | null {
+    const a = analyses[year];
+    const d = TOURNAMENTS[year];
+    if (!a || !d || a.champ === null) return null;
+    return d.teams[a.champ] ?? null;
+  }
+
   const gbName = currentData.goldenBoot?.name;
   const gbGoals = currentData.goldenBoot?.goals;
   const ggName = currentData.goldenGlove?.name;
@@ -427,10 +402,50 @@ export default function App() {
   // timeline (all >= 1986, stepping by 4).
   const editionsCount = Math.floor((activeYear - 1930) / 4) + 1 - (activeYear > 1938 ? 2 : 0);
 
-  useEffect(() => {
-    const champName = champCode ? getTeamName(champCode) : "TBD";
-    document.title = `${activeYear} World Cup Bracket — ${champName} · The Road to Glory`;
-  }, [activeYear, champCode]);
+  const seoMeta = useMemo(() => {
+    if (route.path === "country" && countryProfile) {
+      const p = countryProfile;
+      const desc = p.titles.length > 0
+        ? `${p.name} — ${p.titles.length}× World Cup champion${p.titles.length > 1 ? "s" : ""}. ${p.appearances} tournament appearances since ${p.firstAppearance}. ${p.epithet}`
+        : `${p.name} — ${p.bestResult}. ${p.appearances} World Cup appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. ${p.epithet}`;
+      return {
+        title: `${p.name} World Cup History — The Road to Glory`,
+        description: desc,
+        canonical: countryPath(p.code),
+        jsonLd: {
+          "@type": "SportsTeam",
+          name: p.name,
+          description: p.epithet,
+          url: `https://worldcuparchive.net${countryPath(p.code)}`,
+        },
+      };
+    }
+    if (route.path === "tournament" && tournamentYear && TOURNAMENTS[tournamentYear]) {
+      const t = TOURNAMENTS[tournamentYear];
+      const champ = tournamentYear ? getChampionForYear(tournamentYear) : null;
+      const champName = champ ? getTeamName(champ) : "TBD";
+      return {
+        title: `${tournamentYear} FIFA World Cup Results — ${champName} Champion · The Road to Glory`,
+        description: `${tournamentYear} FIFA World Cup in ${t.host}. ${t.quote || ""} Full knockout results, golden boot, and all participating nations.`,
+        canonical: tournamentPath(tournamentYear),
+        jsonLd: {
+          "@type": "SportsEvent",
+          name: `${tournamentYear} FIFA World Cup`,
+          startDate: `${tournamentYear}-06-01`,
+          endDate: `${tournamentYear}-07-31`,
+          location: { "@type": "Place", name: t.host },
+          description: t.quote || `${tournamentYear} FIFA World Cup`,
+        },
+      };
+    }
+    return {
+      title: `${activeYear} World Cup Bracket — ${champCode ? getTeamName(champCode) : "TBD"} · The Road to Glory`,
+      description: "Every FIFA World Cup knockout stage since 1930, drawn as one interactive radial bracket.",
+      canonical: "/",
+    };
+  }, [route, countryProfile, tournamentYear, activeYear, champCode]);
+
+  useSeo(seoMeta);
 
   return (
     <>
@@ -526,6 +541,7 @@ export default function App() {
             ggName={ggName}
             ggPhoto={ggPhoto}
             editionsCount={editionsCount}
+            onOpenResults={() => navigate(tournamentPath(activeYear))}
           />
 
           {/* Bracket Stage */}
@@ -536,6 +552,7 @@ export default function App() {
                   data={currentData}
                   analysis={currentAnalysis}
                   onSelectMatch={handleSelectMatch}
+                  onNavigateCountry={handleNavigateCountry}
                   hoveredLeaf={hoveredLeaf}
                   setHoveredLeaf={setHoveredLeaf}
                   onShowTooltip={handleShowTooltip}
@@ -549,6 +566,7 @@ export default function App() {
                 data={currentData}
                 analysis={currentAnalysis}
                 onSelectMatch={handleSelectMatch}
+                onNavigateCountry={handleNavigateCountry}
               />
             </div>
           )}
@@ -610,11 +628,30 @@ export default function App() {
         data={currentData}
         analysis={currentAnalysis}
         onClose={handleCloseModal}
+        onNavigateCountry={handleNavigateCountry}
       />
 
       </div>
 
-      <ChampionsWall isOpen={championsOpen} onClose={closeChampions} />
+      <ChampionsWall isOpen={championsOpen} onClose={closeChampions} onNavigateCountry={handleNavigateCountry} />
+
+      {countryProfile && (
+        <CountryPage
+          profile={countryProfile}
+          allCountries={allCountries}
+          onBack={() => navigate("/")}
+          onNavigate={navigate}
+          onSelectCountry={(code) => navigate(countryPath(code))}
+        />
+      )}
+
+      {route.path === "tournament" && tournamentYear && (
+        <TournamentPage
+          year={tournamentYear}
+          onBack={() => navigate("/")}
+          onNavigate={navigate}
+        />
+      )}
     </>
   );
 }

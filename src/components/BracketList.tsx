@@ -7,11 +7,12 @@ interface Props {
   data: TournamentData & { _year: number };
   analysis: TournamentAnalysis;
   onSelectMatch: (round: string, idx: number) => void;
+  onNavigateCountry?: (code: string) => void;
 }
 
 const ROUND_KEYS = ["r32", "r16", "qf", "sf", "final"] as const;
 
-export default function BracketList({ data, analysis, onSelectMatch }: Props) {
+export default function BracketList({ data, analysis, onSelectMatch, onNavigateCountry }: Props) {
   const rounds = useMemo(() => {
     const result: { key: string; label: string; matches: { idx: number; ta: string; tb: string }[] }[] = [];
 
@@ -87,17 +88,31 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
               const score = played ? `${matchData!.s[0]}–${matchData!.s[1]}` : "vs";
               const notes = getMatchNotes(matchData);
 
+              const taCode = m.ta;
+              const tbCode = m.tb;
+
               return (
-                <button
+                <div
                   key={`${current.key}-${m.idx}`}
                   onClick={() => onSelectMatch(current.key, m.idx)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelectMatch(current.key, m.idx); }}}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${getTeamName(taCode)} vs ${getTeamName(tbCode)}${played ? ` ${score}` : ""}. View match details.`}
                   className="w-full text-left px-4 py-3 rounded-xl bg-brand-panel/40 border border-brand-line/40 hover:border-brand-gold/30 hover:bg-brand-panel/60 transition-all cursor-pointer active:scale-[0.98]"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0 flex-[1.2]">
-                      <span className="text-sm leading-none shrink-0">{getTeamFlag(m.ta)}</span>
-                      <span className="text-sm font-semibold truncate">{getTeamName(m.ta)}</span>
-                    </div>
+                    <span
+                      onClick={(e) => { e.stopPropagation(); onNavigateCountry?.(taCode); }}
+                      className="flex items-center gap-2 min-w-0 flex-[1.2] hover:text-brand-gold cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onNavigateCountry?.(taCode); }}}
+                      aria-label={`View ${getTeamName(taCode)} country page`}
+                    >
+                      <span className="text-sm leading-none shrink-0">{getTeamFlag(taCode)}</span>
+                      <span className="text-sm font-semibold truncate">{getTeamName(taCode)}</span>
+                    </span>
                     <div className="flex flex-col items-center shrink-0">
                       <span className="font-unbounded text-sm tracking-wide text-brand-gold font-bold">
                         {score}
@@ -108,12 +123,19 @@ export default function BracketList({ data, analysis, onSelectMatch }: Props) {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 min-w-0 flex-[1.2] justify-end">
-                      <span className="text-sm font-semibold truncate">{getTeamName(m.tb)}</span>
-                      <span className="text-sm leading-none shrink-0">{getTeamFlag(m.tb)}</span>
-                    </div>
+                    <span
+                      onClick={(e) => { e.stopPropagation(); onNavigateCountry?.(tbCode); }}
+                      className="flex items-center gap-2 min-w-0 flex-[1.2] justify-end hover:text-brand-gold cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onNavigateCountry?.(tbCode); }}}
+                      aria-label={`View ${getTeamName(tbCode)} country page`}
+                    >
+                      <span className="text-sm font-semibold truncate">{getTeamName(tbCode)}</span>
+                      <span className="text-sm leading-none shrink-0">{getTeamFlag(tbCode)}</span>
+                    </span>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

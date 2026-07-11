@@ -7,6 +7,7 @@ interface RadialBracketProps {
   data: TournamentData & { _year: number };
   analysis: TournamentAnalysis;
   onSelectMatch: (round: string, idx: number) => void;
+  onNavigateCountry?: (code: string) => void;
   hoveredLeaf: number | null;
   setHoveredLeaf: (leaf: number | null) => void;
   onShowTooltip: (
@@ -74,6 +75,7 @@ function RadialBracket({
   data,
   analysis,
   onSelectMatch,
+  onNavigateCountry,
   hoveredLeaf,
   setHoveredLeaf,
   onShowTooltip,

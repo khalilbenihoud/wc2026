@@ -521,5 +521,17 @@ body::after {
   50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.12); }
 }
 
+/* Country page — the Pulse seismograph. Bars grow from the baseline on load,
+   staggered per edition via inline animation-delay. Static (fully drawn) for
+   reduced-motion users. */
+.pulse-bar { transform-origin: bottom; }
+@media (prefers-reduced-motion: no-preference) {
+  .pulse-bar { animation: pulseRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .country-fade { animation: splashFade 0.8s ease both; }
+}
+@keyframes pulseRise {
+  from { transform: scaleY(0); }
+}
+
 
 
