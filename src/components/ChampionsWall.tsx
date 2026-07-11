@@ -37,7 +37,7 @@ const HERO_IMAGE: Record<string, string> = {
 
 // Editorial hall-of-fame: winner enshrined between gradient rules, rest as a
 // numbered ledger with gradient hairlines between rows.
-function Ledger({ list }: { list: Champion[] }) {
+function Ledger({ list, onNavigateCountry }: { list: Champion[]; onNavigateCountry?: (code: string) => void }) {
   const [first, ...rest] = list;
   const heroSrc = first ? HERO_IMAGE[first.code] : undefined;
   return (
@@ -75,12 +75,16 @@ function Ledger({ list }: { list: Champion[] }) {
               <div className="font-mono text-[10px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">
                 Champion of Champions
               </div>
-              <div className="flex items-center gap-3 mb-3">
+              <button
+                onClick={() => onNavigateCountry?.(first.code)}
+                className="flex items-center gap-3 mb-3 text-left hover:opacity-80 cursor-pointer transition-opacity"
+                aria-label={`View ${first.name} country page`}
+              >
                 <span className="text-3xl leading-none select-none">{first.flag}</span>
                 <span className="font-unbounded font-bold text-3xl md:text-4xl text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
                   {first.name}
                 </span>
-              </div>
+              </button>
               <div className="flex items-center gap-2">
                 <StarRow n={first.stars} max={first.stars} />
                 <span className="font-mono text-[10px] tracking-widest uppercase text-white/75 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
@@ -112,12 +116,16 @@ function Ledger({ list }: { list: Champion[] }) {
           <div className="font-mono text-[9px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3">
             Champion of Champions
           </div>
-          <div className="flex items-center justify-center gap-3 mb-2">
+          <button
+            onClick={() => onNavigateCountry?.(first.code)}
+            className="flex items-center justify-center gap-3 mb-2 mx-auto hover:opacity-80 cursor-pointer transition-opacity"
+            aria-label={`View ${first.name} country page`}
+          >
             <span className="text-3xl leading-none select-none">{first.flag}</span>
             <span className="font-unbounded font-bold text-2xl md:text-3xl text-brand-text tracking-tight">
               {first.name}
             </span>
-          </div>
+          </button>
           <div className="flex items-center justify-center gap-2">
             <StarRow n={first.stars} max={first.stars} />
             <span className="font-mono text-[10px] tracking-widest uppercase text-brand-muted">
@@ -130,7 +138,7 @@ function Ledger({ list }: { list: Champion[] }) {
         {rest.map((c, i) => (
           <li
             key={c.code}
-            className="relative grid grid-cols-[36px_1fr_auto_auto] items-center gap-3 py-2.5"
+            className="relative"
           >
             {i > 0 && (
               <span
@@ -138,6 +146,11 @@ function Ledger({ list }: { list: Champion[] }) {
                 className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-line to-transparent"
               />
             )}
+            <button
+              onClick={() => onNavigateCountry?.(c.code)}
+              className="w-full grid grid-cols-[36px_1fr_auto_auto] items-center gap-3 py-2.5 hover:opacity-80 cursor-pointer text-left transition-opacity"
+              aria-label={`View ${c.name} country page`}
+            >
             <span className="font-unbounded font-semibold text-lg text-brand-muted tabular-nums">
               {i + 2}
             </span>
@@ -149,6 +162,7 @@ function Ledger({ list }: { list: Champion[] }) {
             <span className="font-mono text-[10px] text-brand-muted tabular-nums w-12 text-right">
               {c.latestWin}
             </span>
+            </button>
           </li>
         ))}
       </ol>
@@ -179,9 +193,10 @@ export function ChampionsTrigger({
 interface ChampionsWallProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavigateCountry?: (code: string) => void;
 }
 
-export default function ChampionsWall({ isOpen, onClose }: ChampionsWallProps) {
+export default function ChampionsWall({ isOpen, onClose, onNavigateCountry }: ChampionsWallProps) {
   const champions = useMemo(() => getChampions(), []);
 
   // Keep mounted through the close animation.
@@ -256,7 +271,7 @@ export default function ChampionsWall({ isOpen, onClose }: ChampionsWallProps) {
           </header>
 
           <div className="p-6">
-            <Ledger list={champions} />
+            <Ledger list={champions} onNavigateCountry={onNavigateCountry} />
 
             <p className="mt-6 font-mono text-[10px] tracking-widest uppercase text-brand-muted text-center">
               Eight nations · one trophy · {getTeamFlag("BRA")} five stars stand alone

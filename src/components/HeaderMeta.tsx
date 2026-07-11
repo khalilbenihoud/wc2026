@@ -13,6 +13,7 @@ export interface HeaderMetaProps {
   ggName?: string;
   ggPhoto: string | null;
   editionsCount: number;
+  onOpenResults?: () => void;
 }
 
 const EYEBROW = "font-mono text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold";
@@ -27,14 +28,30 @@ export const GLOVE_SINCE = 1994;
 // tournament's facts as one quiet hairline-separated stat line on the right.
 export default function HeaderMeta({
   year, host, hostFlag, quote, champFlag, champName,
-  gbName, gbGoals, gbPhoto, ggName, ggPhoto, editionsCount,
+  gbName, gbGoals, gbPhoto, ggName, ggPhoto, editionsCount, onOpenResults,
 }: HeaderMetaProps) {
   const cell = "flex flex-col justify-center gap-2 px-6 [&:not(:first-child)]:border-l border-brand-line";
   return (
     <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:hidden md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
       <div className="flex items-center justify-between gap-10 px-1 py-1">
         <div className="min-w-0">
-          <div className={`${EYEBROW} mb-2.5`}>FIFA World Cup · {year}</div>
+          {onOpenResults ? (
+            <button
+              onClick={onOpenResults}
+              aria-label={`View ${year} World Cup results`}
+              className={`${EYEBROW} mb-2.5 group inline-flex items-center gap-1.5 hover:text-brand-gold transition-colors cursor-pointer`}
+            >
+              FIFA World Cup · {year}
+              <span
+                aria-hidden
+                className="text-brand-gold opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+              >
+                →
+              </span>
+            </button>
+          ) : (
+            <div className={`${EYEBROW} mb-2.5`}>FIFA World Cup · {year}</div>
+          )}
           <p className="font-serif italic text-xl leading-snug text-brand-text whitespace-nowrap">
             {quote ?? QUOTE_FALLBACK}
           </p>

@@ -17,6 +17,7 @@ interface MatchDetailsModalProps {
   data: TournamentData & { _year: number };
   analysis: TournamentAnalysis;
   onClose: () => void;
+  onNavigateCountry?: (code: string) => void;
 }
 
 // Horizontal comparison bar (borrowed from the scoreboard modal, restyled to
@@ -59,6 +60,7 @@ export default function MatchDetailsModal({
   data,
   analysis,
   onClose,
+  onNavigateCountry,
 }: MatchDetailsModalProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   // Remember what had focus before the dialog opened, so we can restore it on
@@ -282,7 +284,13 @@ export default function MatchDetailsModal({
             {knownTeams ? (
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                 <div className="text-center">
-                  <div className="text-[44px] leading-none mb-2">{getTeamFlag(ta)}</div>
+                  <button
+                    onClick={() => onNavigateCountry?.(ta)}
+                    className="mx-auto block hover:opacity-80 cursor-pointer transition-opacity"
+                    aria-label={`View ${getTeamName(ta)} country page`}
+                  >
+                    <div className="text-[44px] leading-none mb-2">{getTeamFlag(ta)}</div>
+                  </button>
                   <div
                     className={`font-unbounded text-base tracking-wide break-words leading-snug ${
                       winTop ? "text-brand-gold-hi" : "text-brand-text"
@@ -306,7 +314,13 @@ export default function MatchDetailsModal({
                 )}
 
                 <div className="text-center">
-                  <div className="text-[44px] leading-none mb-2">{getTeamFlag(tb)}</div>
+                  <button
+                    onClick={() => onNavigateCountry?.(tb)}
+                    className="mx-auto block hover:opacity-80 cursor-pointer transition-opacity"
+                    aria-label={`View ${getTeamName(tb)} country page`}
+                  >
+                    <div className="text-[44px] leading-none mb-2">{getTeamFlag(tb)}</div>
+                  </button>
                   <div
                     className={`font-unbounded text-base tracking-wide break-words leading-snug ${
                       !winTop && played ? "text-brand-gold-hi" : "text-brand-text"
