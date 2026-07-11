@@ -913,7 +913,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     qf: [
       // France 2–0 Morocco (QF, Jul 10) — France advance (Mbappé, Dembélé)
       M(2, 0, 0, null, null, [["Kylian Mbappé 60'", "Ousmane Dembélé 66'"], []]),
-      null,
+      // Norway 1–2 England (QF, Jul 11, a.e.t.) — England advance (Schjelderup; Bellingham 2)
+      M(1, 2, 1, null, "a.e.t.", [["Andreas Schjelderup 36'"], ["Jude Bellingham 45+2'", "Jude Bellingham 93'"]]),
       // Spain 2–1 Belgium (QF, Jul 10) — Spain advance (Fabián Ruiz, Merino; De Ketelaere)
       M(2, 1, 0, null, null, [["Fabián Ruiz 30'", "Mikel Merino 88'"], ["Charles De Ketelaere 41'"]]),
       null,
