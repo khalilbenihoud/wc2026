@@ -1,4 +1,5 @@
 import { TOURNAMENTS, TEAMS } from "../src/data";
+import { COUNTRY_PAGE_ENABLED } from "../src/router";
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
@@ -46,8 +47,12 @@ for (const year of Object.keys(TOURNAMENTS).map(Number)) {
   }
 }
 
-for (const code of allCodes) {
-  urls.push({ loc: `/countries/${code.toLowerCase()}`, priority: 0.8, changefreq: "monthly" });
+// Country pages are disabled for now — keep their URLs out of the sitemap so we
+// don't advertise routes that redirect back to the home bracket.
+if (COUNTRY_PAGE_ENABLED) {
+  for (const code of allCodes) {
+    urls.push({ loc: `/countries/${code.toLowerCase()}`, priority: 0.8, changefreq: "monthly" });
+  }
 }
 
 urls.sort((a, b) => b.priority - a.priority || a.loc.localeCompare(b.loc));

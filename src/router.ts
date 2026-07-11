@@ -46,6 +46,10 @@ export function useRouter() {
   return useMemo(() => ({ route, navigate }), [route, navigate]);
 }
 
+// The country page is disabled for now (its profile data isn't ready to ship).
+// Flip to true to re-enable the page, all links to it, and the country routes.
+export const COUNTRY_PAGE_ENABLED = false;
+
 export const countryPath = (code: string) => `/countries/${code.toLowerCase()}`;
 export const tournamentPath = (year: number) => `/tournaments/${year}`;
 export const matchPath = (year: number, slug: string) =>

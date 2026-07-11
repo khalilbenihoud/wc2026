@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
 import { getMatchNotes } from "../constants";
-import { countryPath, tournamentPath } from "../router";
+import { countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "../router";
 import { useUnsplashImage, UNSPLASH_ENABLED } from "../unsplash";
 import { useWikiPhoto } from "../wikiPhoto";
 import PlayerAvatar from "./PlayerAvatar";
@@ -150,12 +150,18 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
               <div className="flex items-center gap-4">
                 <span className="text-4xl">{getTeamFlag(champion)}</span>
                 <div>
-                  <button
-                    onClick={() => onNavigate(countryPath(champion))}
-                    className="font-unbounded font-bold text-xl text-brand-text hover:text-brand-gold transition-colors cursor-pointer"
-                  >
-                    {getTeamName(champion)}
-                  </button>
+                  {COUNTRY_PAGE_ENABLED ? (
+                    <button
+                      onClick={() => onNavigate(countryPath(champion))}
+                      className="font-unbounded font-bold text-xl text-brand-text hover:text-brand-gold transition-colors cursor-pointer"
+                    >
+                      {getTeamName(champion)}
+                    </button>
+                  ) : (
+                    <div className="font-unbounded font-bold text-xl text-brand-text">
+                      {getTeamName(champion)}
+                    </div>
+                  )}
                   {finalMatch && (
                     <p className="text-brand-muted text-sm mt-1">
                       {score} {finalMatch.p ? `(pens ${finalMatch.p})` : ""}
@@ -270,16 +276,26 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             {allTeams
               .filter((c) => c !== "TBD")
               .sort((a, b) => getTeamName(a).localeCompare(getTeamName(b)))
-              .map((code) => (
-                <button
-                  key={code}
-                  onClick={() => onNavigate(countryPath(code))}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-brand-line hover:border-brand-gold/40 hover:bg-brand-gold/[0.04] transition-colors cursor-pointer text-left"
-                >
-                  <span className="text-base">{getTeamFlag(code)}</span>
-                  <span className="text-sm text-brand-text">{getTeamName(code)}</span>
-                </button>
-              ))}
+              .map((code) => {
+                const inner = (
+                  <>
+                    <span className="text-base">{getTeamFlag(code)}</span>
+                    <span className="text-sm text-brand-text">{getTeamName(code)}</span>
+                  </>
+                );
+                const base = "flex items-center gap-2 px-3 py-2 rounded-lg border border-brand-line text-left";
+                return COUNTRY_PAGE_ENABLED ? (
+                  <button
+                    key={code}
+                    onClick={() => onNavigate(countryPath(code))}
+                    className={`${base} hover:border-brand-gold/40 hover:bg-brand-gold/[0.04] transition-colors cursor-pointer`}
+                  >
+                    {inner}
+                  </button>
+                ) : (
+                  <div key={code} className={base}>{inner}</div>
+                );
+              })}
           </div>
         </div>
 
@@ -388,7 +404,7 @@ function TeamSide({
   const content = align === "start" ? <>{flag}{name}</> : <>{name}{flag}</>;
   const base = `flex items-center gap-2 min-w-0 flex-[1.2] ${align === "end" ? "justify-end" : ""}`;
 
-  if (code === "TBD") {
+  if (code === "TBD" || !COUNTRY_PAGE_ENABLED) {
     return <span className={base}>{content}</span>;
   }
   return (

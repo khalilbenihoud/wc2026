@@ -20,7 +20,7 @@ import CountryPage from "./components/CountryPage";
 import TournamentPage from "./components/TournamentPage";
 import { MOCK_COUNTRIES } from "./countries.mock";
 import { generateCountryProfiles } from "./countries.generated";
-import { useRouter, countryPath, tournamentPath } from "./router";
+import { useRouter, countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "./router";
 import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 
@@ -150,6 +150,14 @@ export default function App() {
   useSeoTracking();
 
   useEffect(() => {
+    // Country page is disabled for now: send any country URL (legacy hash or
+    // direct /countries/… link) back to the home bracket instead of a blank page.
+    if (!COUNTRY_PAGE_ENABLED) {
+      if (route.path === "country" || /^#\/country\//.test(window.location.hash)) {
+        navigate("/");
+      }
+      return;
+    }
     const m = window.location.hash.match(/^#\/country\/([A-Za-z]{3})$/);
     if (m) {
       window.history.replaceState(null, "", countryPath(m[1]));
@@ -293,6 +301,7 @@ export default function App() {
   }, []);
 
   const handleNavigateCountry = useCallback((code: string) => {
+    if (!COUNTRY_PAGE_ENABLED) return; // country page disabled for now
     navigate(countryPath(code));
   }, [navigate]);
 
@@ -635,7 +644,7 @@ export default function App() {
 
       <ChampionsWall isOpen={championsOpen} onClose={closeChampions} onNavigateCountry={handleNavigateCountry} />
 
-      {countryProfile && (
+      {COUNTRY_PAGE_ENABLED && countryProfile && (
         <CountryPage
           profile={countryProfile}
           allCountries={allCountries}
