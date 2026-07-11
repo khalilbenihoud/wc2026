@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
 import { getMatchNotes } from "../constants";
 import { countryPath, tournamentPath } from "../router";
@@ -42,6 +42,14 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
     }
   );
 
+  // The page is its own scroll container (fixed inset-0), so switching year keeps
+  // this component mounted and the router's window.scrollTo can't reach it —
+  // reset to the top ourselves whenever the tournament changes.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [year]);
+
   // Wikipedia photos for the award winners — same source as the main header.
   const gbPhoto = useWikiPhoto(t?.goldenBoot?.name);
   const ggPhoto = useWikiPhoto(t?.goldenGlove?.name);
@@ -79,7 +87,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar">
+    <div ref={scrollRef} className="fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar">
       <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
         <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
           <button onClick={onBack} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { CountryProfile } from "../countries.mock";
 import { TOURNAMENTS } from "../data";
 import { countryPath, tournamentPath } from "../router";
@@ -12,8 +13,15 @@ interface CountryPageProps {
 }
 
 export default function CountryPage({ profile, allCountries, onBack, onNavigate, onSelectCountry }: CountryPageProps) {
+  // Own scroll container (fixed inset-0), so switching nation keeps this mounted
+  // and the router can't scroll it — reset to top when the profile changes.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [profile.code]);
+
   return (
-    <div className="country-fade fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar">
+    <div ref={scrollRef} className="country-fade fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar">
       <div className="max-w-[880px] mx-auto px-5 md:px-8 pt-6 pb-20">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-8">
