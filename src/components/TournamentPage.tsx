@@ -42,6 +42,14 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
     scrollRef.current?.scrollTo({ top: 0 });
   }, [year]);
 
+  // Fade out on close: stay mounted for one animation cycle, then navigate away
+  // (the page unmounts on route change, so we defer that until the fade finishes).
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(onBack, 200);
+  };
+
   // Wikipedia photos for the award winners — same source as the main header.
   const gbPhoto = useWikiPhoto(t?.goldenBoot?.name);
   const ggPhoto = useWikiPhoto(t?.goldenGlove?.name);
@@ -81,14 +89,16 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
   return (
     <div
       ref={scrollRef}
-      className="fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]"
+      className={`fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar ${
+        isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : "animate-[fadeIn_0.2s_ease]"
+      }`}
     >
       <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
         <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
-          <button onClick={onBack} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">
+          <button onClick={handleClose} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">
             ← The Road to Glory
           </button>
-          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted/70 select-none">
+          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none">
             Archive · Tournament
           </div>
         </div>
