@@ -14,25 +14,8 @@ for (const year of Object.keys(TOURNAMENTS).map(Number)) {
   // Trailing slash matches the 200 URL Netlify serves (pretty_urls 301s the
   // non-slash form), so canonicals/sitemap point at the real page, not a redirect.
   urls.push({ loc: `/tournaments/${year}/`, priority: 0.9, changefreq: "monthly" });
-
-  const t = TOURNAMENTS[year];
-  const allCodes = new Set<string>();
-  for (const code of t.teams) allCodes.add(code);
-  if (t.r32) {
-    for (const m of t.r32) {
-      allCodes.add(m.ta);
-      allCodes.add(m.tb);
-    }
-  }
-
-  if (t.r32) {
-    for (const m of t.r32) {
-      if (m.ta !== "TBD" && m.tb !== "TBD") {
-        const slug = `${m.ta.toLowerCase()}-vs-${m.tb.toLowerCase()}`;
-        urls.push({ loc: `/tournaments/${year}/matches/${slug}`, priority: 0.6, changefreq: "monthly" });
-      }
-    }
-  }
+  // Per-match pages (/tournaments/<year>/matches/<slug>) aren't built yet — they
+  // render the SPA home shell, so we don't advertise them (they'd be soft-404s).
 }
 
 const allCodes = new Set<string>();
