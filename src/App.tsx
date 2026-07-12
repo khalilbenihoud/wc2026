@@ -436,7 +436,7 @@ export default function App() {
       return {
         title: `${tournamentYear} FIFA World Cup Results — ${champName} Champion · The Road to Glory`,
         description: `${tournamentYear} FIFA World Cup in ${t.host}. ${t.quote || ""} Full knockout results, golden boot, and all participating nations.`,
-        canonical: tournamentPath(tournamentYear),
+        canonical: `${tournamentPath(tournamentYear)}/`, // trailing slash = Netlify's 200 URL
         jsonLd: {
           "@type": "SportsEvent",
           name: `${tournamentYear} FIFA World Cup`,

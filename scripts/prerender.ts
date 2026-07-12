@@ -136,7 +136,9 @@ function build(year: number): string {
     `${year} FIFA World Cup in ${t.host}. ${t.quote ? t.quote + " " : ""}` +
     `${champName ? `${champName} were champions. ` : ""}` +
     `Full knockout results, golden boot & glove, and all participating nations.`;
-  const canonical = `${BASE}/tournaments/${year}`;
+  // Trailing slash = the 200 URL Netlify serves (non-slash 301s here), so the
+  // canonical/og:url/JSON-LD point at the real page rather than a redirect.
+  const canonical = `${BASE}/tournaments/${year}/`;
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
