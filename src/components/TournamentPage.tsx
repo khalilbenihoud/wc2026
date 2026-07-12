@@ -192,6 +192,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Awards
           </div>
+          {t.goldenBoot || t.goldenGlove ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {t.goldenBoot && (
               <div className="p-4 rounded-lg border border-brand-line bg-brand-panel/30 flex items-center gap-4">
@@ -215,6 +216,27 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
               </div>
             )}
           </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-brand-line bg-brand-panel/20 px-5 py-9 text-center">
+              <div className="flex justify-center gap-2.5 text-3xl mb-3 select-none">
+                {["👟", "🏆", "🧤"].map((e, i) => (
+                  <span
+                    key={i}
+                    className="inline-block animate-bounce"
+                    style={{ animationDelay: `${i * 160}ms` }}
+                  >
+                    {e}
+                  </span>
+                ))}
+              </div>
+              <div className="text-brand-text font-semibold">Still up for grabs</div>
+              <p className="text-brand-muted text-sm mt-1.5 leading-relaxed">
+                No Golden Boot or Glove handed out yet.
+                <br />
+                Someone out there is having the tournament of their life. ✨
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mb-10">
