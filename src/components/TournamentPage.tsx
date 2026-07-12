@@ -5,6 +5,8 @@ import { countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "../router";
 import { CHAMPION_IMAGES } from "../championImages.generated";
 import { useWikiPhoto } from "../wikiPhoto";
 import PlayerAvatar from "./PlayerAvatar";
+import AppLink from "./AppLink";
+import CountryMap from "./CountryMap";
 
 interface TournamentPageProps {
   year: number;
@@ -148,6 +150,12 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
                 )}
               </>
             )}
+            {/* Glowing champion-country map, drawn in when the page opens. */}
+            <CountryMap
+              key={champion}
+              code={champion}
+              className="pointer-events-none absolute right-4 md:right-6 top-1/2 -translate-y-1/2 h-45 w-auto opacity-70"
+            />
             <div className={`relative p-6 ${heroExpected ? "pt-40 md:pt-52" : ""}`}>
               <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
                 Champion
@@ -285,7 +293,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
                 const inner = (
                   <>
                     <span className="text-base">{getTeamFlag(code)}</span>
-                    <span className="text-sm text-brand-text">{getTeamName(code)}</span>
+                    <span className="text-sm font-semibold text-brand-text">{getTeamName(code)}</span>
                   </>
                 );
                 const base = "flex items-center gap-2 px-3 py-2 rounded-lg border border-brand-line text-left";
@@ -314,17 +322,14 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
               .sort((a, b) => b - a)
               .filter((y) => y !== year)
               .map((y) => (
-                <button
+                <AppLink
                   key={y}
-                  onClick={() => onNavigate(tournamentPath(y))}
-                  className={`px-3 py-1.5 rounded-full border text-sm transition-colors cursor-pointer ${
-                    y === year
-                      ? "border-brand-gold/60 text-brand-gold bg-brand-gold/10"
-                      : "border-brand-line text-brand-muted hover:text-brand-text hover:border-brand-steel"
-                  }`}
+                  href={tournamentPath(y)}
+                  onNavigate={onNavigate}
+                  className="px-3 py-1.5 rounded-full border text-sm transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
                 >
                   {y}
-                </button>
+                </AppLink>
               ))}
           </div>
         </div>

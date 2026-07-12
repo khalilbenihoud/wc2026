@@ -550,7 +550,8 @@ export default function App() {
             ggName={ggName}
             ggPhoto={ggPhoto}
             editionsCount={editionsCount}
-            onOpenResults={() => navigate(tournamentPath(activeYear))}
+            resultsHref={tournamentPath(activeYear)}
+            onNavigate={navigate}
           />
 
           {/* Bracket Stage */}

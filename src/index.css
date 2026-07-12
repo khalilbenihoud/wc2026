@@ -186,6 +186,22 @@ body::after {
   }
 }
 
+/* Country map (see <CountryMap>): a pure line-drawing animation — each region's
+   border traces itself (drawIn, pathLength=100) like a pen. Timing/order is set
+   per-path inline for a sequential first→last draw; the base state here
+   (invisible, undrawn stroke) holds before each path's turn. */
+.country-map-path {
+  fill: none;
+  stroke: var(--color-brand-gold);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 2px rgba(246, 196, 83, 0.75));
+}
+
 /* Custom classes for svg paths and circles */
 .guide {
   fill: none;
