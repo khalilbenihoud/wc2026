@@ -11,7 +11,9 @@ const urls: { loc: string; priority: number; changefreq: string }[] = [
 ];
 
 for (const year of Object.keys(TOURNAMENTS).map(Number)) {
-  urls.push({ loc: `/tournaments/${year}`, priority: 0.9, changefreq: "monthly" });
+  // Trailing slash matches the 200 URL Netlify serves (pretty_urls 301s the
+  // non-slash form), so canonicals/sitemap point at the real page, not a redirect.
+  urls.push({ loc: `/tournaments/${year}/`, priority: 0.9, changefreq: "monthly" });
 
   const t = TOURNAMENTS[year];
   const allCodes = new Set<string>();
