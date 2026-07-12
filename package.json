@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "gen:champion-images": "tsx scripts/generate-champion-images.ts"
+    "gen:champion-images": "tsx scripts/generate-champion-images.ts",
+    "gen:country-maps": "tsx scripts/generate-country-maps.ts"
   },
   "dependencies": {
     "react": "^19.0.1",

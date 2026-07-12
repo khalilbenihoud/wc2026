@@ -1,4 +1,5 @@
 import PlayerAvatar from "./PlayerAvatar";
+import AppLink from "./AppLink";
 
 export interface HeaderMetaProps {
   year: number;
@@ -13,7 +14,8 @@ export interface HeaderMetaProps {
   ggName?: string;
   ggPhoto: string | null;
   editionsCount: number;
-  onOpenResults?: () => void;
+  resultsHref?: string;
+  onNavigate?: (href: string) => void;
 }
 
 const EYEBROW = "font-mono text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold";
@@ -28,16 +30,17 @@ export const GLOVE_SINCE = 1994;
 // tournament's facts as one quiet hairline-separated stat line on the right.
 export default function HeaderMeta({
   year, host, hostFlag, quote, champFlag, champName,
-  gbName, gbGoals, gbPhoto, ggName, ggPhoto, editionsCount, onOpenResults,
+  gbName, gbGoals, gbPhoto, ggName, ggPhoto, editionsCount, resultsHref, onNavigate,
 }: HeaderMetaProps) {
   const cell = "flex flex-col justify-center gap-2 px-6 [&:not(:first-child)]:border-l border-brand-line";
   return (
     <div className="flex-none w-full max-w-[1100px] mb-5 relative z-10 max-md:hidden md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_0.2s_both]">
       <div className="flex items-center justify-between gap-10 px-1 py-1">
         <div className="min-w-0">
-          {onOpenResults ? (
-            <button
-              onClick={onOpenResults}
+          {resultsHref && onNavigate ? (
+            <AppLink
+              href={resultsHref}
+              onNavigate={onNavigate}
               aria-label={`View ${year} World Cup results`}
               className={`${EYEBROW} mb-2.5 group inline-flex items-center gap-1.5 hover:text-brand-gold transition-colors cursor-pointer`}
             >
@@ -48,7 +51,7 @@ export default function HeaderMeta({
               >
                 →
               </span>
-            </button>
+            </AppLink>
           ) : (
             <div className={`${EYEBROW} mb-2.5`}>FIFA World Cup · {year}</div>
           )}
