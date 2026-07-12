@@ -21,6 +21,7 @@
 <meta name="description" content="Every FIFA World Cup knockout stage since 1930, drawn as one interactive radial bracket." />
 <meta name="keywords" content="FIFA World Cup, knockout bracket, football, soccer, tournament history, radial bracket, World Cup archive" />
 <meta name="robots" content="index, follow" />
+<meta name="google-site-verification" content="O5mH6ffh5vMRtAmW782DqZlTL6UwXNCajrhOjB8owAs" />
 <link rel="canonical" href="https://worldcuparchive.net/" />
 <link rel="alternate" hreflang="en" href="https://worldcuparchive.net/" />
 <link rel="alternate" hreflang="x-default" href="https://worldcuparchive.net/" />
@@ -82,6 +83,19 @@
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text; margin: 0;
   }
+  /* Prerendered SEO content shown until React mounts (createRoot replaces it). */
+  #root > .prerender {
+    max-width: 720px; margin: 0 auto; padding: 40px 24px; min-height: 100vh;
+    background: #09090b; color: #a1a1aa;
+    font-family: Inter, system-ui, sans-serif; line-height: 1.6;
+  }
+  #root > .prerender h1 {
+    font-family: Unbounded, system-ui, sans-serif; color: #f6c453; font-size: 28px;
+  }
+  #root > .prerender h2 { color: #f4f4f5; margin-top: 1.5em; }
+  #root > .prerender h3 { color: #d4d4d8; font-size: 14px; margin-bottom: 0.25em; }
+  #root > .prerender a { color: #f6c453; }
+  #root > .prerender ul { padding-left: 1.2em; }
 </style>
 
 </head>
