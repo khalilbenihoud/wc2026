@@ -9,7 +9,8 @@
     "gen:country-stats": "tsx scripts/generate-country-stats.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "gen:champion-images": "tsx scripts/generate-champion-images.ts"
   },
   "dependencies": {
     "react": "^19.0.1",

@@ -2,15 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
 import { getMatchNotes } from "../constants";
 import { countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "../router";
-import { useUnsplashImage, UNSPLASH_ENABLED } from "../unsplash";
+import { CHAMPION_IMAGES } from "../championImages.generated";
 import { useWikiPhoto } from "../wikiPhoto";
 import PlayerAvatar from "./PlayerAvatar";
-
-// Words that mark an Unsplash result as genuinely football (vs. a landmark).
-const FOOTBALL_KEYWORDS = [
-  "soccer", "football", "stadium", "pitch", "jersey",
-  "supporter", "fan", "goal", "match", "player", "crowd",
-];
 
 interface TournamentPageProps {
   year: number;
@@ -31,16 +25,14 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
     return getRunnerUpCode(t, year);
   }, [t, year]);
 
-  // Free Unsplash hero for the champion — no-op (null) when no access key is set.
-  // We rank results by football relevance and fall back to a generic football
-  // photo when a country's batch turns up only landmarks/landscapes.
-  const heroImage = useUnsplashImage(
-    champion ? `${getTeamName(champion)} football match` : null,
-    {
-      keywords: FOOTBALL_KEYWORDS,
-      fallbackQuery: "football stadium crowd",
-    }
-  );
+  // Champion hero photo, picked at random from the committed Unsplash pool
+  // (scripts/generate-champion-images.ts) — no API call at runtime, so it works
+  // in production without a key. Re-picks when the tournament changes.
+  const heroImage = useMemo(() => {
+    const pool = champion ? CHAMPION_IMAGES[champion] : null;
+    if (!pool?.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }, [champion, year]);
 
   // The page is its own scroll container (fixed inset-0), so switching year keeps
   // this component mounted and the router's window.scrollTo can't reach it —
@@ -54,9 +46,9 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
   const gbPhoto = useWikiPhoto(t?.goldenBoot?.name);
   const ggPhoto = useWikiPhoto(t?.goldenGlove?.name);
 
-  // Fade the photo in once decoded, and reserve its space up front (whenever a
-  // key is set and there's a champion) so the card doesn't jump when it arrives.
-  const heroExpected = UNSPLASH_ENABLED && !!champion;
+  // Fade the photo in once decoded, and reserve its space up front so the card
+  // doesn't jump when the CDN image finishes loading.
+  const heroExpected = !!heroImage;
   const [heroLoaded, setHeroLoaded] = useState(false);
   useEffect(() => {
     setHeroLoaded(false);
@@ -87,7 +79,10 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
   }
 
   return (
-    <div ref={scrollRef} className="fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar">
+    <div
+      ref={scrollRef}
+      className="fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar animate-[slideInRight_0.3s_cubic-bezier(0.2,0.8,0.2,1)]"
+    >
       <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
         <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
           <button onClick={onBack} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">
