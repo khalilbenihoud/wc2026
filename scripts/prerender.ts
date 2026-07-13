@@ -108,7 +108,18 @@ function render(
   if (jsonLd) {
     html = html.replace("</head>", `<script type="application/ld+json">${jsonLd}</script>\n</head>`);
   }
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>\s*<\/body>/, `<div id="root">${content}</div>\n</body>`);
+  // The prerendered text stays in #root so crawlers (and no-JS visitors) can read
+  // it, but human visitors shouldn't watch the raw list flash by while the bundle
+  // loads. Paint the branded loading screen fixed on top of it; createRoot()
+  // replaces all of #root on mount, so the overlay disappears with the content.
+  const overlay =
+    `<div class="loading" style="position:fixed;inset:0;z-index:50">` +
+    `<div class="kicker">FIFA World Cup Archive</div>` +
+    `<h1>The Road to Glory</h1></div>`;
+  html = html.replace(
+    /<div id="root">[\s\S]*?<\/div>\s*<\/body>/,
+    `<div id="root">${content}${overlay}</div>\n</body>`
+  );
   return html;
 }
 
