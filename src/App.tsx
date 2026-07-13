@@ -2,7 +2,7 @@
 //  ║  Inspired by Emilio Sansolini        ║
 //  ╚══════════════════════════════════════╝
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { TournamentData, TournamentAnalysis } from "./types";
+import { TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
@@ -20,9 +20,11 @@ import CountryPage from "./components/CountryPage";
 import TournamentPage from "./components/TournamentPage";
 import { MOCK_COUNTRIES } from "./countries.mock";
 import { generateCountryProfiles } from "./countries.generated";
-import { useRouter, countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "./router";
+import { useRouter, countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
 import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
+import { analyze } from "./analysis";
+import { findMatchBySlug } from "./matches";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -34,116 +36,6 @@ const SIDEBAR_DIVIDER_STYLE: Record<string, string> = {
     "linear-gradient(to bottom, transparent 0%, var(--gold) 2%, var(--gold) 10%, var(--line) 14%, var(--line) 42%, transparent 48%, transparent 50%, var(--gold) 52%, var(--gold) 60%, var(--line) 64%, var(--line) 92%, transparent 100%)",
   backgroundSize: "100% 200%",
 };
-
-// Tournament analysis calculator
-function analyze(d: TournamentData): TournamentAnalysis {
-  if (!d.r16) {
-    return analyzeNoR16(d);
-  }
-  const w1: (number | null)[] = [];
-  const w2: (number | null)[] = [];
-  const w3: (number | null)[] = [];
-
-  for (let i = 0; i < 8; i++) {
-    const m = d.r16[i];
-    w1[i] = m && m.w !== null ? 2 * i + m.w : null;
-  }
-  if (d.qf) {
-    for (let i = 0; i < 4; i++) {
-      const m = d.qf[i];
-      const a = w1[2 * i];
-      const b = w1[2 * i + 1];
-      if (m && m.w !== null && a != null && b != null) {
-        w2[i] = m.w === 0 ? a : b;
-      } else {
-        w2[i] = null;
-      }
-    }
-  }
-  if (d.sf) {
-    for (let i = 0; i < 2; i++) {
-      const m = d.sf[i];
-      const a = w2[2 * i];
-      const b = w2[2 * i + 1];
-      if (m && m.w !== null && a != null && b != null) {
-        w3[i] = m.w === 0 ? a : b;
-      } else {
-        w3[i] = null;
-      }
-    }
-  }
-  const f = d.final?.[0];
-  const champ = (f && f.w !== null && w3[0] != null && w3[1] != null)
-    ? (f.w === 0 ? w3[0] : w3[1]) : null;
-
-  const adv = new Array(16).fill(0);
-  for (let leaf = 0; leaf < 16; leaf++) {
-    let a = 0;
-    const r16w = w1[Math.floor(leaf / 2)];
-    if (r16w != null && r16w === leaf) {
-      a = 1;
-      const qfw = w2[Math.floor(leaf / 4)];
-      if (qfw != null && qfw === leaf) {
-        a = 2;
-        const sfw = w3[Math.floor(leaf / 8)];
-        if (sfw != null && sfw === leaf) {
-          a = 3;
-          if (champ === leaf) a = 4;
-        }
-      }
-    }
-    adv[leaf] = a;
-  }
-
-  return { champ, adv, w1, w2, w3 };
-}
-
-function analyzeNoR16(d: TournamentData): TournamentAnalysis {
-  const w1: (number | null)[] = [null, null, null, null, null, null, null, null];
-  const w2: (number | null)[] = [null, null, null, null];
-  const w3: (number | null)[] = [null, null];
-  let champ: number | null = null;
-
-  if (d.qf) {
-    for (let i = 0; i < 4; i++) {
-      const m = d.qf[i];
-      // QF matches use teams at positions 2*i and 2*i+1
-      w1[i] = m && m.w !== null ? (2 * i + m.w) : null;
-    }
-  }
-  if (d.sf) {
-    for (let i = 0; i < 2; i++) {
-      const m = d.sf[i];
-      const a = w1[2 * i];
-      const b = w1[2 * i + 1];
-      if (m && m.w !== null && a != null && b != null) {
-        w2[i] = m.w === 0 ? a : b;
-      }
-    }
-  }
-  const f = d.final?.[0];
-  if (f && f.w !== null && w2[0] != null && w2[1] != null) {
-    champ = f.w === 0 ? w2[0] : w2[1];
-    w3[0] = champ;
-  }
-
-  const adv = new Array(16).fill(0);
-  for (let leaf = 0; leaf < 16; leaf++) {
-    let a = 0;
-    const qfSlot = Math.floor(leaf / 2);
-    if (qfSlot < 4 && w1[qfSlot] === leaf) {
-      a = 1;
-      const sfSlot = Math.floor(leaf / 4);
-      if (sfSlot < 2 && w2[sfSlot] === leaf) {
-        a = 2;
-        if (champ === leaf) a = 3;
-      }
-    }
-    adv[leaf] = a;
-  }
-
-  return { champ, adv, w1, w2, w3 };
-}
 
 export default function App() {
   const { route, navigate } = useRouter();
@@ -219,6 +111,12 @@ export default function App() {
 
   const tournamentYear = route.path === "tournament" ? Number(route.params.year) : null;
 
+  // A match URL (/tournaments/<year>/matches/<slug>) shows the tournament page
+  // with that match's details modal open. Both drive off the same year.
+  const matchYear = route.path === "match" ? Number(route.params.year) : null;
+  // The year whose TournamentPage sits behind everything, for either route.
+  const pageYear = tournamentYear ?? matchYear;
+
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
   // in the DOM lib yet), feature-detected so this is a no-op everywhere else.
@@ -285,6 +183,26 @@ export default function App() {
     return result;
   }, []);
 
+  // Resolve a match URL to the tournament year + bracket slot, then open its
+  // details modal over that tournament page. Unknown slug → tournament page.
+  useEffect(() => {
+    if (route.path !== "match") return;
+    const year = Number(route.params.year);
+    const data = TOURNAMENTS[year];
+    const analysis = analyses[year];
+    if (!data || !analysis) {
+      navigate("/");
+      return;
+    }
+    const found = findMatchBySlug(data, analysis, route.params.slug);
+    if (!found) {
+      navigate(`${tournamentPath(year)}/`);
+      return;
+    }
+    setActiveYear(year);
+    setSelectedMatch({ round: found.round, idx: found.idx });
+  }, [route, analyses, navigate]);
+
   const currentData = useMemo(() => {
     return {
       ...TOURNAMENTS[activeYear],
@@ -316,7 +234,12 @@ export default function App() {
   }, []);
 
   const handleSelectYear = useCallback((year: number) => setActiveYear(year), []);
-  const handleCloseModal = useCallback(() => setSelectedMatch(null), []);
+  const handleCloseModal = useCallback(() => {
+    setSelectedMatch(null);
+    // Closing a match-URL modal should drop the /matches/<slug> segment so the
+    // URL reflects what's now on screen (the tournament page).
+    if (route.path === "match") navigate(`${tournamentPath(Number(route.params.year))}/`);
+  }, [route, navigate]);
 
   const getTooltipContent = useCallback(() => {
     if (!tooltip.visible || !tooltip.round) return null;
@@ -429,6 +352,40 @@ export default function App() {
         },
       };
     }
+    if (route.path === "match" && matchYear && TOURNAMENTS[matchYear]) {
+      const t = TOURNAMENTS[matchYear];
+      const analysis = analyses[matchYear];
+      const found = analysis ? findMatchBySlug(t, analysis, route.params.slug) : null;
+      if (found) {
+        const taName = getTeamName(found.ta);
+        const tbName = getTeamName(found.tb);
+        const roundName = ROUND_NAME[found.round];
+        const scoreStr = found.score ? `${found.score[0]}–${found.score[1]}` : null;
+        const resultTitle = scoreStr ? `${taName} ${scoreStr} ${tbName}` : `${taName} vs ${tbName}`;
+        const winnerName = found.winner ? getTeamName(found.winner) : null;
+        return {
+          title: `${resultTitle} — ${matchYear} FIFA World Cup ${roundName} · The Road to Glory`,
+          description:
+            `${taName} vs ${tbName}, ${matchYear} FIFA World Cup ${roundName} in ${t.host}. ` +
+            (scoreStr
+              ? `Final score ${scoreStr}${found.pens ? ` (${found.pens} pens)` : found.extra ? ` ${found.extra}` : ""}.${winnerName ? ` ${winnerName} advanced.` : ""} `
+              : "") +
+            `Goalscorers, result, and match details.`,
+          canonical: `${matchPath(matchYear, found.slug)}/`,
+          jsonLd: {
+            "@type": "SportsEvent",
+            name: `${taName} vs ${tbName} — ${matchYear} FIFA World Cup ${roundName}`,
+            sport: "Association football",
+            location: { "@type": "Place", name: t.host },
+            competitor: [
+              { "@type": "SportsTeam", name: taName },
+              { "@type": "SportsTeam", name: tbName },
+            ],
+            url: `https://worldcuparchive.net${matchPath(matchYear, found.slug)}/`,
+          },
+        };
+      }
+    }
     if (route.path === "tournament" && tournamentYear && TOURNAMENTS[tournamentYear]) {
       const t = TOURNAMENTS[tournamentYear];
       const champ = tournamentYear ? getChampionForYear(tournamentYear) : null;
@@ -452,7 +409,7 @@ export default function App() {
       description: "Every FIFA World Cup knockout stage since 1930, drawn as one interactive radial bracket.",
       canonical: "/",
     };
-  }, [route, countryProfile, tournamentYear, activeYear, champCode]);
+  }, [route, countryProfile, tournamentYear, matchYear, analyses, activeYear, champCode]);
 
   useSeo(seoMeta);
 
@@ -550,7 +507,7 @@ export default function App() {
             ggName={ggName}
             ggPhoto={ggPhoto}
             editionsCount={editionsCount}
-            resultsHref={tournamentPath(activeYear)}
+            resultsHref={`${tournamentPath(activeYear)}/`}
             onNavigate={navigate}
           />
 
@@ -655,9 +612,9 @@ export default function App() {
         />
       )}
 
-      {route.path === "tournament" && tournamentYear && (
+      {pageYear !== null && TOURNAMENTS[pageYear] && (
         <TournamentPage
-          year={tournamentYear}
+          year={pageYear}
           onBack={() => navigate("/")}
           onNavigate={navigate}
         />

@@ -1,22 +1,31 @@
 // Post-build prerender: the app is a client-only SPA, so every route otherwise
 // ships the same empty #root shell with one generic <title> — bad for indexing
-// competitive queries like "2010 FIFA World Cup". This writes a real static HTML
-// file per tournament (dist/tournaments/<year>/index.html) with the right
-// title / meta / canonical / OG / JSON-LD AND real, crawlable content baked into
-// #root. createRoot() replaces #root on mount, so the app still takes over
-// client-side with no hydration mismatch.
+// competitive queries like "2010 FIFA World Cup". This writes real static HTML
+// with the right title / meta / canonical / OG / JSON-LD AND real, crawlable
+// content baked into #root for:
+//   • the homepage                     (dist/index.html)
+//   • each tournament                  (dist/tournaments/<year>/index.html)
+//   • each played knockout match       (dist/tournaments/<year>/matches/<slug>/index.html)
+// createRoot() replaces #root on mount, so the app still takes over client-side
+// with no hydration mismatch.
 //
 // Runs after `vite build` so it inherits the built asset references.
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { TOURNAMENTS, TEAMS, getTeamName } from "../src/data";
+import { analyze } from "../src/analysis";
+import { enumerateMatches, EnumeratedMatch } from "../src/matches";
+import { ROUND_NAME } from "../src/constants";
+import { getScorers } from "../src/scorers";
+import { getPlayerOfMatch } from "../src/motm";
 
 const BASE = "https://worldcuparchive.net";
 const DIST = resolve(process.cwd(), "dist");
 const template = readFileSync(resolve(DIST, "index.html"), "utf8");
 
 const years = Object.keys(TOURNAMENTS).map(Number).sort((a, b) => a - b);
+const yearsDesc = [...years].sort((a, b) => b - a);
 
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -72,48 +81,63 @@ function runnerUp(t: T): string | null {
   return t.final[0].w === 0 ? sf[1] : sf[0];
 }
 
-interface Row { a: string; b: string; s: [number, number] | null; }
-function round(label: string, rows: Row[]): string {
-  const items = rows
-    .filter((r) => r.a && r.b && r.a !== "TBD" && r.b !== "TBD")
-    .map((r) => {
-      const score = r.s ? `${r.s[0]}–${r.s[1]}` : "vs";
-      return `<li>${esc(getTeamName(r.a))} ${score} ${esc(getTeamName(r.b))}</li>`;
-    });
-  return items.length ? `<h3>${label}</h3><ul>${items.join("")}</ul>` : "";
+// Penalty / extra-time suffix for a match, from the given team's perspective.
+function matchNote(m: EnumeratedMatch): string {
+  if (m.pens) return ` (${m.pens} pens)`;
+  if (m.extra) return ` ${m.extra}`;
+  return "";
 }
 
-function knockout(t: T): string {
+// ── Shared head-injection ────────────────────────────────────────────────────
+function render(
+  title: string,
+  description: string,
+  canonical: string,
+  jsonLd: string,
+  content: string
+): string {
+  let html = template;
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+  html = html.replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(description)}$2`);
+  html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${canonical}$2`);
+  html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(title)}$2`);
+  html = html.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
+  html = html.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${canonical}$2`);
+  html = html.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${esc(title)}$2`);
+  html = html.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
+  if (jsonLd) {
+    html = html.replace("</head>", `<script type="application/ld+json">${jsonLd}</script>\n</head>`);
+  }
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>\s*<\/body>/, `<div id="root">${content}</div>\n</body>`);
+  return html;
+}
+
+// ── Knockout results list (links each played match to its detail page) ───────
+function knockout(t: T, year: number): string {
+  const matches = enumerateMatches(t, analyze(t));
+  const order = ["r32", "r16", "qf", "sf", "final"];
   const parts: string[] = [];
-  if (t.r32) {
-    parts.push(round("Round of 32", t.r32.map((m) => ({ a: m.ta, b: m.tb, s: m.s ?? null }))));
+  for (const round of order) {
+    const rows = matches.filter((m) => m.round === round);
+    if (!rows.length) continue;
+    const items = rows
+      .map((m) => {
+        const a = esc(getTeamName(m.ta));
+        const b = esc(getTeamName(m.tb));
+        if (m.played && m.score) {
+          const label = `${a} ${m.score[0]}–${m.score[1]} ${b}${esc(matchNote(m))}`;
+          return `<li><a href="/tournaments/${year}/matches/${m.slug}/">${label}</a></li>`;
+        }
+        return `<li>${a} vs ${b}</li>`;
+      })
+      .join("");
+    parts.push(`<h3>${ROUND_NAME[round]}</h3><ul>${items}</ul>`);
   }
-  if (t.r16) {
-    parts.push(round("Round of 16", t.r16.map((m, i) =>
-      m ? { a: t.teams[2 * i], b: t.teams[2 * i + 1], s: m.s } : { a: "", b: "", s: null })));
-  }
-  if (t.qf) {
-    const r16w = r16Winners(t);
-    parts.push(round("Quarter-finals", t.qf.map((m, i) => m ? {
-      a: r16w.length >= 8 ? r16w[2 * i] : t.teams[2 * i],
-      b: r16w.length >= 8 ? r16w[2 * i + 1] : t.teams[2 * i + 1], s: m.s,
-    } : { a: "", b: "", s: null })));
-  }
-  if (t.sf) {
-    const qfw = qfWinners(t);
-    parts.push(round("Semi-finals", t.sf.map((m, i) => m ? {
-      a: qfw[2 * i] ?? "TBD", b: qfw[2 * i + 1] ?? "TBD", s: m.s,
-    } : { a: "", b: "", s: null })));
-  }
-  if (t.final?.[0]) {
-    const sf = sfTeams(t);
-    parts.push(round("Final", [{ a: sf[0] ?? "TBD", b: sf[1] ?? "TBD", s: t.final[0].s }]));
-  }
-  return parts.filter(Boolean).join("");
+  return parts.join("");
 }
 
 // ── Per-year SEO + content ───────────────────────────────────────────────────
-function build(year: number): string {
+function buildTournament(year: number): string {
   const t = TOURNAMENTS[year];
   const champ = champion(t);
   const champName = champ ? getTeamName(champ) : null;
@@ -174,7 +198,7 @@ function build(year: number): string {
 
   const otherHtml =
     `<h2>Every World Cup</h2><ul>` +
-    years.map((y) => `<li><a href="/tournaments/${y}">${y} FIFA World Cup</a></li>`).join("") + `</ul>`;
+    years.map((y) => `<li><a href="/tournaments/${y}/">${y} FIFA World Cup</a></li>`).join("") + `</ul>`;
 
   const content =
     `<main class="prerender">` +
@@ -182,29 +206,130 @@ function build(year: number): string {
     `<h1>${year} FIFA World Cup</h1>` +
     `<p>${esc(t.host)}.${t.quote ? " " + esc(t.quote) : ""}</p>` +
     championHtml + awardsHtml +
-    `<h2>Knockout results</h2>${knockout(t)}` +
+    `<h2>Knockout results</h2>${knockout(t, year)}` +
     nationsHtml + otherHtml +
     `</main>`;
 
-  let html = template;
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
-  html = html.replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(description)}$2`);
-  html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${canonical}$2`);
-  html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(title)}$2`);
-  html = html.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
-  html = html.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${canonical}$2`);
-  html = html.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${esc(title)}$2`);
-  html = html.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
-  html = html.replace("</head>", `<script type="application/ld+json">${jsonLd}</script>\n</head>`);
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>\s*<\/body>/, `<div id="root">${content}</div>\n</body>`);
-  return html;
+  return render(title, description, canonical, jsonLd, content);
 }
 
-let n = 0;
+// ── Per-match SEO + content ──────────────────────────────────────────────────
+function goalsHtml(year: number, m: EnumeratedMatch): string {
+  const goals = getScorers(year, m.ta, m.tb);
+  const a = goals?.[0] ?? [];
+  const b = goals?.[1] ?? [];
+  if (!a.length && !b.length) return "";
+  const col = (team: string, list: string[]) =>
+    `<h3>${esc(getTeamName(team))}</h3>` +
+    (list.length ? `<ul>${list.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : `<p>No goals.</p>`);
+  return `<h2>Goalscorers</h2>${col(m.ta, a)}${col(m.tb, b)}`;
+}
+
+function buildMatch(year: number, m: EnumeratedMatch): string {
+  const t = TOURNAMENTS[year];
+  const taName = getTeamName(m.ta);
+  const tbName = getTeamName(m.tb);
+  const roundName = ROUND_NAME[m.round];
+  const scoreStr = m.score ? `${m.score[0]}–${m.score[1]}` : "";
+  const note = matchNote(m);
+  const winnerName = m.winner ? getTeamName(m.winner) : null;
+  const canonical = `${BASE}/tournaments/${year}/matches/${m.slug}/`;
+
+  const title = `${taName} ${scoreStr} ${tbName} — ${year} FIFA World Cup ${roundName} · The Road to Glory`;
+  const description =
+    `${taName} vs ${tbName}, ${year} FIFA World Cup ${roundName} in ${t.host}. ` +
+    `Final score ${scoreStr}${note}.` +
+    (winnerName ? ` ${winnerName} ${m.round === "final" ? "were crowned champions" : "advanced"}.` : "") +
+    ` Goalscorers, result, and match details.`;
+
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${taName} vs ${tbName} — ${year} FIFA World Cup ${roundName}`,
+    sport: "Association football",
+    location: { "@type": "Place", name: t.host },
+    competitor: [
+      { "@type": "SportsTeam", name: taName },
+      { "@type": "SportsTeam", name: tbName },
+    ],
+    url: canonical,
+  });
+
+  const motm = getPlayerOfMatch(year, m.ta, m.tb);
+  const motmHtml = motm
+    ? `<h2>Player of the Match</h2><p>${esc(motm.name)} (${esc(getTeamName(motm.team))}).</p>`
+    : "";
+
+  const winnerHtml = winnerName
+    ? `<p>${esc(winnerName)} ${m.round === "final" ? "were crowned champions" : "advanced to the next round"}.</p>`
+    : "";
+
+  const content =
+    `<main class="prerender">` +
+    `<p><a href="/tournaments/${year}/">← ${year} FIFA World Cup</a></p>` +
+    `<h1>${esc(taName)} ${scoreStr} ${esc(tbName)}</h1>` +
+    `<p>${year} FIFA World Cup ${roundName} · ${esc(t.host)}${esc(note)}</p>` +
+    winnerHtml +
+    goalsHtml(year, m) +
+    motmHtml +
+    `<p><a href="/tournaments/${year}/">All ${year} results</a> · <a href="/">World Cup Archive</a></p>` +
+    `</main>`;
+
+  return render(title, description, canonical, jsonLd, content);
+}
+
+// ── Homepage ─────────────────────────────────────────────────────────────────
+function buildHome(): string {
+  const title = "The Road to Glory — World Cup Radial Knockout Bracket, 1930–2026";
+  const description =
+    "Every FIFA World Cup knockout stage since 1930, drawn as one interactive radial bracket.";
+  const canonical = `${BASE}/`;
+
+  const list = yearsDesc
+    .map((y) => {
+      const t = TOURNAMENTS[y];
+      const champ = champion(t);
+      const champName = champ ? getTeamName(champ) : null;
+      const tail = champName ? ` — ${esc(champName)} champions` : ` — in ${esc(t.host)}`;
+      return `<li><a href="/tournaments/${y}/">${y} FIFA World Cup</a>${tail}</li>`;
+    })
+    .join("");
+
+  const content =
+    `<main class="prerender">` +
+    `<h1>The Road to Glory — FIFA World Cup Archive</h1>` +
+    `<p>Every FIFA World Cup knockout stage from 1930 to 2026, drawn as one interactive ` +
+    `radial bracket. Browse all ${years.length} tournaments — hosts, champions, golden boots, ` +
+    `and full knockout results from the Round of 16 to the Final.</p>` +
+    `<h2>All World Cups</h2><ul>${list}</ul>` +
+    `</main>`;
+
+  // The homepage keeps its own canonical/OG (already correct in the template);
+  // no page-specific JSON-LD (the WebSite schema in the template head stands).
+  return render(title, description, canonical, "", content);
+}
+
+// ── Emit ─────────────────────────────────────────────────────────────────────
+let nTournaments = 0;
+let nMatches = 0;
+
 for (const year of years) {
   const dir = resolve(DIST, "tournaments", String(year));
   mkdirSync(dir, { recursive: true });
-  writeFileSync(resolve(dir, "index.html"), build(year));
-  n++;
+  writeFileSync(resolve(dir, "index.html"), buildTournament(year));
+  nTournaments++;
+
+  const played = enumerateMatches(TOURNAMENTS[year], analyze(TOURNAMENTS[year])).filter((m) => m.played);
+  for (const m of played) {
+    const mdir = resolve(dir, "matches", m.slug);
+    mkdirSync(mdir, { recursive: true });
+    writeFileSync(resolve(mdir, "index.html"), buildMatch(year, m));
+    nMatches++;
+  }
 }
-console.log(`Prerendered ${n} tournament pages → dist/tournaments/<year>/index.html`);
+
+writeFileSync(resolve(DIST, "index.html"), buildHome());
+
+console.log(
+  `Prerendered homepage + ${nTournaments} tournament pages + ${nMatches} match pages → dist/`
+);
