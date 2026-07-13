@@ -15,6 +15,7 @@ export interface EnumeratedMatch {
   winner: string | null; // winning team code, or null (not played / draw→pens)
   pens: string | null; // penalty shootout score, e.g. "4-3"
   extra: string | null; // e.g. "a.e.t."
+  goals: [string[], string[]] | null; // inline goalscorers [ta, tb] (2026); null otherwise
 }
 
 // URL-safe segment for a team name: strip accents, lowercase, non-alnum → "-".
@@ -38,7 +39,7 @@ function matchAt(data: TournamentData, round: string, idx: number) {
   if (round === "r32") {
     const rm = data.r32?.[idx];
     if (!rm || rm.s === null || rm.w === null) return null;
-    return { s: rm.s, w: rm.w, p: rm.p ?? null, x: rm.x ?? null };
+    return { s: rm.s, w: rm.w, p: rm.p ?? null, x: rm.x ?? null, g: rm.g ?? null };
   }
   const matches = data[round as "r16" | "qf" | "sf" | "final"];
   const m = matches ? (round === "final" ? matches[0] : matches[idx]) : null;
@@ -68,6 +69,7 @@ export function enumerateMatches(
       winner: played ? (m!.w === 0 ? ta : tb) : null,
       pens: m?.p ?? null,
       extra: m?.x ?? null,
+      goals: m?.g ?? null,
     });
   };
 

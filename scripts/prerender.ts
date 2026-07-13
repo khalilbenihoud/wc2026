@@ -226,7 +226,9 @@ function buildTournament(year: number): string {
 
 // ── Per-match SEO + content ──────────────────────────────────────────────────
 function goalsHtml(year: number, m: EnumeratedMatch): string {
-  const goals = getScorers(year, m.ta, m.tb);
+  // Inline goals (2026 matches carry them on the match object) take precedence,
+  // then the generated historical scorers set — same order the modal uses.
+  const goals = m.goals ?? getScorers(year, m.ta, m.tb);
   const a = goals?.[0] ?? [];
   const b = goals?.[1] ?? [];
   if (!a.length && !b.length) return "";
