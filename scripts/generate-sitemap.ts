@@ -1,5 +1,7 @@
 import { TOURNAMENTS, TEAMS } from "../src/data";
 import { COUNTRY_PAGE_ENABLED } from "../src/router";
+import { analyze } from "../src/analysis";
+import { enumerateMatches } from "../src/matches";
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
@@ -14,8 +16,13 @@ for (const year of Object.keys(TOURNAMENTS).map(Number)) {
   // Trailing slash matches the 200 URL Netlify serves (pretty_urls 301s the
   // non-slash form), so canonicals/sitemap point at the real page, not a redirect.
   urls.push({ loc: `/tournaments/${year}/`, priority: 0.9, changefreq: "monthly" });
-  // Per-match pages (/tournaments/<year>/matches/<slug>) aren't built yet — they
-  // render the SPA home shell, so we don't advertise them (they'd be soft-404s).
+  // Per-match detail pages are prerendered (scripts/prerender.ts) for every
+  // played knockout match, so advertise those real static pages too.
+  const t = TOURNAMENTS[year];
+  for (const m of enumerateMatches(t, analyze(t))) {
+    if (!m.played) continue;
+    urls.push({ loc: `/tournaments/${year}/matches/${m.slug}/`, priority: 0.7, changefreq: "monthly" });
+  }
 }
 
 const allCodes = new Set<string>();

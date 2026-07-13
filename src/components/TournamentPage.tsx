@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
 import { getMatchNotes } from "../constants";
-import { countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "../router";
+import { countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "../router";
+import { matchSlug } from "../matches";
 import { CHAMPION_IMAGES } from "../championImages.generated";
 import { useWikiPhoto } from "../wikiPhoto";
 import PlayerAvatar from "./PlayerAvatar";
@@ -247,6 +248,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             {t.r32 && t.r32.length > 0 && (
               <KnockoutRound
                 label="Round of 32"
+                year={year}
                 matches={t.r32.map((m) => ({
                   teamA: m.ta,
                   teamB: m.tb,
@@ -262,6 +264,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             {t.r16 && (
               <KnockoutRound
                 label="Round of 16"
+                year={year}
                 matches={t.r16.map((m, i) => {
                   if (!m) return null;
                   const ta = t.teams[2 * i];
@@ -282,6 +285,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             {t.qf && (
               <KnockoutRound
                 label="Quarter-finals"
+                year={year}
                 matches={getRoundMatches(t, year, "qf")}
                 onNavigate={onNavigate}
               />
@@ -289,6 +293,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             {t.sf && (
               <KnockoutRound
                 label="Semi-finals"
+                year={year}
                 matches={getRoundMatches(t, year, "sf")}
                 onNavigate={onNavigate}
               />
@@ -296,6 +301,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
             {t.final && (
               <KnockoutRound
                 label="Final"
+                year={year}
                 matches={getRoundMatches(t, year, "final")}
                 onNavigate={onNavigate}
               />
@@ -346,7 +352,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
               .map((y) => (
                 <AppLink
                   key={y}
-                  href={tournamentPath(y)}
+                  href={`${tournamentPath(y)}/`}
                   onNavigate={onNavigate}
                   className="px-3 py-1.5 rounded-full border text-sm transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
                 >
@@ -373,10 +379,12 @@ interface KnockoutMatch {
 function KnockoutRound({
   label,
   matches,
+  year,
   onNavigate,
 }: {
   label: string;
   matches: KnockoutMatch[];
+  year: number;
   onNavigate: (path: string) => void;
 }) {
   return (
@@ -389,25 +397,42 @@ function KnockoutRound({
           const played = m.scoreA !== null && m.scoreB !== null;
           const score = played ? `${m.scoreA}–${m.scoreB}` : "vs";
           const notes = getMatchNotes({ x: m.extra, p: m.pens });
-          return (
-            <div
-              key={i}
-              className="w-full px-4 py-3 rounded-xl bg-brand-panel/40 border border-brand-line/40"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <TeamSide code={m.teamA} winner={wA} align="start" onNavigate={onNavigate} />
-                <div className="flex flex-col items-center shrink-0">
-                  <span className="font-unbounded text-sm tracking-wide text-brand-gold font-bold">
-                    {score}
+          const knownTeams = m.teamA !== "TBD" && m.teamB !== "TBD";
+          // Played, fully-resolved matches get their own crawlable detail page;
+          // undecided/TBD fixtures stay as plain rows (no page exists for them).
+          const href = played && knownTeams ? `${matchPath(year, matchSlug(m.teamA, m.teamB))}/` : null;
+
+          const inner = (
+            <div className="flex items-center justify-between gap-2">
+              <TeamSide code={m.teamA} winner={wA} align="start" onNavigate={onNavigate} />
+              <div className="flex flex-col items-center shrink-0">
+                <span className="font-unbounded text-sm tracking-wide text-brand-gold font-bold">
+                  {score}
+                </span>
+                {notes.length > 0 && (
+                  <span className="font-mono text-[10px] tracking-wider uppercase text-brand-muted/70 leading-none mt-0.5">
+                    {notes.join(" ")}
                   </span>
-                  {notes.length > 0 && (
-                    <span className="font-mono text-[10px] tracking-wider uppercase text-brand-muted/70 leading-none mt-0.5">
-                      {notes.join(" ")}
-                    </span>
-                  )}
-                </div>
-                <TeamSide code={m.teamB} winner={wB} align="end" onNavigate={onNavigate} />
+                )}
               </div>
+              <TeamSide code={m.teamB} winner={wB} align="end" onNavigate={onNavigate} />
+            </div>
+          );
+
+          const base = "block w-full px-4 py-3 rounded-xl bg-brand-panel/40 border border-brand-line/40";
+          return href ? (
+            <AppLink
+              key={i}
+              href={href}
+              onNavigate={onNavigate}
+              className={`${base} hover:border-brand-gold/40 hover:bg-brand-gold/[0.06] transition-colors`}
+              aria-label={`${getTeamName(m.teamA)} vs ${getTeamName(m.teamB)} — ${label} match details`}
+            >
+              {inner}
+            </AppLink>
+          ) : (
+            <div key={i} className={base}>
+              {inner}
             </div>
           );
         })}
