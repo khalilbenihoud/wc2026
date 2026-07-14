@@ -461,13 +461,11 @@ body::after {
 
 .ch {
   display: inline-block;
-  transform: translateY(100%);
-  opacity: 0;
-  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+  transform: translateY(120%);
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
 }
 .ch.show {
   transform: translateY(0);
-  opacity: 1;
 }
 .ch-br { display: none; }
 @media (max-width: 640px) { .ch-br { display: block; width: 100%; height: 0; } }

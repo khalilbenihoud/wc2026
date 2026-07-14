@@ -898,13 +898,13 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       // France 1–0 Paraguay (R16, Jul 4) — France advance
       M(0, 1, 1, null, null, [[], ["Kylian Mbappé 70' (pen.)"]]),
       M(0, 3, 1, null, null, [[], ["Azzedine Ounahi 50'", "Azzedine Ounahi 82'", "Soufiane Rahimi 90+8'"]]),
-      M(1, 2, 1, null, null, [["Neymar 90+10' (pen.)"], ["Erling Haaland 79'", "Erling Haaland 90'"]]),
-      // Mexico 2–3 England (R16, Jul 5) — England advance
-      M(2, 3, 1, null, null, [["Julián Quiñones 42'", "Raúl Jiménez 69' (pen.)"], ["Jude Bellingham 36'", "Jude Bellingham 38'", "Harry Kane 60' (pen.)"]]),
       // Portugal 0–1 Spain (R16, Jul 6) — Spain advance on Merino's stoppage-time winner
       M(0, 1, 1, null, null, [[], ["Mikel Merino 90+1'"]]),
       // USA 1–4 Belgium (R16, Jul 6) — Belgium advance (De Ketelaere brace)
       M(1, 4, 1, null, null, [["Malik Tillman 31'"], ["Charles De Ketelaere 9'", "Charles De Ketelaere 33'", "Hans Vanaken 57'", "Romelu Lukaku 90+3'"]]),
+      M(1, 2, 1, null, null, [["Neymar 90+10' (pen.)"], ["Erling Haaland 79'", "Erling Haaland 90'"]]),
+      // Mexico 2–3 England (R16, Jul 5) — England advance
+      M(2, 3, 1, null, null, [["Julián Quiñones 42'", "Raúl Jiménez 69' (pen.)"], ["Jude Bellingham 36'", "Jude Bellingham 38'", "Harry Kane 60' (pen.)"]]),
       // Argentina 3–2 Egypt (R16, Jul 7) — Argentina advance after a 2-goal comeback
       M(3, 2, 0, null, null, [["Cristian Romero 79'", "Lionel Messi 83'", "Enzo Fernández 90+2'"], ["Yasser Ibrahim 15'", "Mostafa Zico 67'"]]),
       // Switzerland 0–0 Colombia (R16, Jul 8) — SUI wins 4-3 on pens
@@ -913,14 +913,18 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     qf: [
       // France 2–0 Morocco (QF, Jul 10) — France advance (Mbappé, Dembélé)
       M(2, 0, 0, null, null, [["Kylian Mbappé 60'", "Ousmane Dembélé 66'"], []]),
-      // Norway 1–2 England (QF, Jul 11, a.e.t.) — England advance (Schjelderup; Bellingham 2)
-      M(1, 2, 1, null, "a.e.t.", [["Andreas Schjelderup 36'"], ["Jude Bellingham 45+2'", "Jude Bellingham 93'"]]),
       // Spain 2–1 Belgium (QF, Jul 10) — Spain advance (Fabián Ruiz, Merino; De Ketelaere)
       M(2, 1, 0, null, null, [["Fabián Ruiz 30'", "Mikel Merino 88'"], ["Charles De Ketelaere 41'"]]),
+      // Norway 1–2 England (QF, Jul 11, a.e.t.) — England advance (Schjelderup; Bellingham 2)
+      M(1, 2, 1, null, "a.e.t.", [["Andreas Schjelderup 36'"], ["Jude Bellingham 45+2'", "Jude Bellingham 93'"]]),
       // Argentina 3–1 Switzerland (QF, Jul 11, a.e.t.) — Argentina advance; Embolo sent off (2nd yellow)
       M(3, 1, 0, null, "a.e.t.", [["Alexis Mac Allister 11'", "Julián Álvarez 112'", "Lautaro Martínez 120+2'"], ["Dan Ndoye 67'"]]),
     ],
-    sf: null,
+    sf: [
+      // France 0–2 Spain (SF, Jul 14) — Spain advance to final (Oyarzabal pen., Porro)
+      M(0, 2, 1, null, null, [[], ["Mikel Oyarzabal 22' (pen.)", "Pedro Porro 58'"]]),
+      null,
+    ],
     final: null,
   },
 };
