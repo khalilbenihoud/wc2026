@@ -8,11 +8,14 @@ interface Props {
   analysis: TournamentAnalysis;
   onSelectMatch: (round: string, idx: number) => void;
   onNavigateCountry?: (code: string) => void;
+  // "New" mobile design: pin the round switcher to the top on scroll and pack
+  // the match rows a little tighter.
+  v2?: boolean;
 }
 
 const ROUND_KEYS = ["r32", "r16", "qf", "sf", "final"] as const;
 
-export default function BracketList({ data, analysis, onSelectMatch, onNavigateCountry }: Props) {
+export default function BracketList({ data, analysis, onSelectMatch, onNavigateCountry, v2 }: Props) {
   const rounds = useMemo(() => {
     const result: { key: string; label: string; matches: { idx: number; ta: string; tb: string }[] }[] = [];
 
@@ -59,7 +62,9 @@ export default function BracketList({ data, analysis, onSelectMatch, onNavigateC
     <div className="w-full h-full min-h-0 flex flex-col pb-24 relative">
       {/* Segmented control */}
       {rounds.length > 1 && (
-        <div className="flex-none px-4 pt-3 pb-3 overflow-x-auto md:px-0 md:mx-auto md:w-full md:max-w-[560px]">
+        <div className={`flex-none px-4 pt-3 pb-3 overflow-x-auto md:px-0 md:mx-auto md:w-full md:max-w-[560px] ${
+          v2 ? "max-md:sticky max-md:top-0 max-md:z-20 max-md:bg-brand-bg/85 max-md:backdrop-blur-md max-md:border-b max-md:border-brand-line/40" : ""
+        }`}>
           <div className="flex items-center gap-1 p-0.5 rounded-lg bg-brand-panel border border-brand-line/60 w-fit mx-auto">
             {rounds.map((r) => (
               <button
@@ -81,7 +86,7 @@ export default function BracketList({ data, analysis, onSelectMatch, onNavigateC
       {/* Matches for the active round */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 max-md:px-4 md:px-0 md:mx-auto md:w-full md:max-w-[560px]">
         {current && (
-          <div className="space-y-2 pb-12">
+          <div className={`${v2 ? "space-y-1.5" : "space-y-2"} pb-12 ${v2 ? "max-md:pt-2" : ""}`}>
             {current.matches.map((m, i) => {
               const matchData = data[current.key as "r16" | "qf" | "sf" | "final"]?.[m.idx];
               const played = matchData?.s != null;
@@ -99,7 +104,7 @@ export default function BracketList({ data, analysis, onSelectMatch, onNavigateC
                   role="button"
                   tabIndex={0}
                   aria-label={`${getTeamName(taCode)} vs ${getTeamName(tbCode)}${played ? ` ${score}` : ""}. View match details.`}
-                  className="w-full text-left px-4 py-3 rounded-xl bg-brand-panel/40 border border-brand-line/40 hover:border-brand-gold/30 hover:bg-brand-panel/60 transition-all cursor-pointer active:scale-[0.98]"
+                  className={`w-full text-left px-4 ${v2 ? "py-2.5" : "py-3"} rounded-xl bg-brand-panel/40 border border-brand-line/40 hover:border-brand-gold/30 hover:bg-brand-panel/60 transition-all cursor-pointer active:scale-[0.98]`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span

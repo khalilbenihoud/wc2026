@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Inter:wght@600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1080px; overflow: hidden; }
+  .canvas {
+    position: relative;
+    width: 1080px; height: 1080px;
+    background:
+      radial-gradient(circle at 50% 46%, rgba(246,196,83,0.16), rgba(246,196,83,0.05) 30%, transparent 58%),
+      radial-gradient(circle at 50% 50%, #101015, #09090b 70%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: "Unbounded", sans-serif;
+    overflow: hidden;
+  }
+  /* Concentric radial-bracket rings — the brand's signature motif, kept faint
+     behind the wordmark. */
+  .rings { position: absolute; inset: 0; }
+  /* Soft dark scrim so the wordmark stays crisp over the rings. */
+  .scrim {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 820px; height: 520px;
+    background: radial-gradient(ellipse at center, rgba(9,9,11,0.82) 38%, transparent 72%);
+  }
+  .wrap { position: relative; text-align: center; z-index: 2; }
+  .kicker {
+    font-family: "Inter", sans-serif;
+    font-weight: 600; font-size: 26px; letter-spacing: 0.42em;
+    text-transform: uppercase; color: #d9b45a; opacity: 0.85;
+    margin-bottom: 34px; padding-left: 0.42em;
+  }
+  h1 {
+    font-weight: 700; font-size: 130px; line-height: 1.04; letter-spacing: 0.01em;
+    background: linear-gradient(180deg, #ffe9ab 0%, #ffdf8e 20%, #f6c453 54%, #b8862f 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 10px 40px rgba(246,196,83,0.22));
+  }
+  .est {
+    font-family: "Inter", sans-serif;
+    font-weight: 600; font-size: 24px; letter-spacing: 0.4em;
+    text-transform: uppercase; color: #7c7c85;
+    margin-top: 40px; padding-left: 0.4em;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <svg class="rings" viewBox="0 0 1080 1080" fill="none">
+    <defs>
+      <linearGradient id="goldArc" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffdf8e" />
+        <stop offset="1" stop-color="#b8862f" />
+      </linearGradient>
+    </defs>
+    <g stroke="#3a3a41" stroke-width="2" opacity="0.55">
+      <circle cx="540" cy="540" r="150" stroke-dasharray="3 26" />
+      <circle cx="540" cy="540" r="250" stroke-dasharray="46 34" />
+      <circle cx="540" cy="540" r="350" stroke-dasharray="70 40" />
+      <circle cx="540" cy="540" r="450" stroke-dasharray="90 54" />
+    </g>
+    <!-- gold winning-run arcs -->
+    <path d="M 540 340 A 200 200 0 0 1 740 540" stroke="url(#goldArc)" stroke-width="3" opacity="0.9" stroke-linecap="round" />
+    <path d="M 540 190 A 350 350 0 0 0 250 720" stroke="url(#goldArc)" stroke-width="3" opacity="0.55" stroke-linecap="round" />
+    <!-- decorative avatar ring, safe inside the circular crop -->
+    <circle cx="540" cy="540" r="516" stroke="#3a3a41" stroke-width="2" opacity="0.5" />
+    <circle cx="540" cy="540" r="516" stroke="url(#goldArc)" stroke-width="3" stroke-dasharray="2 40" opacity="0.8" />
+  </svg>
+  <div class="scrim"></div>
+  <div class="wrap">
+    <div class="kicker">Est. 1930</div>
+    <h1>The&nbsp;Road<br/>to&nbsp;Glory</h1>
+    <div class="est">World Cup Archive</div>
+  </div>
+</div>
+</body>
+</html>

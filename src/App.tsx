@@ -85,6 +85,15 @@ export default function App() {
   const [activeYear, setActiveYear] = useState<number>(2026);
   const [viewMode, setViewMode] = useState<"radial" | "list">("radial");
 
+  // Temporary A/B switch for the redesigned mobile experience, so the new layout
+  // can be compared against the current one live. Persisted across reloads.
+  const [mobileV2, setMobileV2] = useState<boolean>(
+    () => (localStorage.getItem("wc-mobile-v2") ?? "1") === "1"
+  );
+  useEffect(() => {
+    localStorage.setItem("wc-mobile-v2", mobileV2 ? "1" : "0");
+  }, [mobileV2]);
+
   // The radial bracket is desktop-only; phones always get the list view. Track
   // the viewport reactively so resizing across the breakpoint stays correct.
   const [isMobile, setIsMobile] = useState(
@@ -407,10 +416,40 @@ export default function App() {
         inert={selectedMatch !== null}
         className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col"
       >
-        {/* Mobile notice */}
-      <div className="flex-none md:hidden text-center text-[11px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
-        Best viewed on desktop
-      </div>
+        {/* Mobile design A/B switcher — lets you compare the current ("Classic")
+            layout with the redesign ("New"). Remove once a direction is chosen. */}
+        <div className="md:hidden fixed top-2 right-2 z-[60] flex items-center gap-0.5 p-0.5 rounded-full bg-brand-panel/90 backdrop-blur border border-brand-line/70 shadow-lg">
+          {(["Classic", "New"] as const).map((label, i) => {
+            const isNew = i === 1;
+            const active = mobileV2 === isNew;
+            return (
+              <button
+                key={label}
+                onClick={() => setMobileV2(isNew)}
+                className={`px-2.5 py-1 text-[10px] font-mono tracking-wider uppercase rounded-full transition-colors cursor-pointer ${
+                  active ? "bg-brand-gold text-brand-bg font-bold" : "text-brand-muted"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile notice — Classic keeps the "best on desktop" bar; New drops it
+            and, for an in-progress tournament, shows a subtle live indicator. */}
+      {!mobileV2 ? (
+        <div className="flex-none md:hidden text-center text-[11px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
+          Best viewed on desktop
+        </div>
+      ) : champCode === null ? (
+        <div className="flex-none md:hidden flex justify-center py-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/[0.08] border border-brand-gold/25 px-3 py-1 text-[10px] font-mono font-semibold tracking-[0.2em] uppercase text-brand-gold">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />
+            {activeYear} · Live
+          </span>
+        </div>
+      ) : null}
       {/* Dynamic Background Layout Frame */}
       <div className="app relative grid grid-cols-1 md:grid-cols-[300px_1fr] md:min-h-0 md:flex-1 items-stretch">
         {/* Sidebar divider — pinned to the full height of the app frame, gradient effect */}
@@ -421,7 +460,7 @@ export default function App() {
 
         {/* Left Rail: Brand + Timeline */}
         <aside className="rail relative z-20 flex flex-col md:min-h-0 px-4 pt-4 pb-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both] max-md:border-b border-brand-line/40">
-          <div className="brand relative mb-4 md:mb-6 max-md:text-center">
+          <div className={`brand relative md:mb-6 max-md:text-center ${mobileV2 ? "max-md:mb-2" : "mb-4"}`}>
             {/* Light/dark toggle — hidden via SHOW_THEME_TOGGLE, code kept intact */}
             {SHOW_THEME_TOGGLE && (
               <button
@@ -441,7 +480,7 @@ export default function App() {
                 The Road to Glory
               </span>
             </h1>
-            <p className="sub text-brand-muted text-sm mt-2 md:mt-3 leading-relaxed max-w-[280px] max-md:mx-auto">
+            <p className={`sub text-brand-muted text-sm mt-2 md:mt-3 leading-relaxed max-w-[280px] max-md:mx-auto ${mobileV2 ? "max-md:hidden" : ""}`}>
               Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
           </div>
@@ -451,6 +490,7 @@ export default function App() {
           {/* Mobile summary — the desktop header is hidden on phones, so surface
               the same host / champion / awards here, in the chosen variant. */}
           <HeaderMetaMobile
+            v2={mobileV2}
             year={activeYear}
             host={currentData.host}
             hostFlag={currentData.hostFlag}
@@ -518,6 +558,7 @@ export default function App() {
                 analysis={currentAnalysis}
                 onSelectMatch={handleSelectMatch}
                 onNavigateCountry={handleNavigateCountry}
+                v2={mobileV2}
               />
             </div>
           )}
