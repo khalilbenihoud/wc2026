@@ -869,10 +869,10 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     teams: [
       "PAR", "FRA",
       "CAN", "MAR",
-      "BRA", "NOR",
-      "MEX", "ENG",
       "POR", "ESP",
       "USA", "BEL",
+      "BRA", "NOR",
+      "MEX", "ENG",
       "ARG", "EGY",
       "SUI", "COL",
     ],
