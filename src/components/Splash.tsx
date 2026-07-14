@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 
 const YEARS = [1930, 1934, 1938, 1950, 1954, 1958, 1962, 1966, 1970, 1974, 1978, 1982, 1986, 1990, 1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022, 2026];
 
@@ -162,12 +162,16 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
           <span className="splash-line" style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem", animationDelay: "0.15s" }} />
         </div>
 
-        <h1 style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2rem,5.5vw,3.75rem)", fontWeight: 600, lineHeight: 1.15, letterSpacing: "0.04em", overflow: "hidden" }}>
+        <h1 style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2rem,5.5vw,3.75rem)", fontWeight: 600, lineHeight: 1.15, letterSpacing: "0.04em", overflow: "hidden", textAlign: "center" }}>
           {"The Road to Glory".split("").map((char, i) => (
-            <span key={i} ref={(el) => { if (el) charsRef.current[i] = el; }} className="ch">
-              {char === " " ? "\u00A0" : char}
+            <Fragment key={i}>
+              <span ref={(el) => { if (el) charsRef.current[i] = el; }} className="ch">
+                {char === " " ? "\u00A0" : char}
+              </span>
+              {/* Sibling of the char spans (not nested), so on mobile the
+                  width:100% break actually wraps "to Glory" to its own line. */}
               {i === 7 ? <span className="ch-br" /> : null}
-            </span>
+            </Fragment>
           ))}
         </h1>
 
