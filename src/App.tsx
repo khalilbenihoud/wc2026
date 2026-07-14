@@ -25,6 +25,7 @@ import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
 import { findMatchBySlug } from "./matches";
+import { tournamentEvent, matchEvent } from "./schema";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -372,17 +373,7 @@ export default function App() {
               : "") +
             `Goalscorers, result, and match details.`,
           canonical: `${matchPath(matchYear, found.slug)}/`,
-          jsonLd: {
-            "@type": "SportsEvent",
-            name: `${taName} vs ${tbName} — ${matchYear} FIFA World Cup ${roundName}`,
-            sport: "Association football",
-            location: { "@type": "Place", name: t.host },
-            competitor: [
-              { "@type": "SportsTeam", name: taName },
-              { "@type": "SportsTeam", name: tbName },
-            ],
-            url: `https://worldcuparchive.net${matchPath(matchYear, found.slug)}/`,
-          },
+          jsonLd: matchEvent(matchYear, t.host, taName, tbName, roundName, found.slug),
         };
       }
     }
@@ -394,14 +385,7 @@ export default function App() {
         title: `${tournamentYear} FIFA World Cup Results — ${champName} Champion · The Road to Glory`,
         description: `${tournamentYear} FIFA World Cup in ${t.host}. ${t.quote || ""} Full knockout results, golden boot, and all participating nations.`,
         canonical: `${tournamentPath(tournamentYear)}/`, // trailing slash = Netlify's 200 URL
-        jsonLd: {
-          "@type": "SportsEvent",
-          name: `${tournamentYear} FIFA World Cup`,
-          startDate: `${tournamentYear}-06-01`,
-          endDate: `${tournamentYear}-07-31`,
-          location: { "@type": "Place", name: t.host },
-          description: t.quote || `${tournamentYear} FIFA World Cup`,
-        },
+        jsonLd: tournamentEvent(tournamentYear, t, champ),
       };
     }
     return {
