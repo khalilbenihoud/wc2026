@@ -162,7 +162,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
           <span className="splash-line" style={{ flex: 1, height: 1, background: "#d9b45a", opacity: 0.25, minWidth: "1.5rem", animationDelay: "0.15s" }} />
         </div>
 
-        <h1 style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2rem,5.5vw,3.75rem)", fontWeight: 600, lineHeight: 1.15, letterSpacing: "0.04em", overflow: "hidden", textAlign: "center" }}>
+        <h1 style={{ fontFamily: "Unbounded, sans-serif", fontSize: "clamp(2rem,5.5vw,3.75rem)", fontWeight: 600, lineHeight: 1.15, letterSpacing: "0.04em", overflow: "hidden", textAlign: "center", color: "#f6c453" }}>
           {"The Road to Glory".split("").map((char, i) => (
             <Fragment key={i}>
               <span ref={(el) => { if (el) charsRef.current[i] = el; }} className="ch">
@@ -172,8 +172,7 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
                   width:100% break actually wraps "to Glory" to its own line. */}
               {i === 7 ? <span className="ch-br" /> : null}
             </Fragment>
-          ))}
-        </h1>
+          ))}</h1>
 
         <p className="splash-rise" style={{ maxWidth: "36rem", fontSize: "0.9375rem", lineHeight: 1.6, opacity: 0.55, animationDelay: "0.9s" }}>
           Every knockout bracket since 1930, drawn as a single radial map from the first round of sixteen to the final whistle.

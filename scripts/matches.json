@@ -1878,20 +1878,6 @@
   {
     "year": 2026,
     "round": "r16",
-    "key": "2026_BRA_NOR",
-    "teamA": "BRA",
-    "teamB": "NOR"
-  },
-  {
-    "year": 2026,
-    "round": "r16",
-    "key": "2026_MEX_ENG",
-    "teamA": "MEX",
-    "teamB": "ENG"
-  },
-  {
-    "year": 2026,
-    "round": "r16",
     "key": "2026_POR_ESP",
     "teamA": "POR",
     "teamB": "ESP"
@@ -1906,8 +1892,64 @@
   {
     "year": 2026,
     "round": "r16",
+    "key": "2026_BRA_NOR",
+    "teamA": "BRA",
+    "teamB": "NOR"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_MEX_ENG",
+    "teamA": "MEX",
+    "teamB": "ENG"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
     "key": "2026_ARG_EGY",
     "teamA": "ARG",
     "teamB": "EGY"
+  },
+  {
+    "year": 2026,
+    "round": "r16",
+    "key": "2026_SUI_COL",
+    "teamA": "SUI",
+    "teamB": "COL"
+  },
+  {
+    "year": 2026,
+    "round": "qf",
+    "key": "2026_FRA_MAR",
+    "teamA": "FRA",
+    "teamB": "MAR"
+  },
+  {
+    "year": 2026,
+    "round": "qf",
+    "key": "2026_ESP_BEL",
+    "teamA": "ESP",
+    "teamB": "BEL"
+  },
+  {
+    "year": 2026,
+    "round": "qf",
+    "key": "2026_NOR_ENG",
+    "teamA": "NOR",
+    "teamB": "ENG"
+  },
+  {
+    "year": 2026,
+    "round": "qf",
+    "key": "2026_ARG_SUI",
+    "teamA": "ARG",
+    "teamB": "SUI"
+  },
+  {
+    "year": 2026,
+    "round": "sf",
+    "key": "2026_FRA_ESP",
+    "teamA": "FRA",
+    "teamB": "ESP"
   }
 ]

@@ -41,8 +41,12 @@ const MOTM: Record<string, PlayerOfMatch> = {
 
   // Quarter-finals
   "2026_FRA_MAR": { name: "Kylian Mbappé", team: "FRA" },
-  "2026_ESP_BEL": { name: "Lamine Yamal", team: "ESP" },
   "2026_NOR_ENG": { name: "Jude Bellingham", team: "ENG" },
+  "2026_ESP_BEL": { name: "Lamine Yamal", team: "ESP" },
+  "2026_ARG_SUI": { name: "Julián Alvarez", team: "ARG" },
+
+  // Semi-finals
+  "2026_FRA_ESP": { name: "Pedro Porro", team: "ESP" },
 
   // ─── 2022 ────────────────────────────────────────────────────────────────
   // Budweiser Player of the Match (Wikipedia)
