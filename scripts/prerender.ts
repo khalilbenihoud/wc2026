@@ -19,6 +19,7 @@ import { enumerateMatches, EnumeratedMatch } from "../src/matches";
 import { ROUND_NAME } from "../src/constants";
 import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
+import { tournamentEvent, matchEvent } from "../src/schema";
 
 const BASE = "https://worldcuparchive.net";
 const DIST = resolve(process.cwd(), "dist");
@@ -106,8 +107,14 @@ function render(
   html = html.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${esc(title)}$2`);
   html = html.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
   if (jsonLd) {
-    html = html.replace("</head>", `<script type="application/ld+json">${jsonLd}</script>\n</head>`);
+    html = html.replace(
+      "</head>",
+      `<script type="application/ld+json" id="seo-jsonld">${jsonLd}</script>\n</head>`
+    );
   }
+  // id="seo-jsonld" matches the id the runtime SEO hook (src/seo.ts) uses, so on
+  // mount it REPLACES this prerendered event instead of appending a second one —
+  // otherwise Googlebot (which runs JS) sees two SportsEvents per page.
   // The prerendered text stays in #root so crawlers (and no-JS visitors) can read
   // it, but human visitors shouldn't watch the raw list flash by while the bundle
   // loads. Paint the branded loading screen fixed on top of it; createRoot()
@@ -177,14 +184,7 @@ function buildTournament(year: number): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: `${year} FIFA World Cup`,
-    sport: "Association football",
-    startDate: `${year}-06-01`,
-    endDate: `${year}-07-31`,
-    location: { "@type": "Place", name: t.host },
-    description: t.quote || `${year} FIFA World Cup in ${t.host}.`,
-    url: canonical,
+    ...tournamentEvent(year, t, champ),
   });
 
   const teams = [...new Set([...t.teams, ...(t.r32?.flatMap((m) => [m.ta, m.tb]) ?? [])])]
@@ -257,15 +257,7 @@ function buildMatch(year: number, m: EnumeratedMatch): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: `${taName} vs ${tbName} — ${year} FIFA World Cup ${roundName}`,
-    sport: "Association football",
-    location: { "@type": "Place", name: t.host },
-    competitor: [
-      { "@type": "SportsTeam", name: taName },
-      { "@type": "SportsTeam", name: tbName },
-    ],
-    url: canonical,
+    ...matchEvent(year, t.host, taName, tbName, roundName, m.slug),
   });
 
   const motm = getPlayerOfMatch(year, m.ta, m.tb);
