@@ -16,7 +16,7 @@ Explore tournament history through an interactive SVG — from the Round of 16 t
 
 ## Stack
 
-React 19 · TypeScript · Vite 6 · Tailwind CSS 4 · SVG · Cloudflare Pages
+React 19 · TypeScript · Vite 6 · Tailwind CSS 4 · SVG · Netlify
 
 ### Fonts
 
