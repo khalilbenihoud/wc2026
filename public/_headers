@@ -1,8 +1,10 @@
-# Cloudflare Pages custom response headers.
-# https://developers.cloudflare.com/pages/configuration/headers/
+# Netlify custom response headers.
+# https://docs.netlify.com/routing/headers/
+# Fonts are self-hosted ('self') — see src/index.css @font-face. Do not re-add
+# fonts.googleapis.com / fonts.gstatic.com to the CSP.
 
 /*
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://en.wikipedia.org https://eu.i.posthog.com; img-src 'self' data: https://upload.wikimedia.org https://i.ytimg.com https://images.unsplash.com; script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com; frame-ancestors 'none'; form-action 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://en.wikipedia.org https://eu.i.posthog.com; img-src 'self' data: https://upload.wikimedia.org https://i.ytimg.com https://images.unsplash.com; script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com; frame-ancestors 'none'; form-action 'none'; base-uri 'self'
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
