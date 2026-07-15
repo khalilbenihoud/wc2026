@@ -18,6 +18,16 @@ Explore tournament history through an interactive SVG — from the Round of 16 t
 
 React 19 · TypeScript · Vite 6 · Tailwind CSS 4 · SVG · Cloudflare Pages
 
+### Fonts
+
+Inter and Unbounded are **self-hosted** in `public/fonts/` (`@font-face` in
+`src/index.css`), not loaded from the Google Fonts CDN — this keeps two
+render-blocking third-party requests off the critical path and lets us preload
+the LCP heading font. Both are variable fonts, so one `woff2` per subset
+(`latin`, `latin-ext`) covers every weight. **Please don't re-add the Google
+Fonts `<link>` tags** in `index.html`; to change weights or subsets, update the
+vendored files and the `@font-face` rules instead.
+
 ## Getting started
 
 ```bash
