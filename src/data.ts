@@ -923,7 +923,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     sf: [
       // France 0–2 Spain (SF, Jul 14) — Spain advance to final (Oyarzabal pen., Porro)
       M(0, 2, 1, null, null, [[], ["Mikel Oyarzabal 22' (pen.)", "Pedro Porro 58'"]]),
-      null,
+      // England 1–2 Argentina (SF, Jul 15) — Argentina rally late (Messi 2 assists) to reach the final
+      M(1, 2, 1, null, null, [["Anthony Gordon 55'"], ["Enzo Fernández 85'", "Lautaro Martínez 90+2'"]]),
     ],
     final: null,
   },

@@ -47,6 +47,7 @@ const MOTM: Record<string, PlayerOfMatch> = {
 
   // Semi-finals
   "2026_FRA_ESP": { name: "Pedro Porro", team: "ESP" },
+  "2026_ENG_ARG": { name: "Lionel Messi", team: "ARG" },
 
   // ─── 2022 ────────────────────────────────────────────────────────────────
   // Budweiser Player of the Match (Wikipedia)
