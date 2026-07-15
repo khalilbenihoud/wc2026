@@ -62,8 +62,8 @@ const STATS_2026: Record<string, MatchStats> = {
   "2026_ENG_NOR": { cards: [[], ["🟨"]], subs: [[], []], pens: [[], []], possession: ["52%", "48%"], totalShots: [14, 13], fouls: [8, 10] },
   "2026_ARG_SUI": { cards: [["🟨", "🟨", "🟨"], ["🟨", "🟥"]], subs: [[], []], pens: [[], []], possession: ["59%", "41%"], totalShots: [22, 11], fouls: [14, 18] },
   "2026_SUI_ARG": { cards: [["🟨", "🟥"], ["🟨", "🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["41%", "59%"], totalShots: [11, 22], fouls: [18, 14] },
-  "2026_FRA_ESP": { cards: [["🟨", "🟨"], ["🟨"]], subs: [[], []], pens: [[], []], possession: undefined, totalShots: undefined, fouls: undefined },
-  "2026_ESP_FRA": { cards: [["🟨"], ["🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: undefined, totalShots: undefined, fouls: undefined },
+  "2026_FRA_ESP": { cards: [["🟨", "🟨"], ["🟨"]], subs: [[], []], pens: [[], []], possession: ["49%", "51%"], totalShots: [10, 10], fouls: [11, 12] },
+  "2026_ESP_FRA": { cards: [["🟨"], ["🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["51%", "49%"], totalShots: [10, 10], fouls: [12, 11] },
 };
 
 export function getStats2026(year: number, teamA: string, teamB: string): MatchStats | null {

@@ -244,20 +244,29 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Knockout Results
           </div>
+          {/* Latest rounds first: Final at the top, down to the earliest round. */}
           <div className="space-y-6">
-            {t.r32 && t.r32.length > 0 && (
+            {t.final && (
               <KnockoutRound
-                label="Round of 32"
+                label="Final"
                 year={year}
-                matches={t.r32.map((m) => ({
-                  teamA: m.ta,
-                  teamB: m.tb,
-                  scoreA: m.s?.[0] ?? null,
-                  scoreB: m.s?.[1] ?? null,
-                  winner: m.w,
-                  pens: m.p ?? null,
-                  extra: m.x ?? null,
-                }))}
+                matches={getRoundMatches(t, year, "final")}
+                onNavigate={onNavigate}
+              />
+            )}
+            {t.sf && (
+              <KnockoutRound
+                label="Semi-finals"
+                year={year}
+                matches={getRoundMatches(t, year, "sf")}
+                onNavigate={onNavigate}
+              />
+            )}
+            {t.qf && (
+              <KnockoutRound
+                label="Quarter-finals"
+                year={year}
+                matches={getRoundMatches(t, year, "qf")}
                 onNavigate={onNavigate}
               />
             )}
@@ -282,27 +291,19 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
                 onNavigate={onNavigate}
               />
             )}
-            {t.qf && (
+            {t.r32 && t.r32.length > 0 && (
               <KnockoutRound
-                label="Quarter-finals"
+                label="Round of 32"
                 year={year}
-                matches={getRoundMatches(t, year, "qf")}
-                onNavigate={onNavigate}
-              />
-            )}
-            {t.sf && (
-              <KnockoutRound
-                label="Semi-finals"
-                year={year}
-                matches={getRoundMatches(t, year, "sf")}
-                onNavigate={onNavigate}
-              />
-            )}
-            {t.final && (
-              <KnockoutRound
-                label="Final"
-                year={year}
-                matches={getRoundMatches(t, year, "final")}
+                matches={t.r32.map((m) => ({
+                  teamA: m.ta,
+                  teamB: m.tb,
+                  scoreA: m.s?.[0] ?? null,
+                  scoreB: m.s?.[1] ?? null,
+                  winner: m.w,
+                  pens: m.p ?? null,
+                  extra: m.x ?? null,
+                }))}
                 onNavigate={onNavigate}
               />
             )}
