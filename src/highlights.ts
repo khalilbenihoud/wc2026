@@ -135,6 +135,7 @@ const HIGHLIGHTS: Record<string, Highlight> = {
   "2026_NOR_ENG": { videoId: "9jfPUTD66UY", title: "Norway 1-2 England (a.e.t.) | FIFA World Cup 2026™ Quarter-final Highlights", thumbnail: "https://i.ytimg.com/vi/9jfPUTD66UY/hqdefault.jpg" },
   "2026_ARG_SUI": { videoId: "zZxxDbLxEi4", title: "Highlights | Argentina 3-1 Switzerland | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/zZxxDbLxEi4/hqdefault.jpg" },
   "2026_FRA_ESP": { videoId: "xbUoFYtCoNA", title: "Highlights | France 0-2 Spain | FIFA World Cup 2026™ Semi-final", thumbnail: "https://i.ytimg.com/vi/xbUoFYtCoNA/hqdefault.jpg" },
+  "2026_ENG_ARG": { videoId: "o6VO6xvrAwY", title: "Résumé : ANGLETERRE – ARGENTINE, MESSI en finale contre l’ESPAGNE ?", thumbnail: "https://i.ytimg.com/vi/o6VO6xvrAwY/hqdefault.jpg" },
   "1970_BRA_PER": { videoId: "kCwYo9nL_Dk", title: "All of Brazil&#39;s 1970 World Cup Goals | Pele, Jairzinho &amp; more!", thumbnail: "https://i.ytimg.com/vi/kCwYo9nL_Dk/hqdefault.jpg" },
   "1970_BRA_ITA": { videoId: "xZRdegSdrBI", title: "Brazil 4-1 Italy | Extended Highlights | 1970 FIFA World Cup Final", thumbnail: "https://i.ytimg.com/vi/xZRdegSdrBI/hqdefault.jpg" },
   "1974_NED_ARG": { videoId: "vv8QWLjFwzI", title: "Netherlands 4-0 Argentina world cup 1974 | Full highlight | 1080p HD | Ruud Krol | Johan Cruyff", thumbnail: "https://i.ytimg.com/vi/vv8QWLjFwzI/hqdefault.jpg" },
