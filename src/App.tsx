@@ -1,14 +1,13 @@
 //  ╔══════════════════════════════════════╗
 //  ║  Inspired by Emilio Sansolini        ║
 //  ╚══════════════════════════════════════╝
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
 import { TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
 import RadialBracket from "./components/RadialBracket";
 import BracketList from "./components/BracketList";
-import MatchDetailsModal from "./components/MatchDetailsModal";
 import Splash from "./components/Splash";
 import PlayerAvatar from "./components/PlayerAvatar";
 import { useWikiPhoto } from "./wikiPhoto";
@@ -16,11 +15,16 @@ import HeaderMeta from "./components/HeaderMeta";
 import HeaderMetaMobile from "./components/HeaderMetaMobile";
 import MobileTimeline from "./components/MobileTimeline";
 import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
-import CountryPage from "./components/CountryPage";
-import TournamentPage from "./components/TournamentPage";
-import { MOCK_COUNTRIES } from "./countries.mock";
-import { generateCountryProfiles } from "./countries.generated";
+import type { CountryProfile } from "./countries.mock";
 import { useRouter, countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
+
+// Heavy, interaction-/route-only surfaces are code-split so the initial home
+// bracket doesn't ship their JS + data. MatchDetailsModal pulls in the big
+// scorers/stats/highlights datasets; TournamentPage pulls champion images and
+// country maps; CountryRoute pulls the generated country profiles/stats.
+const MatchDetailsModal = lazy(() => import("./components/MatchDetailsModal"));
+const TournamentPage = lazy(() => import("./components/TournamentPage"));
+const CountryRoute = lazy(() => import("./components/CountryRoute"));
 import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
@@ -102,13 +106,10 @@ export default function App() {
   // On mobile we force the list view regardless of the stored preference.
   const effectiveViewMode = isMobile ? "list" : viewMode;
 
-  const allCountries = useMemo(() => {
-    const generated = generateCountryProfiles();
-    return { ...generated, ...MOCK_COUNTRIES };
-  }, []);
-
   const countryCode = route.path === "country" ? route.params.code : null;
-  const countryProfile = countryCode ? allCountries[countryCode] : undefined;
+  // Country profiles live inside the lazy CountryRoute chunk; the page is parked
+  // (COUNTRY_PAGE_ENABLED === false) so nothing here needs the full dataset.
+  const countryProfile: CountryProfile | undefined = undefined;
 
   const tournamentYear = route.path === "tournament" ? Number(route.params.year) : null;
 
@@ -166,6 +167,14 @@ export default function App() {
     round: string;
     idx: number;
   } | null>(null);
+
+  // The match modal is code-split; only pull its chunk (scorers/stats/highlights)
+  // once a match is first opened. Stays mounted afterwards so its own open/close
+  // animation keeps working while the cached chunk makes re-opens instant.
+  const [modalMounted, setModalMounted] = useState(false);
+  useEffect(() => {
+    if (selectedMatch !== null) setModalMounted(true);
+  }, [selectedMatch]);
 
   const [tooltip, setTooltip] = useState({
     round: "",
@@ -571,37 +580,44 @@ export default function App() {
         </div>
       )}
 
-      {/* Overlay modal detail wrapper */}
-      <MatchDetailsModal
-        isOpen={selectedMatch !== null}
-        round={selectedMatch?.round || ""}
-        idx={selectedMatch?.idx ?? 0}
-        data={currentData}
-        analysis={currentAnalysis}
-        onClose={handleCloseModal}
-        onNavigateCountry={handleNavigateCountry}
-      />
+      {/* Overlay modal detail wrapper (code-split; mounts on first open) */}
+      {modalMounted && (
+        <Suspense fallback={null}>
+          <MatchDetailsModal
+            isOpen={selectedMatch !== null}
+            round={selectedMatch?.round || ""}
+            idx={selectedMatch?.idx ?? 0}
+            data={currentData}
+            analysis={currentAnalysis}
+            onClose={handleCloseModal}
+            onNavigateCountry={handleNavigateCountry}
+          />
+        </Suspense>
+      )}
 
       </div>
 
       <ChampionsWall isOpen={championsOpen} onClose={closeChampions} onNavigateCountry={handleNavigateCountry} />
 
-      {COUNTRY_PAGE_ENABLED && countryProfile && (
-        <CountryPage
-          profile={countryProfile}
-          allCountries={allCountries}
-          onBack={() => navigate("/")}
-          onNavigate={navigate}
-          onSelectCountry={(code) => navigate(countryPath(code))}
-        />
+      {COUNTRY_PAGE_ENABLED && countryCode && (
+        <Suspense fallback={null}>
+          <CountryRoute
+            code={countryCode}
+            onBack={() => navigate("/")}
+            onNavigate={navigate}
+            onSelectCountry={(code) => navigate(countryPath(code))}
+          />
+        </Suspense>
       )}
 
       {pageYear !== null && TOURNAMENTS[pageYear] && (
-        <TournamentPage
-          year={pageYear}
-          onBack={() => navigate("/")}
-          onNavigate={navigate}
-        />
+        <Suspense fallback={null}>
+          <TournamentPage
+            year={pageYear}
+            onBack={() => navigate("/")}
+            onNavigate={navigate}
+          />
+        </Suspense>
       )}
     </>
   );
