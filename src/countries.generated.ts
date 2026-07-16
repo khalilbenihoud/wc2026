@@ -294,7 +294,7 @@ const CONFEDERATION_MAP: Record<string, string> = {
   PAN: "CONCACAF", IRN: "AFC", HUN: "UEFA", CUB: "CONCACAF",
   IDN: "AFC", BOL: "CONMEBOL", NIR: "UEFA", WAL: "UEFA",
   PRK: "AFC", PER: "CONMEBOL", ISR: "UEFA", ZAI: "CAF",
-  GDR: "UEFA", HON: "CONCACAF", KUW: "AFC", SLV: "CONCACAF",
+  GDR: "UEFA", HON: "CONCACAF", KUW: "AFC", PLE: "AFC", SLV: "CONCACAF",
 };
 
 export function generateCountryProfiles(): Record<string, CountryProfile> {

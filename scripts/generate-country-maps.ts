@@ -23,7 +23,7 @@ const ISO2: Record<string, string> = {
   HON: "hn", HUN: "hu", IDN: "id", IRL: "ie", IRN: "ir", IRQ: "iq",
   ISR: "il", ITA: "it", JOR: "jo", JPN: "jp", KOR: "kr", KSA: "sa",
   KUW: "kw", MAR: "ma", MEX: "mx", NED: "nl", NGA: "ng", NIR: "gb",
-  NOR: "no", NZL: "nz", PAN: "pa", PAR: "py", PER: "pe", POL: "pl",
+  NOR: "no", NZL: "nz", PAN: "pa", PAR: "py", PER: "pe", PLE: "ps", POL: "pl",
   POR: "pt", PRK: "kp", QAT: "qa", ROU: "ro", RSA: "za", RUS: "ru",
   SCO: "gb", SEN: "sn", SLV: "sv", SUI: "ch", SVK: "sk", SWE: "se",
   TUN: "tn", TUR: "tr", UKR: "ua", URU: "uy", USA: "us", UZB: "uz",
@@ -66,7 +66,8 @@ async function main() {
   for (const code of CODES) {
     const iso2 = ISO2[code];
     if (!iso2) { console.warn(`skip ${code}: no ISO2 mapping`); continue; }
-    const map = await fetchMap(iso2);
+    let map: CountryMap;
+    try { map = await fetchMap(iso2); } catch (e) { console.warn(`skip ${code} (${iso2}): ${(e as Error).message}`); continue; }
     const extras = EXTRA_TERRITORIES[code];
     if (extras) {
       for (const extra of extras) {

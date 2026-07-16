@@ -96,6 +96,7 @@ export const TEAMS: Record<string, [string, string]> = {
   HON: ["Honduras", "🇭🇳"],
   KUW: ["Kuwait", "🇰🇼"],
   SLV: ["El Salvador", "🇸🇻"],
+  PLE: ["Palestine", "🇵🇸"],
   TBD: ["To Be Decided", ""],
 };
 
@@ -180,6 +181,7 @@ export const COLORS: Record<string, string> = {
   HON: "#0F3D7D",
   KUW: "#007A33",
   SLV: "#0047AB",
+  PLE: "#000000",
   TBD: "#71717a",
 };
 
