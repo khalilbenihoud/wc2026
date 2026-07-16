@@ -35,6 +35,12 @@ const ISO2: Record<string, string> = {
 // All nation codes that appear in tournament data (skipping TBD).
 const CODES = Object.keys(ISO2).sort();
 
+// Extra territories to merge into a nation's map outline (e.g. Western Sahara
+// included in Morocco). The extra paths share the host's transform.
+const EXTRA_TERRITORIES: Record<string, string[]> = {
+  MAR: ["eh"],
+};
+
 interface CountryMap { transform: string; paths: string[]; }
 
 async function fetchMap(iso2: string): Promise<CountryMap> {
@@ -60,8 +66,19 @@ async function main() {
   for (const code of CODES) {
     const iso2 = ISO2[code];
     if (!iso2) { console.warn(`skip ${code}: no ISO2 mapping`); continue; }
-    out[code] = await fetchMap(iso2);
-    console.log(`${code} (${iso2}): ${out[code].paths.length} path(s)`);
+    const map = await fetchMap(iso2);
+    const extras = EXTRA_TERRITORIES[code];
+    if (extras) {
+      for (const extra of extras) {
+        try {
+          const em = await fetchMap(extra);
+          map.paths.push(...em.paths);
+          console.log(`  + ${extra} (${out[code]?.paths.length ?? map.paths.length - em.paths.length} → ${map.paths.length})`);
+        } catch { console.warn(`  skip extra ${extra}: not available`); }
+      }
+    }
+    out[code] = map;
+    console.log(`${code} (${iso2}): ${map.paths.length} path(s)`);
   }
 
   const body =
