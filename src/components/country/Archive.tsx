@@ -8,7 +8,6 @@ import {
   VideoHighlight,
 } from "../../countries.mock";
 import CountryMap from "../CountryMap";
-import { COUNTRY_MAPS } from "../../countryMaps.generated";
 import PlayerAvatar from "../PlayerAvatar";
 import { useWikiPhoto } from "../../wikiPhoto";
 import { Rule, SectionKicker } from "./shared";
@@ -120,14 +119,9 @@ function Rivalries({ profile }: { profile: CountryProfile }) {
 }
 
 function HeroSection({ p }: { p: CountryProfile }) {
-  const hasMap = !!COUNTRY_MAPS[p.code];
   return (
     <header className="relative mb-8 flex flex-col items-center text-center py-8 md:py-12 overflow-hidden rounded-xl">
-      {hasMap ? (
-        <CountryMap code={p.code} className="pointer-events-none absolute h-56 md:h-72 w-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15" />
-      ) : (
-        <div className="pointer-events-none absolute h-56 md:h-72 w-56 md:w-72 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)' }} />
-      )}
+      <CountryMap code={p.code} className="pointer-events-none absolute h-56 md:h-72 w-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15" />
       <div className="relative flex flex-col items-center gap-3">
         <span className="text-6xl md:text-7xl leading-none select-none drop-shadow-lg">{p.flag}</span>
         <h1 className="font-unbounded font-bold text-3xl md:text-5xl tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-b from-brand-text to-brand-text/70">{p.name}</h1>

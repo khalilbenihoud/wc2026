@@ -12,15 +12,28 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 
 // App team code → ISO 3166-1 alpha-2 (mapsicon folder). England has no separate
-// outline in the set, so it borrows the UK ("gb").
+// outline in the set, so it borrows the UK ("gb"). Historical nations map to
+// their modern successor.
 const ISO2: Record<string, string> = {
-  FRA: "fr", BRA: "br", ARG: "ar", ESP: "es", ITA: "it",
-  URU: "uy", ENG: "gb", GER: "de", FRG: "de",
+  ALG: "dz", ARG: "ar", AUS: "au", AUT: "at", BEL: "be", BIH: "ba",
+  BOL: "bo", BRA: "br", BUL: "bg", CAN: "ca", CHI: "cl", CIV: "ci",
+  CMR: "cm", COD: "cd", COL: "co", CPV: "cv", CRC: "cr", CRO: "hr",
+  CUB: "cu", CUW: "cw", CZE: "cz", DEN: "dk", ECU: "ec", EGY: "eg",
+  ENG: "gb", ESP: "es", FRA: "fr", GHA: "gh", GRE: "gr", HAI: "ht",
+  HON: "hn", HUN: "hu", IDN: "id", IRL: "ie", IRN: "ir", IRQ: "iq",
+  ISR: "il", ITA: "it", JOR: "jo", JPN: "jp", KOR: "kr", KSA: "sa",
+  KUW: "kw", MAR: "ma", MEX: "mx", NED: "nl", NGA: "ng", NIR: "gb",
+  NOR: "no", NZL: "nz", PAN: "pa", PAR: "py", PER: "pe", POL: "pl",
+  POR: "pt", PRK: "kp", QAT: "qa", ROU: "ro", RSA: "za", RUS: "ru",
+  SCO: "gb", SEN: "sn", SLV: "sv", SUI: "ch", SVK: "sk", SWE: "se",
+  TUN: "tn", TUR: "tr", UKR: "ua", URU: "uy", USA: "us", UZB: "uz",
+  WAL: "gb",
+  FRG: "de", GDR: "de", GER: "de",
+  TCH: "cz", URS: "ru", YUG: "rs", ZAI: "cd",
 };
 
-// Every nation that has won the World Cup (FRG/GER both → Germany). Expand this
-// (and re-run) if a new nation wins.
-const CODES = ["URU", "ITA", "FRG", "GER", "BRA", "ENG", "ARG", "FRA", "ESP"];
+// All nation codes that appear in tournament data (skipping TBD).
+const CODES = Object.keys(ISO2).sort();
 
 interface CountryMap { transform: string; paths: string[]; }
 
