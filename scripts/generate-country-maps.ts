@@ -21,7 +21,7 @@ const ISO2: Record<string, string> = {
   CUB: "cu", CUW: "cw", CZE: "cz", DEN: "dk", ECU: "ec", EGY: "eg",
   ENG: "gb", ESP: "es", FRA: "fr", GHA: "gh", GRE: "gr", HAI: "ht",
   HON: "hn", HUN: "hu", IDN: "id", IRL: "ie", IRN: "ir", IRQ: "iq",
-  ISR: "il", ITA: "it", JOR: "jo", JPN: "jp", KOR: "kr", KSA: "sa",
+  ITA: "it", JOR: "jo", JPN: "jp", KOR: "kr", KSA: "sa",
   KUW: "kw", MAR: "ma", MEX: "mx", NED: "nl", NGA: "ng", NIR: "gb",
   NOR: "no", NZL: "nz", PAN: "pa", PAR: "py", PER: "pe", PLE: "ps", POL: "pl",
   POR: "pt", PRK: "kp", QAT: "qa", ROU: "ro", RSA: "za", RUS: "ru",

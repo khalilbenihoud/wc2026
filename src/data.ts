@@ -90,7 +90,7 @@ export const TEAMS: Record<string, [string, string]> = {
   WAL: ["Wales", "🏴󠁧󠁢󠁷󠁬󠁳󠁿"],
   PRK: ["North Korea", "🇰🇵"],
   PER: ["Peru", "🇵🇪"],
-  ISR: ["Israel", "🇮🇱"],
+
   ZAI: ["Zaire", "🇨🇩"],
   GDR: ["East Germany", "🇩🇪"],
   HON: ["Honduras", "🇭🇳"],
@@ -175,7 +175,7 @@ export const COLORS: Record<string, string> = {
   WAL: "#D30731",
   PRK: "#ED1C27",
   PER: "#D91023",
-  ISR: "#00529B",
+
   ZAI: "#007FFF",
   GDR: "#C9CCD1",
   HON: "#0F3D7D",
@@ -388,7 +388,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       "ITA", "MEX",
       "FRG", "ENG",
       "SWE", "ROU",
-      "BEL", "ISR",
+      "BEL", "TBD",
       "BUL", "MAR",
       "TCH", "SLV",
     ],

@@ -45,7 +45,7 @@ const TEAM_NAME: Record<string, string> = {
   GHA: "Ghana",         GRE: "Greece",        HAI: "Haiti",
   HON: "Honduras",      HUN: "Hungary",       IDN: "Dutch East Indies",
   IRL: "Rep. Ireland",  IRN: "Iran",          IRQ: "Iraq",
-  ISR: "Israel",        ITA: "Italy",         JOR: "Jordan",
+  ITA: "Italy",         JOR: "Jordan",
   JPN: "Japan",         KOR: "South Korea",   KSA: "Saudi Arabia",
   KUW: "Kuwait",        MAR: "Morocco",       MEX: "Mexico",
   NED: "Netherlands",   NGA: "Nigeria",       NIR: "Northern Ireland",
