@@ -16,55 +16,57 @@ function getResultForTeam(code: string, year: number): RoundResult {
   const t = TOURNAMENTS[year];
   if (!t) return { year, result: "DNE" };
 
-  const teamIdx = t.teams.indexOf(code);
-  const hasR32 = t.r32 && t.r32.length > 0;
-  const hasR16 = t.r16 && t.r16.length > 0;
+  const hasR32 = !!(t.r32 && t.r32.length);
+  const inR32 = hasR32 && t.r32!.some((m) => m.ta === code || m.tb === code);
+  const inTeams = t.teams.indexOf(code) !== -1;
+  if (!inTeams && !inR32) return { year, result: "DNE" };
 
-  if (teamIdx === -1 && !hasR32) return { year, result: "DNE" };
-
-  if (hasR32) {
-    const r32Match = t.r32!.find((m) => m.ta === code || m.tb === code);
-    if (!r32Match) return { year, result: "DNE" };
-    const isA = r32Match.ta === code;
-    const won = r32Match.w !== null && ((isA && r32Match.w === 0) || (!isA && r32Match.w === 1));
-    if (!won) return { year, result: "R32" };
-  }
-
-  if (teamIdx === -1 && !hasR32) return { year, result: "DNE" };
-
-  if (!hasR16 && !hasR32) {
-    if (teamIdx === -1) return { year, result: "DNE" };
-    if (!t.qf) return { year, result: "GS" };
-    const inQf = t.qf.some(
-      (m) => m && (t.teams.indexOf(code) !== -1)
-    );
-    if (!inQf) return { year, result: "GS" };
-  }
-
-  if (teamIdx === -1 && hasR32) {
-    // Already handled above for R32
-  }
-
-  const champ = getChampion(t, year);
-  if (champ === code) return { year, result: "W" };
-
-  const finalist = getFinalist(t, year);
-  if (finalist === code) return { year, result: "F" };
-
-  const semiFinalists = getSemiFinalists(t, year);
-  if (semiFinalists.includes(code)) return { year, result: "3RD" };
-
-  const qfTeams = getQFTeams(t, year);
-  if (qfTeams.includes(code)) return { year, result: "QF" };
-
-  if (hasR16) {
-    const r16Teams = getR16Teams(t, year);
-    if (r16Teams.includes(code)) return { year, result: "R16" };
-  }
-
-  if (teamIdx !== -1) return { year, result: "GS" };
-
+  // A team's result is the DEEPEST round it reached. Each reached* helper below
+  // returns the teams that played in that round (i.e. won their way into it), so
+  // a team present in round N but not N+1 was eliminated in N. Champion and
+  // runner-up come straight off the final. (The previous logic labelled the
+  // WINNERS of a round with that round's name, shifting every knockout finish
+  // down a stage — semi-finalists showed as "QF", R16 teams as "GS", etc.)
+  if (getChampion(t, year) === code) return { year, result: "W" };
+  if (getFinalist(t, year) === code) return { year, result: "F" };
+  if (reachedSemis(t, year).includes(code)) return { year, result: "3RD" };
+  // 1930 had no quarter-finals: 4 groups → semi‑finals → final.
+  // Teams that didn't reach the semis went out in the group stage.
+  if (year === 1930) return { year, result: "GS" };
+  if (reachedQuarters(t, year).includes(code)) return { year, result: "QF" };
+  if (reachedR16(t, year).includes(code)) return { year, result: "R16" };
+  if (inR32) return { year, result: "R32" };
+  if (inTeams) return { year, result: "GS" };
   return { year, result: "DNE" };
+}
+
+// ── Teams that reached (contested) each knockout round ───────────────────────
+// Winners of the previous round advance INTO the next, so "reached the semis" =
+// "won a quarter-final", and so on.
+function reachedSemis(t: typeof TOURNAMENTS[number], year: number): string[] {
+  return getQFWinnerTeams(t, year);
+}
+function reachedQuarters(t: typeof TOURNAMENTS[number], year: number): string[] {
+  if (t.r16 && t.r16.length) return getR16WinnerTeams(t, year);
+  // 8-team knockouts (1930, 1950, 1954–1982) have no R16; the qf round is fed
+  // positionally from the first eight listed teams.
+  if (t.qf && t.qf.length) return t.teams.slice(0, 8).filter((c) => c !== "TBD");
+  return [];
+}
+function reachedR16(t: typeof TOURNAMENTS[number], year: number): string[] {
+  if (t.r32 && t.r32.length) return getR32WinnerTeams(t, year);
+  if (t.r16 && t.r16.length) return t.teams.filter((c) => c !== "TBD");
+  return [];
+}
+function getR32WinnerTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
+  void year;
+  if (!t.r32) return [];
+  const out: string[] = [];
+  for (const m of t.r32) {
+    if (m.w === null || m.w === undefined) continue;
+    out.push(m.w === 0 ? m.ta : m.tb);
+  }
+  return out;
 }
 
 function getChampion(t: typeof TOURNAMENTS[number], year: number): string | null {
@@ -367,21 +369,28 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
     if (titles.length > 0) {
       bestResult = `Champions ×${titles.length}`;
     } else {
+      const order: ResultLevel[] = ["F", "3RD", "4TH", "QF", "R16", "R32", "GS"];
+      let bestLevel: ResultLevel | null = null;
+      let bestYear = 0;
       for (const year of EDITIONS) {
         const entry = timeline[year];
         if (!entry) continue;
-        const order: ResultLevel[] = ["F", "3RD", "4TH", "QF", "R16", "R32", "GS"];
         for (const level of order) {
           if (entry.result === level) {
-            const labels: Record<string, string> = {
-              F: "Runner-up", "3RD": "Third place", "4TH": "Fourth place",
-              QF: "Quarter-final", R16: "Round of 16", R32: "Round of 32", GS: "Group stage",
-            };
-            if (labels[level]) bestResult = `${labels[level]} — ${year}`;
+            if (!bestLevel || order.indexOf(level) < order.indexOf(bestLevel)) {
+              bestLevel = level;
+              bestYear = year;
+            }
             break;
           }
         }
-        if (bestResult !== "Group stage") break;
+      }
+      if (bestLevel) {
+        const labels: Record<string, string> = {
+          F: "Runner-up", "3RD": "Third place", "4TH": "Fourth place",
+          QF: "Quarter-final", R16: "Round of 16", R32: "Round of 32", GS: "Group stage",
+        };
+        bestResult = `${labels[bestLevel]} — ${bestYear}`;
       }
     }
 
@@ -402,6 +411,8 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
       topScorers,
       rivalries,
       definingMatches: [],
+      news: [],
+      videos: [],
     };
   }
 

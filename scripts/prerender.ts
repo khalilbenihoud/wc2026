@@ -20,6 +20,9 @@ import { ROUND_NAME } from "../src/constants";
 import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
 import { tournamentEvent, matchEvent } from "../src/schema";
+import { generateCountryProfiles } from "../src/countries.generated";
+import { MOCK_COUNTRIES, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
+import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 
 const BASE = "https://worldcuparchive.net";
 const DIST = resolve(process.cwd(), "dist");
@@ -283,6 +286,99 @@ function buildMatch(year: number, m: EnumeratedMatch): string {
   return render(title, description, canonical, jsonLd, content);
 }
 
+// ── Per-country SEO + content ────────────────────────────────────────────────
+function buildCountry(code: string, p: CountryProfile): string {
+  const slug = slugForCode(code)!;
+  const canonical = `${BASE}/countries/${slug}/`;
+  const n = p.titles.length;
+
+  const title = `${p.name} World Cup History — Record, Results & Top Scorers · The Road to Glory`;
+  const description =
+    n > 0
+      ? `${p.name}: ${n}× FIFA World Cup champion${n > 1 ? "s" : ""}, ${p.appearances} appearances since ${p.firstAppearance}. All-time record, every knockout result, top scorers, and biggest rivalries.`
+      : `${p.name} at the FIFA World Cup: ${p.bestResult.toLowerCase()}, ${p.appearances} appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. All-time record, results, top scorers, and biggest rivalries.`;
+
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SportsTeam",
+    name: p.name,
+    sport: "Association football",
+    description: p.epithet,
+    url: canonical,
+  });
+
+  const titlesHtml =
+    n > 0
+      ? `<h2>World Cup titles (${n})</h2><ul>` +
+        p.titles.map((t) => `<li>${t.year} — won ${esc(t.final)}</li>`).join("") +
+        `</ul>`
+      : `<h2>Best result</h2><p>${esc(p.bestResult)}.</p>`;
+
+  const rec = p.record;
+  const played = rec.w + rec.d + rec.l;
+  const recordHtml =
+    `<h2>All-time World Cup record</h2>` +
+    `<p>Played ${played} · Won ${rec.w} · Drawn ${rec.d} · Lost ${rec.l} · Goals ${rec.gf}–${rec.ga}` +
+    (rec.pensWon || rec.pensLost ? ` · Shootouts won ${rec.pensWon}, lost ${rec.pensLost}` : "") +
+    `.</p>`;
+
+  const scorersHtml = p.topScorers.length
+    ? `<h2>Top World Cup scorers</h2><ul>` +
+      p.topScorers
+        .map((s) => `<li>${esc(s.name)} — ${s.goals} goal${s.goals === 1 ? "" : "s"} (${esc(s.span)})</li>`)
+        .join("") +
+      `</ul>`
+    : "";
+
+  const rivalriesHtml = p.rivalries.length
+    ? `<h2>Biggest rivalries</h2><ul>` +
+      p.rivalries
+        .map((r) => {
+          const rslug = slugForCode(r.code);
+          const label = `${esc(r.name)} — played ${r.played} (W${r.w} D${r.d} L${r.l})`;
+          return rslug ? `<li><a href="/countries/${rslug}/">${label}</a></li>` : `<li>${label}</li>`;
+        })
+        .join("") +
+      `</ul>`
+    : "";
+
+  const definingHtml = p.definingMatches.length
+    ? `<h2>Defining matches</h2><ul>` +
+      p.definingMatches
+        .map((d) => `<li>${d.year} ${esc(d.round)}: ${esc(d.fixture)} — ${esc(d.note)}</li>`)
+        .join("") +
+      `</ul>`
+    : "";
+
+  // Tournament-by-tournament: every edition the nation entered, linking played
+  // editions to their tournament pages.
+  const timelineRows = years
+    .filter((y) => p.timeline[y])
+    .map((y) => {
+      const e = p.timeline[y]!;
+      return `<li><a href="/tournaments/${y}/">${y}</a> — ${esc(RESULT_LABEL[e.result])}${e.note ? ` (${esc(e.note)})` : ""}</li>`;
+    })
+    .join("");
+  const timelineHtml = timelineRows ? `<h2>Tournament by tournament</h2><ul>${timelineRows}</ul>` : "";
+
+  const content =
+    `<main class="prerender">` +
+    `<p><a href="/">← World Cup Archive</a></p>` +
+    `<h1>${esc(p.name)} at the FIFA World Cup</h1>` +
+    `<p>${esc(p.epithet)}</p>` +
+    `<p>${esc(p.confederation)} · ${p.appearances} appearance${p.appearances > 1 ? "s" : ""} · first in ${p.firstAppearance}.</p>` +
+    titlesHtml +
+    recordHtml +
+    scorersHtml +
+    rivalriesHtml +
+    definingHtml +
+    timelineHtml +
+    `<p><a href="/">Explore every World Cup bracket, 1930–2026</a></p>` +
+    `</main>`;
+
+  return render(title, description, canonical, jsonLd, content);
+}
+
 // ── Homepage ─────────────────────────────────────────────────────────────────
 function buildHome(): string {
   const title = "The Road to Glory — World Cup Radial Knockout Bracket, 1930–2026";
@@ -333,8 +429,23 @@ for (const year of years) {
   }
 }
 
+const countryProfiles = { ...generateCountryProfiles(), ...MOCK_COUNTRIES };
+let nCountries = 0;
+for (const code of COUNTRY_CODES) {
+  const profile = countryProfiles[code];
+  const slug = slugForCode(code);
+  if (!profile || !slug) {
+    console.warn(`prerender: no profile/slug for ${code} — skipping country page`);
+    continue;
+  }
+  const cdir = resolve(DIST, "countries", slug);
+  mkdirSync(cdir, { recursive: true });
+  writeFileSync(resolve(cdir, "index.html"), buildCountry(code, profile));
+  nCountries++;
+}
+
 writeFileSync(resolve(DIST, "index.html"), buildHome());
 
 console.log(
-  `Prerendered homepage + ${nTournaments} tournament pages + ${nMatches} match pages → dist/`
+  `Prerendered homepage + ${nTournaments} tournament pages + ${nMatches} match pages + ${nCountries} country pages → dist/`
 );

@@ -1,65 +1,68 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CountryProfile } from "../countries.mock";
-import { TOURNAMENTS } from "../data";
+import { TOURNAMENTS, getTeamColor } from "../data";
 import { countryPath, tournamentPath } from "../router";
 import Archive from "./country/Archive";
 
 interface CountryPageProps {
   profile: CountryProfile;
-  allCountries: Record<string, CountryProfile>;
   onBack: () => void;
   onNavigate: (path: string) => void;
-  onSelectCountry: (code: string) => void;
 }
 
-export default function CountryPage({ profile, allCountries, onBack, onNavigate, onSelectCountry }: CountryPageProps) {
-  // Own scroll container (fixed inset-0), so switching nation keeps this mounted
-  // and the router can't scroll it — reset to top when the profile changes.
+export default function CountryPage({ profile, onBack, onNavigate }: CountryPageProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
   }, [profile.code]);
 
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(onBack, 200);
+  };
+
+  const color = getTeamColor(profile.code);
+
   return (
-    <div ref={scrollRef} className="country-fade fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar">
-      <div className="max-w-[880px] mx-auto px-5 md:px-8 pt-6 pb-20">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={onBack}
-            className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer"
-          >
+    <div
+      ref={scrollRef}
+      className={`fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar ${
+        isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : "animate-[fadeIn_0.2s_ease]"
+      }`}
+    >
+      {/* Ambient aurora — two drifting gradients for depth */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        aria-hidden
+      >
+        <div
+          className="absolute -inset-48 animate-[aurora_14s_ease_infinite_alternate]"
+          style={{
+            background: `radial-gradient(ellipse 60% 50% at 30% 40%, ${color}18 0%, transparent 60%)`,
+          }}
+        />
+        <div
+          className="absolute -inset-48 animate-[aurora_20s_ease_infinite_alternate-reverse]"
+          style={{
+            background: `radial-gradient(ellipse 50% 40% at 70% 60%, ${color}0d 0%, transparent 50%)`,
+          }}
+        />
+      </div>
+      <div className="relative z-10 max-w-[880px] mx-auto px-5 md:px-8 pb-20">
+        <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
+          <button onClick={handleClose} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">
             ← The Road to Glory
           </button>
-          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted/70 select-none">
+          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none">
             Archive · Nation
-          </div>
-        </div>
-
-        {/* Nation switcher (mock phase) */}
-        <div className="mb-10 space-y-2.5 font-mono text-[10px] tracking-wider uppercase">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-brand-muted/50 select-none w-16">Nation:</span>
-            {Object.values(allCountries).map((c) => (
-              <button
-                key={c.code}
-                onClick={() => onSelectCountry(c.code)}
-                className={`px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                  c.code === profile.code
-                    ? "border-brand-gold/60 text-brand-gold bg-brand-gold/10"
-                    : "border-brand-line text-brand-muted hover:text-brand-text hover:border-brand-steel"
-                }`}
-              >
-                {c.flag} {c.code}
-              </button>
-            ))}
           </div>
         </div>
 
         <Archive profile={profile} />
 
         {/* Internal cross-links for SEO */}
-        <section className="mt-16 pt-8 border-t border-brand-line/40">
+        <section className="mb-10 pt-8 border-t border-brand-line/40">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Tournament Appearances
           </div>
@@ -90,7 +93,7 @@ export default function CountryPage({ profile, allCountries, onBack, onNavigate,
                   <button
                     key={r.code}
                     onClick={() => onNavigate(countryPath(r.code))}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer text-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer text-sm font-mono"
                   >
                     <span>{r.flag}</span>
                     {r.name}
@@ -111,7 +114,7 @@ export default function CountryPage({ profile, allCountries, onBack, onNavigate,
                 <button
                   key={year}
                   onClick={() => onNavigate(tournamentPath(year))}
-                  className="px-2.5 py-1 rounded-full border border-brand-line/60 text-brand-muted/70 hover:text-brand-text hover:border-brand-steel transition-colors cursor-pointer text-xs font-mono"
+                  className="px-3 py-1.5 rounded-full border border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer text-sm font-mono"
                 >
                   {year}
                 </button>

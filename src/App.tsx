@@ -351,14 +351,16 @@ export default function App() {
         ? `${p.name} — ${p.titles.length}× World Cup champion${p.titles.length > 1 ? "s" : ""}. ${p.appearances} tournament appearances since ${p.firstAppearance}. ${p.epithet}`
         : `${p.name} — ${p.bestResult}. ${p.appearances} World Cup appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. ${p.epithet}`;
       return {
-        title: `${p.name} World Cup History — The Road to Glory`,
+        title: `${p.name} World Cup History — Record, Results & Top Scorers · The Road to Glory`,
         description: desc,
-        canonical: countryPath(p.code),
+        // Trailing slash = the prerendered 200 URL Netlify serves.
+        canonical: `${countryPath(p.code)}/`,
         jsonLd: {
           "@type": "SportsTeam",
           name: p.name,
+          sport: "Association football",
           description: p.epithet,
-          url: `https://worldcuparchive.net${countryPath(p.code)}`,
+          url: `https://worldcuparchive.net${countryPath(p.code)}/`,
         },
       };
     }
@@ -616,7 +618,6 @@ export default function App() {
             code={countryCode}
             onBack={() => navigate("/")}
             onNavigate={navigate}
-            onSelectCountry={(code) => navigate(countryPath(code))}
           />
         </Suspense>
       )}
