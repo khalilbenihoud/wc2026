@@ -482,6 +482,12 @@ export default function App() {
             onSelectYear={handleSelectYear}
             analyses={analyses}
           />
+
+          {/* Trademark disclaimer — pinned to the bottom of the rail on desktop.
+              A mobile variant is rendered at the end of <main>. */}
+          <p className="mt-auto pt-5 text-brand-muted/60 text-[10px] leading-relaxed max-w-[280px] max-md:hidden">
+            Independent fan project — not affiliated with, endorsed by, or associated with FIFA. Team and tournament names are the property of their respective owners.
+          </p>
         </aside>
 
         {/* Right Main Panel: Interactive Bracket */}
@@ -557,6 +563,11 @@ export default function App() {
               <ChampionsTrigger onClick={openChampions} className="max-md:hidden" />
             </div>
           </div>
+
+          {/* Trademark disclaimer — mobile only; the desktop copy lives in the rail. */}
+          <p className="md:hidden mt-6 px-6 text-center text-brand-muted/60 text-[10px] leading-relaxed">
+            Independent fan project — not affiliated with, endorsed by, or associated with FIFA. Team and tournament names are the property of their respective owners.
+          </p>
         </main>
       </div>
 

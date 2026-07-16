@@ -59,6 +59,10 @@ Built by **Benihoud Khalil** — a personal project made for fun, by a football 
 
 The radial bracket design was inspired by **Emilio Sansolini**.
 
+## Disclaimer
+
+This is an independent, non-commercial fan project. It is **not affiliated with, endorsed by, or associated with FIFA** or any football federation. "FIFA" and "FIFA World Cup", along with all team and tournament names, are trademarks of their respective owners and are used here for identification and editorial purposes only.
+
 ## License
 
 MIT
