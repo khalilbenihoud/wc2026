@@ -176,6 +176,7 @@ body::after {
   to { opacity: 0; }
 }
 
+
 @keyframes slideOutRight {
   from { transform: translateX(0); }
   to { transform: translateX(100%); }

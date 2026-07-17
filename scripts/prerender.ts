@@ -19,7 +19,7 @@ import { enumerateMatches, EnumeratedMatch } from "../src/matches";
 import { ROUND_NAME } from "../src/constants";
 import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
-import { tournamentEvent, matchEvent } from "../src/schema";
+import { tournamentEvent, matchEvent, breadcrumbList, SITE_NAME } from "../src/schema";
 import { generateCountryProfiles } from "../src/countries.generated";
 import { MOCK_COUNTRIES, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
@@ -187,7 +187,13 @@ function buildTournament(year: number): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    ...tournamentEvent(year, t, champ),
+    "@graph": [
+      tournamentEvent(year, t, champ),
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: `${year} FIFA World Cup`, url: canonical },
+      ]),
+    ],
   });
 
   const teams = [...new Set([...t.teams, ...(t.r32?.flatMap((m) => [m.ta, m.tb]) ?? [])])]
@@ -206,9 +212,18 @@ function buildTournament(year: number): string {
     (t.goldenGlove ? `Golden Glove: ${esc(t.goldenGlove.name)}.` : "") +
     `</p>`;
 
+  // Link each nation to its country page — this is the crawlable entry point into
+  // the country cluster (the homepage lists only tournaments), so it spreads
+  // ranking signal from the tournament pages into the 71 country pages.
   const nationsHtml =
     `<h2>Participating nations (${teams.length})</h2><ul>` +
-    teams.map((c) => `<li>${esc(getTeamName(c))}</li>`).join("") + `</ul>`;
+    teams
+      .map((c) => {
+        const cslug = slugForCode(c);
+        const name = esc(getTeamName(c));
+        return cslug ? `<li><a href="/countries/${cslug}/">${name}</a></li>` : `<li>${name}</li>`;
+      })
+      .join("") + `</ul>`;
 
   const otherHtml =
     `<h2>Every World Cup</h2><ul>` +
@@ -260,7 +275,14 @@ function buildMatch(year: number, m: EnumeratedMatch): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    ...matchEvent(year, t.host, taName, tbName, roundName, m.slug),
+    "@graph": [
+      matchEvent(year, t.host, taName, tbName, roundName, m.slug),
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: `${year} FIFA World Cup`, url: `${BASE}/tournaments/${year}/` },
+        { name: `${taName} ${scoreStr} ${tbName}`, url: canonical },
+      ]),
+    ],
   });
 
   const motm = getPlayerOfMatch(year, m.ta, m.tb);
@@ -300,11 +322,19 @@ function buildCountry(code: string, p: CountryProfile): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "SportsTeam",
-    name: p.name,
-    sport: "Association football",
-    description: p.epithet,
-    url: canonical,
+    "@graph": [
+      {
+        "@type": "SportsTeam",
+        name: p.name,
+        sport: "Association football",
+        description: p.epithet,
+        url: canonical,
+      },
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: p.name, url: canonical },
+      ]),
+    ],
   });
 
   const titlesHtml =

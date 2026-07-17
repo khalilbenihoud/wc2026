@@ -253,4 +253,29 @@ export const MOCK_COUNTRIES: Record<string, CountryProfile> = {
       { title: "En-Nesyri's header v Portugal: How they made history", thumbnail: "", url: "#", duration: "3:15" },
     ],
   },
+
+  // Palestine (Al-Fida'i) have never reached a World Cup, so no generated
+  // profile exists for them — this hand-written entry gives the nation a page.
+  // Every WC-specific field is empty by design (each section hides when empty),
+  // and the appearances === 0 state is handled in the hero + stat cards.
+  PLE: {
+    code: "PLE",
+    name: "Palestine",
+    flag: "🇵🇸",
+    confederation: "AFC",
+    epithet: "Still chasing a first World Cup — a footballing nation that carries a flag far larger than any scoreline.",
+    appearances: 0,
+    firstAppearance: 0,
+    titles: [],
+    bestResult: "Yet to qualify — chasing a debut",
+    timeline: {},
+    record: { w: 0, d: 0, l: 0, gf: 0, ga: 0, pensWon: 0, pensLost: 0 },
+    ranking: 0,
+    form: [],
+    topScorers: [],
+    rivalries: [],
+    definingMatches: [],
+    news: [],
+    videos: [],
+  },
 };

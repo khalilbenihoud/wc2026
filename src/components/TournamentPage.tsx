@@ -8,15 +8,21 @@ import { useWikiPhoto } from "../wikiPhoto";
 import PlayerAvatar from "./PlayerAvatar";
 import AppLink from "./AppLink";
 import CountryMap from "./CountryMap";
+import Breadcrumb from "./Breadcrumb";
+import { SITE_NAME } from "../schema";
 
 interface TournamentPageProps {
   year: number;
   onBack: () => void;
   onNavigate: (path: string) => void;
+  // Opened directly from another full-screen overlay: skip the fade-in so the
+  // home bracket never flashes between the two. Frozen at mount (below).
+  instant?: boolean;
 }
 
-export default function TournamentPage({ year, onBack, onNavigate }: TournamentPageProps) {
+export default function TournamentPage({ year, onBack, onNavigate, instant }: TournamentPageProps) {
   const t = TOURNAMENTS[year];
+  const [skipIntro] = useState(!!instant);
 
   const champion = useMemo(() => {
     if (!t?.final?.[0] || t.final[0].w === null) return null;
@@ -93,15 +99,16 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
     <div
       ref={scrollRef}
       className={`fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar ${
-        isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : "animate-[fadeIn_0.2s_ease]"
+        isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
     >
       <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
-        <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
-          <button onClick={handleClose} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">
-            ← The Road to Glory
-          </button>
-          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none">
+        <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between gap-4 bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
+          <Breadcrumb
+            items={[{ label: SITE_NAME, href: "/", home: true }, { label: `${year} FIFA World Cup` }]}
+            onNavigate={(href) => (href === "/" ? handleClose() : onNavigate(href))}
+          />
+          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden shrink-0">
             Archive · Tournament
           </div>
         </div>
@@ -167,12 +174,12 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
                   {COUNTRY_PAGE_ENABLED ? (
                     <button
                       onClick={() => onNavigate(countryPath(champion))}
-                      className="font-unbounded font-bold text-xl text-brand-text hover:text-brand-gold transition-colors cursor-pointer"
+                      className="font-unbounded font-bold text-xl text-brand-text hover:text-brand-gold transition-colors cursor-pointer truncate"
                     >
                       {getTeamName(champion)}
                     </button>
                   ) : (
-                    <div className="font-unbounded font-bold text-xl text-brand-text">
+                    <div className="font-unbounded font-bold text-xl text-brand-text truncate">
                       {getTeamName(champion)}
                     </div>
                   )}
@@ -322,7 +329,7 @@ export default function TournamentPage({ year, onBack, onNavigate }: TournamentP
                 const inner = (
                   <>
                     <span className="text-base">{getTeamFlag(code)}</span>
-                    <span className="text-sm font-semibold text-brand-text">{getTeamName(code)}</span>
+                    <span className="text-sm font-semibold text-brand-text truncate">{getTeamName(code)}</span>
                   </>
                 );
                 const base = "flex items-center gap-2 px-3 py-2 rounded-lg border border-brand-line text-left";
@@ -467,7 +474,14 @@ function TeamSide({
   }
   return (
     <button
-      onClick={() => onNavigate(countryPath(code))}
+      onClick={(e) => {
+        // This button sits inside the match-row link (AppLink). Without stopping
+        // the event, the click would bubble to that link and navigate to the
+        // match page instead — so a team name could never reach its country page.
+        e.preventDefault();
+        e.stopPropagation();
+        onNavigate(countryPath(code));
+      }}
       className={`${base} hover:text-brand-gold transition-colors cursor-pointer`}
       aria-label={`View ${getTeamName(code)} country page`}
     >

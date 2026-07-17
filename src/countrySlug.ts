@@ -28,8 +28,14 @@ export function slugifyName(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+// Nations that have a hand-written country page (countries.mock.ts) despite
+// never having appeared at a World Cup, so they aren't picked up by the
+// tournament sweep below. Keep in sync with the extra MOCK_COUNTRIES entries.
+const EXTRA_CODES = ["PLE"];
+
 // The canonical set of country-page codes: every real nation that has appeared
-// in a tournament in our data (mirrors the enumeration the sitemap uses).
+// in a tournament in our data (mirrors the enumeration the sitemap uses), plus
+// the hand-written extras above.
 function computeCodes(): string[] {
   const codes = new Set<string>();
   for (const year of Object.keys(TOURNAMENTS).map(Number)) {
@@ -42,6 +48,7 @@ function computeCodes(): string[] {
       }
     }
   }
+  for (const c of EXTRA_CODES) if (TEAMS[c]) codes.add(c);
   return [...codes];
 }
 

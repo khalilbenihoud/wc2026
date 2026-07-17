@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CountryProfile,
   EDITIONS,
@@ -11,7 +11,13 @@ import CountryMap from "../CountryMap";
 import { COUNTRY_MAPS } from "../../countryMaps.generated";
 import PlayerAvatar from "../PlayerAvatar";
 import { useWikiPhoto } from "../../wikiPhoto";
+import { countryPath } from "../../router";
 import { Rule, SectionKicker } from "./shared";
+
+interface ArchiveProps {
+  profile: CountryProfile;
+  onNavigate: (path: string) => void;
+}
 
 // ── Shared sub-components ────────────────────────────────────────────────────
 
@@ -91,7 +97,7 @@ function TopScorers({ profile }: { profile: CountryProfile }) {
   );
 }
 
-function Rivalries({ profile }: { profile: CountryProfile }) {
+function Rivalries({ profile, onNavigate }: { profile: CountryProfile; onNavigate: (path: string) => void }) {
   if (profile.rivalries.length === 0) return null;
   return (
     <div>
@@ -100,9 +106,13 @@ function Rivalries({ profile }: { profile: CountryProfile }) {
         {profile.rivalries.map((r, i) => (
           <div key={r.code}>
             {i > 0 && <Rule />}
-            <div className="flex items-center gap-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => onNavigate(countryPath(r.code))}
+              className="w-full flex items-center gap-3 py-2.5 -mx-2 px-2 rounded-md cursor-pointer text-left hover:bg-brand-gold/[0.04] focus-visible:bg-brand-gold/[0.06] focus:outline-none transition-colors"
+            >
               <span aria-hidden className="text-base leading-none">{r.flag}</span>
-              <span className="text-sm text-brand-text flex-1">{r.name}</span>
+              <span className="text-sm font-semibold text-brand-text flex-1 truncate">{r.name}</span>
               <span className="font-mono text-[11px] tabular-nums tracking-wider">
                 <span className="text-brand-gold">{r.w}W</span><span className="text-brand-muted"> · {r.d}D · </span><span className="text-brand-text/70">{r.l}L</span>
               </span>
@@ -111,7 +121,7 @@ function Rivalries({ profile }: { profile: CountryProfile }) {
                 <span className="bg-brand-steel" style={{ width: `${(r.d / r.played) * 100}%` }} />
                 <span className="bg-brand-steel/30" style={{ width: `${(r.l / r.played) * 100}%` }} />
               </span>
-            </div>
+            </button>
           </div>
         ))}
       </div>
@@ -119,24 +129,167 @@ function Rivalries({ profile }: { profile: CountryProfile }) {
   );
 }
 
-function HeroSection({ p }: { p: CountryProfile }) {
+function HeroMap({ p }: { p: CountryProfile }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const el = mapRef.current;
+    if (!el) return;
+    const svg = el.querySelector("svg");
+    if (!svg) return;
+    const g = svg.querySelector("g");
+    if (!g) return;
+    const bbox = g.getBBox();
+    if (bbox.width === 0 || bbox.height === 0) return;
+    const viewW = svg.viewBox?.baseVal?.width ?? 1024;
+    const viewH = svg.viewBox?.baseVal?.height ?? 1024;
+    setPos({
+      x: ((bbox.x + bbox.width / 2) / viewW) * 100,
+      y: ((bbox.y + bbox.height / 2) / viewH) * 100,
+    });
+  }, [p.code]);
+
   const hasMap = !!COUNTRY_MAPS[p.code];
-  return (
-    <header className="relative mb-8 flex flex-col items-center text-center py-8 md:py-12 overflow-hidden rounded-xl">
-      {hasMap ? (
-        <CountryMap code={p.code} className="pointer-events-none absolute h-56 md:h-72 w-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15" />
-      ) : (
-        <div className="pointer-events-none absolute h-56 md:h-72 w-56 md:w-72 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)' }} />
-      )}
-      <div className="relative flex flex-col items-center gap-3">
-        <span className="text-6xl md:text-7xl leading-none select-none drop-shadow-lg">{p.flag}</span>
-        <h1 className="font-unbounded font-bold text-3xl md:text-5xl tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-b from-brand-text to-brand-text/70">{p.name}</h1>
-        <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted">{p.confederation} · {p.appearances} appearances · since {p.firstAppearance}</div>
-        {p.titles.length > 0 && <div className="text-brand-gold text-xl md:text-2xl tracking-[0.25em] select-none" aria-label={`${p.titles.length} World Cup titles`}>{"★".repeat(p.titles.length)}</div>}
-        <p className="mt-2 font-serif text-brand-muted text-[15px] leading-relaxed italic max-w-xl">{p.epithet}</p>
-      </div>
-    </header>
+  if (!hasMap) {
+    return (
+      <div
+        className="pointer-events-none h-64 md:h-80 w-64 md:w-80 rounded-full animate-pulse"
+        style={{ background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)" }}
+      />
+    );
+  }
+
+  const dot = pos && (
+    <>
+      <span
+        className="absolute w-3 h-3 rounded-full bg-brand-gold shadow-[0_0_10px_rgba(246,196,83,0.8)] animate-[pulse_2s_ease-in-out_infinite] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+      />
+      <span
+        className="absolute w-8 h-8 rounded-full bg-brand-gold/20 animate-[ping_2s_ease-in-out_infinite] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+      />
+    </>
   );
+
+  return (
+    <div ref={mapRef} className="relative opacity-50">
+      <CountryMap key={p.code} code={p.code} className="pointer-events-none h-64 md:h-80 w-auto" />
+      {dot}
+    </div>
+  );
+}
+
+function TitlesDisplay({ count }: { count: number }) {
+  const stars = Array.from({ length: count }, (_, i) => i);
+  return (
+    <div className="flex items-center gap-1.5 select-none" aria-label={`${count} World Cup title${count > 1 ? "s" : ""}`}>
+      <span className="text-brand-muted/40 text-lg leading-none">❦</span>
+      <span className="flex items-center gap-0.5">
+        {stars.map((i) => (
+          <span key={i} className="text-brand-gold text-xl md:text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">★</span>
+        ))}
+      </span>
+      <span className="text-brand-muted/40 text-lg leading-none">❦</span>
+    </div>
+  );
+}
+
+const HERO_VARIANTS_KEY = "country-hero-variant";
+const VARIANTS = ["v1", "v2"] as const;
+type HeroVariant = (typeof VARIANTS)[number];
+
+const labels: Record<HeroVariant, string> = {
+  v1: "Side",
+  v2: "Full",
+};
+
+function VariantSwitcher({ value, onChange }: { value: HeroVariant; onChange: (v: HeroVariant) => void }) {
+  return (
+    <div className="flex items-center gap-1 mb-4">
+      {VARIANTS.map((v) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          className={`text-[10px] font-mono tracking-wider px-2 py-1 rounded border transition-colors ${
+            value === v
+              ? "border-brand-gold text-brand-gold bg-brand-gold/10"
+              : "border-brand-line/40 text-brand-muted hover:text-brand-text hover:border-brand-line"
+          }`}
+        >
+          {labels[v]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function HeroSection({ p }: { p: CountryProfile }) {
+  const [variant, setVariant] = useState<HeroVariant>(() => {
+    if (typeof window === "undefined") return "v1";
+    return (localStorage.getItem(HERO_VARIANTS_KEY) as HeroVariant) ?? "v1";
+  });
+
+  const changeVariant = (v: HeroVariant) => {
+    setVariant(v);
+    localStorage.setItem(HERO_VARIANTS_KEY, v);
+  };
+
+  const stars = p.titles.length > 0 && <TitlesDisplay count={p.titles.length} />;
+
+  const info = p.appearances === 0
+    ? `${p.confederation} · Yet to reach a World Cup`
+    : `${p.confederation} · ${p.appearances} appearances · since ${p.firstAppearance}`;
+
+  const mapEl = (
+    <div className="hidden md:flex items-center justify-center min-h-[16rem]">
+      <HeroMap p={p} />
+    </div>
+  );
+
+  if (variant === "v1") {
+    return (
+      <>
+        <VariantSwitcher value={variant} onChange={changeVariant} />
+        <header className="relative mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-center py-8 md:py-12 overflow-hidden rounded-xl">
+          <div className="relative z-10">
+            <div className="flex flex-col items-start text-left gap-3">
+              {stars}
+              <h1 className="font-unbounded font-bold text-3xl md:text-5xl tracking-tight leading-tight flex items-center gap-3 md:gap-4">
+                <span className="leading-none select-none drop-shadow-lg">{p.flag}</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-b from-brand-text to-brand-text/70 whitespace-nowrap">{p.name}</span>
+              </h1>
+              <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted">{info}</div>
+              <p className="mt-2 font-serif text-brand-muted text-[15px] leading-relaxed italic max-w-md">{p.epithet}</p>
+            </div>
+          </div>
+          <div className="relative z-10">{mapEl}</div>
+        </header>
+      </>
+    );
+  }
+
+  if (variant === "v2") {
+    return (
+      <>
+        <VariantSwitcher value={variant} onChange={changeVariant} />
+        <header className="relative mb-8 py-16 md:py-24 overflow-hidden rounded-xl flex flex-col items-center text-center">
+          <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center scale-150">{mapEl}</div>
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-bg via-brand-bg/60 to-transparent pointer-events-none" />
+          <div className="relative z-10 flex flex-col items-center gap-3 max-w-lg">
+            {stars}
+            <span className="text-6xl md:text-7xl leading-none select-none drop-shadow-lg">{p.flag}</span>
+            <h1 className="font-unbounded font-bold text-4xl md:text-6xl tracking-tight leading-tight text-brand-text">{p.name}</h1>
+            <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted">{info}</div>
+            <p className="font-serif text-brand-muted text-[15px] leading-relaxed italic">{p.epithet}</p>
+          </div>
+        </header>
+      </>
+    );
+  }
+
+  return null;
 }
 
 function StatsRow({ p }: { p: CountryProfile }) {
@@ -233,14 +386,14 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
   );
 }
 
-function LayoutDashboard({ p }: { p: CountryProfile }) {
+function LayoutDashboard({ p, onNavigate }: { p: CountryProfile; onNavigate: (path: string) => void }) {
   const rec = p.record;
   return (
     <div>
       <HeroSection p={p} />
       <section className={`mb-10 grid grid-cols-2 gap-3 ${p.titles.length > 0 ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
         <StatCard label="Record" value={`${rec.w}W · ${rec.d}D · ${rec.l}L`} sub={`${rec.gf} GF · ${rec.ga} GA`} />
-        <StatCard label="Appearances" value={String(p.appearances)} sub={`since ${p.firstAppearance}`} />
+        <StatCard label="Appearances" value={String(p.appearances)} sub={p.appearances === 0 ? "none yet" : `since ${p.firstAppearance}`} />
         <StatCard label="Best result" value={p.titles.length > 0 ? `Champion ×${p.titles.length}` : p.bestResult.replace(/ —.*/, "")} sub={p.titles.length > 0 ? "" : p.bestResult.replace(/.*— /, "")} />
         {p.titles.length > 0 && <StatCard label="Titles" value={"★".repeat(p.titles.length)} sub={`${p.titles.length} star${p.titles.length > 1 ? "s" : ""}`} />}
       </section>
@@ -253,7 +406,7 @@ function LayoutDashboard({ p }: { p: CountryProfile }) {
           <TopScorers profile={p} />
         </div>
       </section>
-      {p.rivalries.length > 0 && <section className="mb-10"><Rivalries profile={p} /></section>}
+      {p.rivalries.length > 0 && <section className="mb-10"><Rivalries profile={p} onNavigate={onNavigate} /></section>}
       <DefiningMatches p={p} />
       <NewsSection articles={p.news} />
       <VideosSection videos={p.videos} />
@@ -263,6 +416,6 @@ function LayoutDashboard({ p }: { p: CountryProfile }) {
 
 // ── Archive ───────────────────────────────────────────────────────────────────
 
-export default function Archive({ profile }: { profile: CountryProfile }) {
-  return <LayoutDashboard p={profile} />;
+export default function Archive({ profile, onNavigate }: ArchiveProps) {
+  return <LayoutDashboard p={profile} onNavigate={onNavigate} />;
 }

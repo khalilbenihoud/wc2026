@@ -16,9 +16,10 @@ interface CountryRouteProps {
   code: string;
   onBack: () => void;
   onNavigate: (path: string) => void;
+  instant?: boolean;
 }
 
-export default function CountryRoute({ code, onBack, onNavigate }: CountryRouteProps) {
+export default function CountryRoute({ code, onBack, onNavigate, instant }: CountryRouteProps) {
   const profile = allCountries()[code];
   if (!profile) return null;
 
@@ -27,6 +28,7 @@ export default function CountryRoute({ code, onBack, onNavigate }: CountryRouteP
       profile={profile}
       onBack={onBack}
       onNavigate={onNavigate}
+      instant={instant}
     />
   );
 }

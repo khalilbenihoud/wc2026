@@ -181,7 +181,7 @@ export const COLORS: Record<string, string> = {
   HON: "#0F3D7D",
   KUW: "#007A33",
   SLV: "#0047AB",
-  PLE: "#000000",
+  PLE: "#CE1126",
   TBD: "#71717a",
 };
 

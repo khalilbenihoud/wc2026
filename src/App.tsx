@@ -1,7 +1,7 @@
 //  ╔══════════════════════════════════════╗
 //  ║  Inspired by Emilio Sansolini        ║
 //  ╚══════════════════════════════════════╝
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
@@ -29,7 +29,7 @@ import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
 import { findMatchBySlug } from "./matches";
-import { tournamentEvent, matchEvent } from "./schema";
+import { tournamentEvent, matchEvent, breadcrumbList, BASE_URL, SITE_NAME } from "./schema";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -118,6 +118,41 @@ export default function App() {
   const matchYear = route.path === "match" ? Number(route.params.year) : null;
   // The year whose TournamentPage sits behind everything, for either route.
   const pageYear = tournamentYear ?? matchYear;
+
+  // The full-screen overlays (tournament / match / country) each animate in from
+  // opacity 0. When you jump straight from one overlay to another (e.g. tapping a
+  // nation on the tournament page), that fade would briefly reveal the home
+  // bracket underneath. Track the route we came from so the incoming overlay can
+  // skip the intro and appear opaque instead, swapping seamlessly.
+  const OVERLAY_ROUTES = ["tournament", "match", "country"];
+  const prevPathRef = useRef(route.path);
+  const fromOverlay =
+    prevPathRef.current !== route.path && OVERLAY_ROUTES.includes(prevPathRef.current);
+  useEffect(() => {
+    prevPathRef.current = route.path;
+  });
+
+  // Preload the sibling overlay's code-split chunk so navigating between them is
+  // instant — otherwise the Suspense fallback (null) flashes the home bracket
+  // while the chunk downloads. From a tournament/match, the next tap is usually a
+  // nation (CountryRoute); from a country, it's a tournament. Deferred to idle so
+  // it doesn't contend with the current overlay's own load.
+  useEffect(() => {
+    const preload = () => {
+      if (route.path === "tournament" || route.path === "match") {
+        import("./components/CountryRoute");
+      } else if (route.path === "country") {
+        import("./components/TournamentPage");
+      }
+    };
+    const ric = window.requestIdleCallback;
+    if (ric) {
+      const id = ric(preload);
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(preload, 400);
+    return () => window.clearTimeout(id);
+  }, [route.path]);
 
   // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
   // the browser supports it. Experimental API (navigator.modelContext isn't
@@ -230,6 +265,10 @@ export default function App() {
 
   const handleNavigateCountry = useCallback((code: string) => {
     if (!COUNTRY_PAGE_ENABLED) return; // country page disabled for now
+    // Unmount the match modal immediately — otherwise it stays mounted over the
+    // country page for the duration of its close animation.
+    setSelectedMatch(null);
+    setModalMounted(false);
     navigate(countryPath(code));
   }, [navigate]);
 
@@ -360,8 +399,12 @@ export default function App() {
           name: p.name,
           sport: "Association football",
           description: p.epithet,
-          url: `https://worldcuparchive.net${countryPath(p.code)}/`,
+          url: `${BASE_URL}${countryPath(p.code)}/`,
         },
+        breadcrumb: breadcrumbList([
+          { name: SITE_NAME, url: `${BASE_URL}/` },
+          { name: p.name, url: `${BASE_URL}${countryPath(p.code)}/` },
+        ]),
       };
     }
     if (route.path === "match" && matchYear && TOURNAMENTS[matchYear]) {
@@ -385,6 +428,11 @@ export default function App() {
             `Goalscorers, result, and match details.`,
           canonical: `${matchPath(matchYear, found.slug)}/`,
           jsonLd: matchEvent(matchYear, t.host, taName, tbName, roundName, found.slug),
+          breadcrumb: breadcrumbList([
+            { name: SITE_NAME, url: `${BASE_URL}/` },
+            { name: `${matchYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(matchYear)}/` },
+            { name: resultTitle, url: `${BASE_URL}${matchPath(matchYear, found.slug)}/` },
+          ]),
         };
       }
     }
@@ -397,6 +445,10 @@ export default function App() {
         description: `${tournamentYear} FIFA World Cup in ${t.host}. ${t.quote || ""} Full knockout results, golden boot, and all participating nations.`,
         canonical: `${tournamentPath(tournamentYear)}/`, // trailing slash = Netlify's 200 URL
         jsonLd: tournamentEvent(tournamentYear, t, champ),
+        breadcrumb: breadcrumbList([
+          { name: SITE_NAME, url: `${BASE_URL}/` },
+          { name: `${tournamentYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(tournamentYear)}/` },
+        ]),
       };
     }
     return {
@@ -618,6 +670,7 @@ export default function App() {
             code={countryCode}
             onBack={() => navigate("/")}
             onNavigate={navigate}
+            instant={fromOverlay}
           />
         </Suspense>
       )}
@@ -628,6 +681,7 @@ export default function App() {
             year={pageYear}
             onBack={() => navigate("/")}
             onNavigate={navigate}
+            instant={fromOverlay}
           />
         </Suspense>
       )}
