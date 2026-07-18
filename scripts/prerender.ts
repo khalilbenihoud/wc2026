@@ -21,7 +21,7 @@ import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
 import { tournamentEvent, matchEvent, breadcrumbList, SITE_NAME } from "../src/schema";
 import { generateCountryProfiles } from "../src/countries.generated";
-import { MOCK_COUNTRIES, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
+import { applyMockOverrides, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 
 const BASE = "https://worldcuparchive.net";
@@ -459,7 +459,7 @@ for (const year of years) {
   }
 }
 
-const countryProfiles = { ...generateCountryProfiles(), ...MOCK_COUNTRIES };
+const countryProfiles = applyMockOverrides(generateCountryProfiles());
 let nCountries = 0;
 for (const code of COUNTRY_CODES) {
   const profile = countryProfiles[code];

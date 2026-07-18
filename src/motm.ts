@@ -14,7 +14,7 @@ const MOTM: Record<string, PlayerOfMatch> = {
   // Round of 32
   "2026_RSA_CAN": { name: "Stephen Eustaquio", team: "CAN" },
   "2026_GER_PAR": { name: "Orlando Gill", team: "PAR" },
-  "2026_NED_MAR": { name: "Issa Diop", team: "MAR" },
+  "2026_NED_MAR": { name: "Ismael Saibari", team: "MAR" },
   "2026_BRA_JPN": { name: "Casemiro", team: "BRA" },
   "2026_FRA_SWE": { name: "Kylian Mbappé", team: "FRA" },
   "2026_CIV_NOR": { name: "Antonio Nusa", team: "NOR" },

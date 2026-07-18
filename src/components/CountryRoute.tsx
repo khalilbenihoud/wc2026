@@ -2,13 +2,13 @@
 // + stats here — instead of in App — keeps ~150KB of data out of the initial
 // home-bracket payload. Only loaded when COUNTRY_PAGE_ENABLED is on and a
 // /countries/<code> route is active.
-import { MOCK_COUNTRIES } from "../countries.mock";
+import { applyMockOverrides } from "../countries.mock";
 import { generateCountryProfiles } from "../countries.generated";
 import CountryPage from "./CountryPage";
 
 let cached: ReturnType<typeof generateCountryProfiles> | null = null;
 function allCountries() {
-  if (!cached) cached = { ...generateCountryProfiles(), ...MOCK_COUNTRIES };
+  if (!cached) cached = applyMockOverrides(generateCountryProfiles());
   return cached;
 }
 

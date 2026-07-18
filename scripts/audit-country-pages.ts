@@ -8,14 +8,11 @@
  */
 
 import { generateCountryProfiles } from "../src/countries.generated";
-import { MOCK_COUNTRIES, CountryProfile, EDITIONS, RESULT_LABEL, ResultLevel } from "../src/countries.mock";
+import { applyMockOverrides, MOCK_COUNTRIES, CountryProfile, EDITIONS, RESULT_LABEL, ResultLevel } from "../src/countries.mock";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 import { TEAMS, TOURNAMENTS, getTeamName, getTeamFlag } from "../src/data";
 
-const profiles: Record<string, CountryProfile> = {
-  ...generateCountryProfiles(),
-  ...MOCK_COUNTRIES,
-};
+const profiles = applyMockOverrides(generateCountryProfiles());
 
 // ── Ground truth ─────────────────────────────────────────────────────────────
 const CHAMPIONS: Record<number, string> = {

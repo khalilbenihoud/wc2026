@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   CountryProfile,
   EDITIONS,
   RESULT_HEIGHT,
   RESULT_LABEL,
-  NewsArticle,
+  Milestone,
   VideoHighlight,
 } from "../../countries.mock";
 import CountryMap from "../CountryMap";
@@ -130,26 +130,6 @@ function Rivalries({ profile, onNavigate }: { profile: CountryProfile; onNavigat
 }
 
 function HeroMap({ p }: { p: CountryProfile }) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
-
-  useEffect(() => {
-    const el = mapRef.current;
-    if (!el) return;
-    const svg = el.querySelector("svg");
-    if (!svg) return;
-    const g = svg.querySelector("g");
-    if (!g) return;
-    const bbox = g.getBBox();
-    if (bbox.width === 0 || bbox.height === 0) return;
-    const viewW = svg.viewBox?.baseVal?.width ?? 1024;
-    const viewH = svg.viewBox?.baseVal?.height ?? 1024;
-    setPos({
-      x: ((bbox.x + bbox.width / 2) / viewW) * 100,
-      y: ((bbox.y + bbox.height / 2) / viewH) * 100,
-    });
-  }, [p.code]);
-
   const hasMap = !!COUNTRY_MAPS[p.code];
   if (!hasMap) {
     return (
@@ -160,23 +140,9 @@ function HeroMap({ p }: { p: CountryProfile }) {
     );
   }
 
-  const dot = pos && (
-    <>
-      <span
-        className="absolute w-3 h-3 rounded-full bg-brand-gold shadow-[0_0_10px_rgba(246,196,83,0.8)] animate-[pulse_2s_ease-in-out_infinite] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-      />
-      <span
-        className="absolute w-8 h-8 rounded-full bg-brand-gold/20 animate-[ping_2s_ease-in-out_infinite] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-      />
-    </>
-  );
-
   return (
-    <div ref={mapRef} className="relative opacity-50">
+    <div className="relative opacity-50">
       <CountryMap key={p.code} code={p.code} className="pointer-events-none h-64 md:h-80 w-auto" />
-      {dot}
     </div>
   );
 }
@@ -196,46 +162,7 @@ function TitlesDisplay({ count }: { count: number }) {
   );
 }
 
-const HERO_VARIANTS_KEY = "country-hero-variant";
-const VARIANTS = ["v1", "v2"] as const;
-type HeroVariant = (typeof VARIANTS)[number];
-
-const labels: Record<HeroVariant, string> = {
-  v1: "Side",
-  v2: "Full",
-};
-
-function VariantSwitcher({ value, onChange }: { value: HeroVariant; onChange: (v: HeroVariant) => void }) {
-  return (
-    <div className="flex items-center gap-1 mb-4">
-      {VARIANTS.map((v) => (
-        <button
-          key={v}
-          onClick={() => onChange(v)}
-          className={`text-[10px] font-mono tracking-wider px-2 py-1 rounded border transition-colors ${
-            value === v
-              ? "border-brand-gold text-brand-gold bg-brand-gold/10"
-              : "border-brand-line/40 text-brand-muted hover:text-brand-text hover:border-brand-line"
-          }`}
-        >
-          {labels[v]}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function HeroSection({ p }: { p: CountryProfile }) {
-  const [variant, setVariant] = useState<HeroVariant>(() => {
-    if (typeof window === "undefined") return "v1";
-    return (localStorage.getItem(HERO_VARIANTS_KEY) as HeroVariant) ?? "v1";
-  });
-
-  const changeVariant = (v: HeroVariant) => {
-    setVariant(v);
-    localStorage.setItem(HERO_VARIANTS_KEY, v);
-  };
-
   const stars = p.titles.length > 0 && <TitlesDisplay count={p.titles.length} />;
 
   const info = p.appearances === 0
@@ -248,48 +175,22 @@ function HeroSection({ p }: { p: CountryProfile }) {
     </div>
   );
 
-  if (variant === "v1") {
-    return (
-      <>
-        <VariantSwitcher value={variant} onChange={changeVariant} />
-        <header className="relative mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-center py-8 md:py-12 overflow-hidden rounded-xl">
-          <div className="relative z-10">
-            <div className="flex flex-col items-start text-left gap-3">
-              {stars}
-              <h1 className="font-unbounded font-bold text-3xl md:text-5xl tracking-tight leading-tight flex items-center gap-3 md:gap-4">
-                <span className="leading-none select-none drop-shadow-lg">{p.flag}</span>
-                <span className="bg-clip-text text-transparent bg-gradient-to-b from-brand-text to-brand-text/70 whitespace-nowrap">{p.name}</span>
-              </h1>
-              <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted">{info}</div>
-              <p className="mt-2 font-serif text-brand-muted text-[15px] leading-relaxed italic max-w-md">{p.epithet}</p>
-            </div>
-          </div>
-          <div className="relative z-10">{mapEl}</div>
-        </header>
-      </>
-    );
-  }
-
-  if (variant === "v2") {
-    return (
-      <>
-        <VariantSwitcher value={variant} onChange={changeVariant} />
-        <header className="relative mb-8 py-16 md:py-24 overflow-hidden rounded-xl flex flex-col items-center text-center">
-          <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center scale-150">{mapEl}</div>
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-bg via-brand-bg/60 to-transparent pointer-events-none" />
-          <div className="relative z-10 flex flex-col items-center gap-3 max-w-lg">
-            {stars}
-            <span className="text-6xl md:text-7xl leading-none select-none drop-shadow-lg">{p.flag}</span>
-            <h1 className="font-unbounded font-bold text-4xl md:text-6xl tracking-tight leading-tight text-brand-text">{p.name}</h1>
-            <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted">{info}</div>
-            <p className="font-serif text-brand-muted text-[15px] leading-relaxed italic">{p.epithet}</p>
-          </div>
-        </header>
-      </>
-    );
-  }
-
-  return null;
+  return (
+    <header className="relative mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-center py-8 md:py-12 overflow-hidden rounded-xl">
+      <div className="relative z-10">
+        <div className="flex flex-col items-start text-left gap-3">
+          {stars}
+          <h1 className="font-unbounded font-bold text-3xl md:text-5xl tracking-tight leading-tight flex items-center gap-3 md:gap-4">
+            <span className="leading-none select-none drop-shadow-lg">{p.flag}</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-b from-brand-text to-brand-text/70 whitespace-nowrap">{p.name}</span>
+          </h1>
+          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted">{info}</div>
+          <p className="mt-2 font-serif text-brand-muted text-[15px] leading-relaxed italic max-w-md">{p.epithet}</p>
+        </div>
+      </div>
+      <div className="relative z-10">{mapEl}</div>
+    </header>
+  );
 }
 
 function StatsRow({ p }: { p: CountryProfile }) {
@@ -330,20 +231,20 @@ function DefiningMatches({ p }: { p: CountryProfile }) {
   );
 }
 
-function NewsSection({ articles }: { articles: NewsArticle[] }) {
-  if (articles.length === 0) return null;
+function MilestonesSection({ milestones }: { milestones: Milestone[] }) {
+  if (milestones.length === 0) return null;
   return (
     <section className="mb-10">
-      <SectionKicker>Latest news</SectionKicker>
+      <SectionKicker>Milestones</SectionKicker>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {articles.map((a, i) => (
-          <a key={i} href={a.url} className="block p-4 rounded-xl border border-brand-line/40 bg-brand-panel/20 hover:border-brand-gold/30 hover:bg-brand-gold/[0.03] transition-colors">
+        {milestones.map((m, i) => (
+          <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl border border-brand-line/40 bg-brand-panel/20 hover:border-brand-gold/30 hover:bg-brand-gold/[0.03] transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono text-[10px] tracking-wider uppercase text-brand-muted">{a.source}</span>
-              <span className="font-mono text-[10px] text-brand-muted/60">{a.date}</span>
+              <span className="font-mono text-[10px] tracking-wider uppercase text-brand-gold tabular-nums">{m.year}</span>
+              <span className="font-mono text-[10px] tracking-wider uppercase text-brand-muted/60">World Cup</span>
             </div>
-            <h3 className="text-sm font-semibold text-brand-text leading-snug mb-1">{a.headline}</h3>
-            <p className="text-xs text-brand-muted leading-relaxed line-clamp-2">{a.snippet}</p>
+            <h3 className="text-sm font-semibold text-brand-text leading-snug mb-1">{m.headline}</h3>
+            <p className="text-xs text-brand-muted leading-relaxed line-clamp-2">{m.detail}</p>
           </a>
         ))}
       </div>
@@ -358,13 +259,22 @@ function VideosSection({ videos }: { videos: VideoHighlight[] }) {
       <SectionKicker>Videos</SectionKicker>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {videos.map((v, i) => (
-          <a key={i} href={v.url} className="flex items-center gap-4 p-3 rounded-xl border border-brand-line/40 bg-brand-panel/20 hover:border-brand-gold/30 hover:bg-brand-gold/[0.03] transition-colors">
-            <div className="w-16 h-12 rounded-lg bg-brand-steel/40 flex items-center justify-center shrink-0 font-mono text-[10px] text-brand-muted">
-              <span className="text-lg">▶</span>
+          <a
+            key={i}
+            href={v.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 p-3 rounded-xl border border-brand-line/40 bg-brand-panel/20 hover:border-brand-gold/30 hover:bg-brand-gold/[0.03] transition-colors group"
+          >
+            <div
+              className="w-20 h-14 rounded-lg bg-brand-steel/40 flex items-center justify-center shrink-0 font-mono text-[10px] text-brand-muted bg-cover bg-center overflow-hidden"
+              style={v.thumbnail ? { backgroundImage: `url(${v.thumbnail})` } : undefined}
+            >
+              <span className="text-xl opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-lg">▶</span>
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-brand-text leading-snug truncate">{v.title}</h3>
-              <span className="font-mono text-[10px] text-brand-muted/60">{v.duration}</span>
+              {v.duration && <span className="font-mono text-[10px] text-brand-muted/60">{v.duration}</span>}
             </div>
           </a>
         ))}
@@ -408,7 +318,7 @@ function LayoutDashboard({ p, onNavigate }: { p: CountryProfile; onNavigate: (pa
       </section>
       {p.rivalries.length > 0 && <section className="mb-10"><Rivalries profile={p} onNavigate={onNavigate} /></section>}
       <DefiningMatches p={p} />
-      <NewsSection articles={p.news} />
+      <MilestonesSection milestones={p.milestones} />
       <VideosSection videos={p.videos} />
     </div>
   );

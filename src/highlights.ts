@@ -7,7 +7,7 @@ export interface Highlight {
   thumbnail: string;
 }
 
-const HIGHLIGHTS: Record<string, Highlight> = {
+export const HIGHLIGHTS: Record<string, Highlight> = {
   "1930_ARG_CHI": { videoId: "drQhxpdW3Oc", title: "1930 WC G1 Argentina - Chile (Montevideo, 22.7.1930)", thumbnail: "https://i.ytimg.com/vi/drQhxpdW3Oc/hqdefault.jpg" },
   "1930_USA_BEL": { videoId: "h6j1iN1IP9s", title: "USA 🇺🇸 3–0 Belgium 🇧🇪 | 1930 FIFA World Cup 🔥 Remembering America’s Forgotten Legends 🕊️", thumbnail: "https://i.ytimg.com/vi/h6j1iN1IP9s/hqdefault.jpg" },
   "1930_URU_PER": { videoId: "LBhirjwWs0Y", title: "1930 WC G3 Uruguay - Peru (Montevideo, 18.7.1930)", thumbnail: "https://i.ytimg.com/vi/LBhirjwWs0Y/hqdefault.jpg" },

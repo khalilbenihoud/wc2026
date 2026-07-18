@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CountryProfile, RESULT_LABEL, ResultLevel } from "../countries.mock";
-import { TOURNAMENTS, getTeamColor } from "../data";
+import { TOURNAMENTS, getTeamPalette } from "../data";
 import { tournamentPath } from "../router";
 import Archive from "./country/Archive";
 import Breadcrumb from "./Breadcrumb";
@@ -41,7 +41,14 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
     setTimeout(onBack, 200);
   };
 
-  const color = getTeamColor(profile.code);
+  const palette = getTeamPalette(profile.code);
+  // Up to three drifting gradients, one per dominant colour, at staggered
+  // positions/sizes/opacities so the nation's flag palette washes the backdrop.
+  const auroraStops = [
+    { size: "60% 50%", pos: "28% 38%", alpha: "1f", anim: "aurora 14s ease infinite alternate" },
+    { size: "52% 46%", pos: "74% 62%", alpha: "17", anim: "aurora 20s ease infinite alternate-reverse" },
+    { size: "55% 42%", pos: "52% 10%", alpha: "12", anim: "aurora 24s ease infinite alternate" },
+  ].map((s, i) => ({ ...s, color: palette[i % palette.length] }));
 
   return (
     <div
@@ -50,23 +57,21 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
         isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
     >
-      {/* Ambient aurora — two drifting gradients for depth */}
+      {/* Ambient aurora — one drifting gradient per dominant flag colour */}
       <div
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         aria-hidden
       >
-        <div
-          className="absolute -inset-48 animate-[aurora_14s_ease_infinite_alternate]"
-          style={{
-            background: `radial-gradient(ellipse 60% 50% at 30% 40%, ${color}18 0%, transparent 60%)`,
-          }}
-        />
-        <div
-          className="absolute -inset-48 animate-[aurora_20s_ease_infinite_alternate-reverse]"
-          style={{
-            background: `radial-gradient(ellipse 50% 40% at 70% 60%, ${color}0d 0%, transparent 50%)`,
-          }}
-        />
+        {auroraStops.map((s, i) => (
+          <div
+            key={i}
+            className="absolute -inset-48"
+            style={{
+              animation: s.anim,
+              background: `radial-gradient(ellipse ${s.size} at ${s.pos}, ${s.color}${s.alpha} 0%, transparent 60%)`,
+            }}
+          />
+        ))}
       </div>
       <div className="relative z-10 max-w-[880px] mx-auto px-5 md:px-8 pb-20">
         <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between gap-4 bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">

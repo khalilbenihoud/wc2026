@@ -1,10 +1,15 @@
 import { TOURNAMENTS, TEAMS, getTeamName, getTeamFlag } from "./data";
 import {
   CountryProfile,
+  Milestone,
+  VideoHighlight,
   EDITIONS,
+  RESULT_LABEL,
   ResultLevel,
 } from "./countries.mock";
 import { COUNTRY_STATS } from "./countryStats.generated";
+import { ROUND_NAME } from "./constants";
+import { HIGHLIGHTS } from "./highlights";
 
 type RoundResult = {
   year: number;
@@ -218,11 +223,12 @@ function getTeamsInMatch(
   return [];
 }
 
-function getTopScorers(code: string): { name: string; goals: number; span: string }[] {
+function getTopScorers(code: string, minYear?: number): { name: string; goals: number; span: string }[] {
   const goalsByPlayer: Record<string, number> = {};
   const yearsByPlayer: Record<string, Set<number>> = {};
 
   for (const year of Object.keys(TOURNAMENTS).map(Number)) {
+    if (minYear !== undefined && year < minYear) continue;
     const t = TOURNAMENTS[year];
     const allGoals: [string[], string[]][] = [];
 
@@ -272,6 +278,272 @@ function getTopScorers(code: string): { name: string; goals: number; span: strin
         : `${years[0]}–${years[years.length - 1]}`;
       return { name, goals, span };
     });
+}
+
+type MatchInfo = {
+  year: number;
+  roundKey: string;
+  opponent: string;
+  ourScore: number;
+  theirScore: number;
+  outcome: "W" | "D" | "L";
+};
+
+function getTeamMatches(code: string): MatchInfo[] {
+  const matches: MatchInfo[] = [];
+
+  for (const year of Object.keys(TOURNAMENTS).map(Number).sort((a, b) => b - a)) {
+    const t = TOURNAMENTS[year];
+
+    if (t.r32) {
+      for (const m of t.r32) {
+        if (m.ta !== code && m.tb !== code) continue;
+        if (!m.s) continue;
+        const isA = m.ta === code;
+        matches.push({
+          year,
+          roundKey: "r32",
+          opponent: isA ? m.tb : m.ta,
+          ourScore: isA ? m.s[0] : m.s[1],
+          theirScore: isA ? m.s[1] : m.s[0],
+          outcome: m.w === null ? "D" : (isA ? (m.w === 0 ? "W" : "L") : (m.w === 1 ? "W" : "L")),
+        });
+      }
+    }
+
+    const teamIdx = t.teams.indexOf(code);
+    if (teamIdx === -1) continue;
+
+    const rounds: { key: string; resolve: (t: typeof TOURNAMENTS[number], m: typeof t.r16[number]) => string[] }[] = [
+      { key: "r16", resolve: (_t, m) => {
+        const idx = _t.r16?.indexOf(m as typeof _t.r16[number]) ?? -1;
+        return idx >= 0 ? [_t.teams[2 * idx], _t.teams[2 * idx + 1]] : [];
+      }},
+      { key: "qf", resolve: (_t, m) => {
+        const r16w = getR16WinnerTeams(_t, year);
+        const idx = _t.qf?.indexOf(m as typeof _t.qf[number]) ?? -1;
+        if (idx >= 0 && r16w.length >= 8) return [r16w[2 * idx], r16w[2 * idx + 1]];
+        if (idx >= 0) return [_t.teams[2 * idx], _t.teams[2 * idx + 1]];
+        return [];
+      }},
+      { key: "sf", resolve: (_t, m) => {
+        const qfw = getQFWinnerTeams(_t, year);
+        const idx = _t.sf?.indexOf(m as typeof _t.sf[number]) ?? -1;
+        if (idx >= 0 && qfw.length >= 4) return [qfw[2 * idx], qfw[2 * idx + 1]];
+        return [];
+      }},
+    ];
+
+    for (const { key, resolve } of rounds) {
+      const arr = t[key as "r16" | "qf" | "sf"];
+      if (!arr) continue;
+      for (const m of arr) {
+        if (!m) continue;
+        const involved = resolve(t, m);
+        if (!involved.includes(code)) continue;
+        const isA = involved[0] === code;
+        matches.push({
+          year,
+          roundKey: key,
+          opponent: isA ? involved[1] : involved[0],
+          ourScore: isA ? m.s[0] : m.s[1],
+          theirScore: isA ? m.s[1] : m.s[0],
+          outcome: m.w === null ? "D" : (isA ? (m.w === 0 ? "W" : "L") : (m.w === 1 ? "W" : "L")),
+        });
+      }
+    }
+
+    // Final
+    if (t.final && t.final[0]) {
+      const f = t.final[0];
+      if (f.w !== null) {
+        const sfw = getSemiFinalistTeams(t, year);
+        if (sfw.length >= 2 && [sfw[0], sfw[1]].includes(code)) {
+          const isA = sfw[0] === code;
+          matches.push({
+            year,
+            roundKey: "final",
+            opponent: isA ? sfw[1] : sfw[0],
+            ourScore: isA ? f.s[0] : f.s[1],
+            theirScore: isA ? f.s[1] : f.s[0],
+            outcome: (isA ? (f.w === 0 ? "W" : "L") : (f.w === 1 ? "W" : "L")),
+          });
+        }
+      }
+    }
+  }
+
+  return matches;
+}
+
+function deriveForm(code: string): { label: string; fixture: string; outcome: "W" | "D" | "L" }[] {
+  return getTeamMatches(code).slice(0, 5).map((m) => ({
+    label: `${m.year} · ${ROUND_NAME[m.roundKey] ?? m.roundKey}`,
+    fixture: `${getTeamName(code)} ${m.ourScore}–${m.theirScore} ${getTeamName(m.opponent)}`,
+    outcome: m.outcome,
+  }));
+}
+
+function deriveDefiningMatches(code: string): { year: number; round: string; fixture: string; note: string }[] {
+  const all = getTeamMatches(code);
+  const defining: { year: number; round: string; fixture: string; note: string }[] = [];
+
+  for (const m of all) {
+    if (m.roundKey === "final") {
+      const verb = m.outcome === "W" ? "champions" : "runners-up";
+      defining.push({
+        year: m.year,
+        round: "Final",
+        fixture: `${getTeamName(code)} ${m.ourScore}–${m.theirScore} ${getTeamName(m.opponent)}`,
+        note: `${getTeamName(code)} finished as ${verb} of the ${m.year} FIFA World Cup.`,
+      });
+    } else if (m.roundKey === "sf" && m.outcome === "W") {
+      defining.push({
+        year: m.year,
+        round: "Semi-final",
+        fixture: `${getTeamName(code)} ${m.ourScore}–${m.theirScore} ${getTeamName(m.opponent)}`,
+        note: `A semi-final victory that sent ${getTeamName(code)} to the ${m.year} final.`,
+      });
+    }
+  }
+
+  return defining;
+}
+
+// Factual career milestones derived from the bracket data — one per title, plus
+// the best finish for nations without a title. These are NOT presented as news:
+// no source or publication date is attached, only the tournament year and a link
+// to the official FIFA page for that edition.
+function deriveMilestones(code: string, name: string, titles: { year: number; final: string }[]): Milestone[] {
+  const milestones: Milestone[] = [];
+  const fifaUrl = (year: number) => `https://www.fifa.com/tournaments/mens/worldcup/${year}`;
+
+  if (titles.length > 0) {
+    titles.forEach((t, i) => {
+      milestones.push({
+        year: t.year,
+        headline: `World champions — ${t.year}`,
+        detail: `${name} lifted the trophy for the ${i === 0 ? "first" : ordinal(i + 1)} time after a ${t.final} final.`,
+        url: fifaUrl(t.year),
+      });
+    });
+    return milestones.sort((a, b) => b.year - a.year);
+  }
+
+  const order: ResultLevel[] = ["F", "3RD", "4TH", "QF", "R16", "R32", "GS"];
+  let bestLevel: ResultLevel | null = null;
+  let bestYear = 0;
+  for (const year of EDITIONS) {
+    const t = TOURNAMENTS[year];
+    if (!t) continue;
+    const r = getResultForTeam(code, year);
+    if (r.result !== "DNE") {
+      for (const level of order) {
+        if (r.result === level) {
+          if (!bestLevel || order.indexOf(level) < order.indexOf(bestLevel)) {
+            bestLevel = level;
+            bestYear = year;
+          }
+          break;
+        }
+      }
+    }
+  }
+  if (bestLevel) {
+    milestones.push({
+      year: bestYear,
+      headline: `Best finish — ${RESULT_LABEL[bestLevel]}`,
+      detail: `${name}'s deepest World Cup run came in ${bestYear}, reaching the ${RESULT_LABEL[bestLevel].toLowerCase()}.`,
+      url: fifaUrl(bestYear),
+    });
+  }
+
+  return milestones;
+}
+
+function ordinal(n: number): string {
+  if (n === 1) return "1st";
+  if (n === 2) return "2nd";
+  if (n === 3) return "3rd";
+  return `${n}th`;
+}
+
+// The highlights dataset is keyed by fixture, but the auto-fetcher sometimes
+// mapped a key to the wrong clip (typically the tournament final) when it could
+// not find the exact match. The clip's *title* is always truthful about what it
+// shows, so we gate on the title: a video only appears on a nation's page if its
+// title actually names that nation. Aliases cover historical names and the short
+// forms that show up in YouTube titles.
+const TEAM_TITLE_ALIASES: Record<string, string[]> = {
+  USA: ["United States", "USA"],
+  KOR: ["South Korea", "Korea Republic"],
+  PRK: ["North Korea", "Korea DPR", "DPR Korea"],
+  NED: ["Netherlands", "Holland"],
+  URS: ["Soviet Union", "USSR"],
+  RUS: ["Russia"],
+  FRG: ["West Germany", "W. Germany", "Germany"],
+  GDR: ["East Germany"],
+  GER: ["Germany"],
+  TCH: ["Czechoslovakia"],
+  CZE: ["Czech Republic", "Czechia"],
+  YUG: ["Yugoslavia"],
+  ZAI: ["Zaire", "DR Congo"],
+  COD: ["DR Congo", "Congo"],
+  IRL: ["Ireland"],
+  NIR: ["Northern Ireland"],
+  TUR: ["Türkiye", "Turkey"],
+  CIV: ["Côte d'Ivoire", "Ivory Coast"],
+  IDN: ["Dutch East Indies", "Indonesia"],
+  RSA: ["South Africa"],
+  BIH: ["Bosnia"],
+  KSA: ["Saudi Arabia"],
+};
+
+function titleAliases(code: string): string[] {
+  return TEAM_TITLE_ALIASES[code] ?? [getTeamName(code)];
+}
+
+// Does a clip title reference this nation? Full-name aliases match case-
+// insensitively; the 3-letter code matches only as a whole word (upper-case) so
+// short codes like "GER" don't false-match inside words such as "Nigeria".
+function titleNamesTeam(code: string, title: string): boolean {
+  const lower = title.toLowerCase();
+  if (titleAliases(code).some((a) => lower.includes(a.toLowerCase()))) return true;
+  return new RegExp(`\\b${code}\\b`).test(title);
+}
+
+// A clip is confidently mis-keyed only when its title names some *other* team
+// but not this one (e.g. the "Italy 2-1 Czechoslovakia" final keyed under
+// Austria). Titles we can't parse — foreign-language ones like "Angleterre –
+// Argentine" or "Nizozemska - Jugoslavija" — name no recognised team, so we fall
+// through and keep trusting the fixture key rather than hide a real match.
+function titleIsAboutOtherTeams(code: string, title: string): boolean {
+  if (titleNamesTeam(code, title)) return false;
+  return Object.keys(TEAMS).some((other) => other !== code && titleNamesTeam(other, title));
+}
+
+function deriveVideos(code: string): VideoHighlight[] {
+  const seen = new Set<string>();
+  const videos: VideoHighlight[] = [];
+
+  for (const [key, h] of Object.entries(HIGHLIGHTS)) {
+    const parts = key.split("_");
+    const [, ta, tb] = parts;
+    if (ta !== code && tb !== code) continue;
+    // Skip clips whose title is demonstrably a different fixture (mis-keyed).
+    if (titleIsAboutOtherTeams(code, h.title)) continue;
+    if (seen.has(h.videoId)) continue;
+    seen.add(h.videoId);
+    videos.push({
+      title: h.title,
+      thumbnail: h.thumbnail,
+      url: `https://www.youtube.com/watch?v=${h.videoId}`,
+      duration: "",
+    });
+    if (videos.length >= 3) break;
+  }
+
+  return videos;
 }
 
 const CONFEDERATION_MAP: Record<string, string> = {
@@ -339,7 +611,32 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
     const record = stats
       ? { ...stats.record }
       : { ...countMatchResults(code), pensWon: 0, pensLost: 0 };
-    const topScorers = stats ? stats.topScorers : getTopScorers(code);
+    const historical = stats ? stats.topScorers : getTopScorers(code);
+    const recent = getTopScorers(code, 2026);
+    const merged = new Map<string, { name: string; goals: number; years: Set<number> }>();
+    for (const s of historical) {
+      merged.set(s.name, { name: s.name, goals: s.goals, years: new Set(s.span.split("–").map(Number)) });
+    }
+    for (const s of recent) {
+      const existing = merged.get(s.name);
+      if (existing) {
+        existing.goals = Math.max(existing.goals, s.goals);
+        for (const y of s.span.split("–").map(Number)) existing.years.add(y);
+      } else {
+        merged.set(s.name, { name: s.name, goals: s.goals, years: new Set(s.span.split("–").map(Number)) });
+      }
+    }
+    // Rank by goals, then break ties by recency (most recent scorer first) so a
+    // nation's current stars surface above long-retired players on the same
+    // tally — e.g. Ounahi (2026) ahead of Khairi (1986) at two goals apiece.
+    const topScorers = Array.from(merged.values())
+      .map((s) => ({ ...s, lastYear: Math.max(...s.years) }))
+      .sort((a, b) => b.goals - a.goals || b.lastYear - a.lastYear)
+      .slice(0, 5)
+      .map((s) => {
+        const ys = Array.from(s.years).sort();
+        return { name: s.name, goals: s.goals, span: ys.length === 1 ? `${ys[0]}` : `${ys[0]}–${ys[ys.length - 1]}` };
+      });
     const rivalries = stats
       ? stats.rivalries.map((r) => ({
           code: r.code,
@@ -407,12 +704,12 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
       timeline,
       record,
       ranking: 0,
-      form: [],
+      form: deriveForm(code),
       topScorers,
       rivalries,
-      definingMatches: [],
-      news: [],
-      videos: [],
+      definingMatches: deriveDefiningMatches(code),
+      milestones: deriveMilestones(code, getTeamName(code), titles),
+      videos: deriveVideos(code),
     };
   }
 

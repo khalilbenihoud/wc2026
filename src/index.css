@@ -239,6 +239,19 @@ body::after {
   filter: drop-shadow(0 0 2px rgba(246, 196, 83, 0.75));
 }
 
+/* Traces the border (stroke-dashoffset 100 → 0) while the engraved hatch fill
+   fades in behind it, so each region draws and fills in one motion. */
+@keyframes drawInHatch {
+  from {
+    stroke-dashoffset: 100;
+    fill-opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+  }
+}
+
 /* Custom classes for svg paths and circles */
 .guide {
   fill: none;

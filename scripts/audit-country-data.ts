@@ -2,9 +2,9 @@
 // bestResult, appearances, firstAppearance) against known ground truth, to find
 // where the bracket-derived data disagrees with reality. Not part of the build.
 import { generateCountryProfiles } from "../src/countries.generated";
-import { MOCK_COUNTRIES } from "../src/countries.mock";
+import { applyMockOverrides } from "../src/countries.mock";
 
-const profiles = { ...generateCountryProfiles(), ...MOCK_COUNTRIES };
+const profiles = applyMockOverrides(generateCountryProfiles());
 const P = (c: string) => profiles[c];
 
 // ── Ground truth ─────────────────────────────────────────────────────────────
