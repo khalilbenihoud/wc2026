@@ -210,12 +210,16 @@ function StatsRow({ p }: { p: CountryProfile }) {
 
 function DefiningMatches({ p }: { p: CountryProfile }) {
   if (p.definingMatches.length === 0) return null;
+  // Long histories (Argentina, Brazil, Italy…) run to a dozen entries — split
+  // them into two column-major columns at md+ so the section stays compact while
+  // each column reads chronologically. Shorter lists stay a single column.
+  const twoCol = p.definingMatches.length > 4;
   return (
     <section className="mb-10">
       <SectionKicker>Defining matches</SectionKicker>
-      <div>
+      <div className={twoCol ? "md:columns-2 md:gap-x-10" : ""}>
         {p.definingMatches.map((m, i) => (
-          <div key={`${m.year}-${i}`}>
+          <div key={`${m.year}-${i}`} className="break-inside-avoid">
             {i > 0 && <Rule />}
             <div className="py-4">
               <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted mb-1.5">
