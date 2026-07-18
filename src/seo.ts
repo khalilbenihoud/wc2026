@@ -5,6 +5,8 @@ interface SeoMeta {
   description: string;
   canonical?: string;
   jsonLd?: Record<string, unknown>;
+  // Additional top-level schema.org nodes emitted alongside jsonLd/breadcrumb.
+  jsonLdNodes?: Record<string, unknown>[];
   breadcrumb?: Record<string, unknown>;
 }
 
@@ -62,7 +64,11 @@ export function useSeo(meta: SeoMeta | null) {
     const url = meta.canonical ? `${BASE_URL}${meta.canonical}` : BASE_URL;
     setCanonical(url);
     setMeta("og:url", url, "property");
-    setJsonLd([meta.jsonLd, meta.breadcrumb].filter(Boolean) as Record<string, unknown>[]);
+    setJsonLd(
+      [meta.jsonLd, ...(meta.jsonLdNodes ?? []), meta.breadcrumb].filter(
+        Boolean
+      ) as Record<string, unknown>[]
+    );
   }, [meta]);
 }
 

@@ -19,7 +19,7 @@ import { enumerateMatches, EnumeratedMatch } from "../src/matches";
 import { ROUND_NAME } from "../src/constants";
 import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
-import { tournamentEvent, matchEvent, breadcrumbList, SITE_NAME } from "../src/schema";
+import { tournamentEvent, matchEvent, breadcrumbList, videoObject, SITE_NAME } from "../src/schema";
 import { generateCountryProfiles } from "../src/countries.generated";
 import { applyMockOverrides, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
@@ -320,6 +320,7 @@ function buildCountry(code: string, p: CountryProfile): string {
       ? `${p.name}: ${n}× FIFA World Cup champion${n > 1 ? "s" : ""}, ${p.appearances} appearances since ${p.firstAppearance}. All-time record, every knockout result, top scorers, and biggest rivalries.`
       : `${p.name} at the FIFA World Cup: ${p.bestResult.toLowerCase()}, ${p.appearances} appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. All-time record, results, top scorers, and biggest rivalries.`;
 
+  const videoNodes = p.videos.map(videoObject);
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -330,6 +331,7 @@ function buildCountry(code: string, p: CountryProfile): string {
         description: p.epithet,
         url: canonical,
       },
+      ...videoNodes,
       breadcrumbList([
         { name: SITE_NAME, url: `${BASE}/` },
         { name: p.name, url: canonical },
@@ -380,6 +382,19 @@ function buildCountry(code: string, p: CountryProfile): string {
       `</ul>`
     : "";
 
+  const videosHtml = p.videos.length
+    ? `<h2>Video highlights</h2><ul>` +
+      p.videos
+        .map(
+          (v) =>
+            `<li><a href="${esc(v.url)}">${esc(v.title)}</a>` +
+            (v.year ? ` (${v.year})` : "") +
+            `</li>`
+        )
+        .join("") +
+      `</ul>`
+    : "";
+
   // Tournament-by-tournament: every edition the nation entered, linking played
   // editions to their tournament pages.
   const timelineRows = years
@@ -402,6 +417,7 @@ function buildCountry(code: string, p: CountryProfile): string {
     scorersHtml +
     rivalriesHtml +
     definingHtml +
+    videosHtml +
     timelineHtml +
     `<p><a href="/">Explore every World Cup bracket, 1930–2026</a></p>` +
     `</main>`;

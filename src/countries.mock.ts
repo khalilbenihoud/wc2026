@@ -47,6 +47,10 @@ export interface VideoHighlight {
   thumbnail: string;
   url: string;
   duration: string;
+  // Edition year the clip belongs to (taken from the match key). Lets the
+  // VideoObject schema emit an uploadDate, which Google requires for video
+  // rich-result eligibility.
+  year?: number;
 }
 
 export interface CountryProfile {

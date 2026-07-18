@@ -1,4 +1,5 @@
-import { COUNTRY_MAPS } from "../countryMaps.generated";
+import { useEffect, useState } from "react";
+import { loadCountryMap, type CountryMap as CountryMapData } from "../countryMaps";
 
 // Total time to draw the whole country, split across its regions by size and
 // traced one after another (largest first) — so a many-island nation still
@@ -7,10 +8,16 @@ const TOTAL_MS = 20500;
 
 // Strokes a country's outline with a slow glowing gold draw-in while an engraved
 // diagonal hatch fill fades in behind the trace (see .country-map-path + the
-// drawInHatch keyframe in index.css). Renders nothing for countries we haven't
-// generated a map for.
+// drawInHatch keyframe in index.css). The outline is lazy-loaded per country, so
+// nothing renders until its map chunk resolves (or if we have no map for it).
 export default function CountryMap({ code, className }: { code: string; className?: string }) {
-  const map = COUNTRY_MAPS[code];
+  const [map, setMap] = useState<CountryMapData | null>(null);
+  useEffect(() => {
+    let alive = true;
+    setMap(null);
+    loadCountryMap(code).then((m) => { if (alive) setMap(m); });
+    return () => { alive = false; };
+  }, [code]);
   if (!map) return null;
 
   // Weight each region by its path complexity so the mainland draws slowly and

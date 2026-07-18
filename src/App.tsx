@@ -29,7 +29,7 @@ import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
 import { findMatchBySlug } from "./matches";
-import { tournamentEvent, matchEvent, breadcrumbList, BASE_URL, SITE_NAME } from "./schema";
+import { tournamentEvent, matchEvent, breadcrumbList, videoObject, BASE_URL, SITE_NAME } from "./schema";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -389,6 +389,7 @@ export default function App() {
       const desc = p.titles.length > 0
         ? `${p.name} — ${p.titles.length}× World Cup champion${p.titles.length > 1 ? "s" : ""}. ${p.appearances} tournament appearances since ${p.firstAppearance}. ${p.epithet}`
         : `${p.name} — ${p.bestResult}. ${p.appearances} World Cup appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. ${p.epithet}`;
+      const videoNodes = p.videos.map(videoObject);
       return {
         title: `${p.name} World Cup History — Record, Results & Top Scorers · The Road to Glory`,
         description: desc,
@@ -401,6 +402,7 @@ export default function App() {
           description: p.epithet,
           url: `${BASE_URL}${countryPath(p.code)}/`,
         },
+        jsonLdNodes: videoNodes,
         breadcrumb: breadcrumbList([
           { name: SITE_NAME, url: `${BASE_URL}/` },
           { name: p.name, url: `${BASE_URL}${countryPath(p.code)}/` },

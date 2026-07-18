@@ -8,7 +8,7 @@ import {
   VideoHighlight,
 } from "../../countries.mock";
 import CountryMap from "../CountryMap";
-import { COUNTRY_MAPS } from "../../countryMaps.generated";
+import { COUNTRY_MAP_CODES } from "../../countryMaps";
 import PlayerAvatar from "../PlayerAvatar";
 import { useWikiPhoto } from "../../wikiPhoto";
 import { countryPath, tournamentPath } from "../../router";
@@ -130,7 +130,7 @@ function Rivalries({ profile, onNavigate }: { profile: CountryProfile; onNavigat
 }
 
 function HeroMap({ p }: { p: CountryProfile }) {
-  const hasMap = !!COUNTRY_MAPS[p.code];
+  const hasMap = COUNTRY_MAP_CODES.has(p.code);
   if (!hasMap) {
     return (
       <div

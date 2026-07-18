@@ -101,3 +101,25 @@ export function breadcrumbList(items: { name: string; url: string }[]): Record<s
     })),
   };
 }
+
+// Convert a country-page video highlight into schema.org VideoObject. Real
+// title, thumbnail, and URL are available for every clip; the edition year is
+// used as an approximate uploadDate so Google treats the page as eligible for
+// video rich results.
+export function videoObject(v: {
+  title: string;
+  thumbnail: string;
+  url: string;
+  year?: number;
+}): Record<string, unknown> {
+  const obj: Record<string, unknown> = {
+    "@type": "VideoObject",
+    name: v.title,
+    description: v.title,
+    thumbnailUrl: v.thumbnail,
+    contentUrl: v.url,
+    url: v.url,
+  };
+  if (v.year) obj.uploadDate = `${v.year}-01-01`;
+  return obj;
+}

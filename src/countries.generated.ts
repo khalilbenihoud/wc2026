@@ -555,6 +555,7 @@ function deriveVideos(code: string): VideoHighlight[] {
       thumbnail: h.thumbnail,
       url: `https://www.youtube.com/watch?v=${h.videoId}`,
       duration: "",
+      year: parseInt(parts[0], 10),
     });
     if (videos.length >= 8) break;
   }
