@@ -927,6 +927,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(2, 2, 1, "3-4"), M(1, 1, 0, "4-2"), M(1, 0, 0), M(1, 2, 1)],
     sf: [M(3, 0, 0), M(0, 2, 1)],
+    tp: M(2, 1, 0),
     final: [M(3, 3, 0, "4-2")],
   },
 

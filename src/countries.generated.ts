@@ -34,7 +34,15 @@ function getResultForTeam(code: string, year: number): RoundResult {
   // down a stage — semi-finalists showed as "QF", R16 teams as "GS", etc.)
   if (getChampion(t, year) === code) return { year, result: "W" };
   if (getFinalist(t, year) === code) return { year, result: "F" };
-  if (reachedSemis(t, year).includes(code)) return { year, result: "3RD" };
+  if (reachedSemis(t, year).includes(code)) {
+    if (t.tp) {
+      const tpTeams = getThirdPlaceTeams(t, year);
+      if (tpTeams.length === 2) {
+        return { year, result: t.tp.w === 0 ? (code === tpTeams[0] ? "3RD" : "4TH") : (code === tpTeams[1] ? "3RD" : "4TH") };
+      }
+    }
+    return { year, result: "3RD" };
+  }
   // 1930 had no quarter-finals: 4 groups → semi‑finals → final.
   // Teams that didn't reach the semis went out in the group stage.
   if (year === 1930) return { year, result: "GS" };
@@ -108,6 +116,17 @@ function getSemiFinalists(t: typeof TOURNAMENTS[number], year: number): string[]
   const champ = getChampion(t, year);
   const finalist = getFinalist(t, year);
   return sfTeams.filter((c) => c !== champ && c !== finalist);
+}
+
+// Teams in the third-place match: SF1 loser, SF2 loser.
+function getThirdPlaceTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
+  if (!t.sf || !t.tp) return [];
+  const qfw = getQFWinnerTeams(t, year);
+  if (qfw.length < 4) return [];
+  const sf1 = t.sf[0];
+  const sf2 = t.sf[1];
+  if (!sf1 || sf1.w === null || !sf2 || sf2.w === null) return [];
+  return [sf1.w === 0 ? qfw[1] : qfw[0], sf2.w === 0 ? qfw[3] : qfw[2]];
 }
 
 function getQFWinnerTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
