@@ -410,55 +410,71 @@ function deriveDefiningMatches(code: string): { year: number; round: string; fix
   return defining;
 }
 
-// Factual career milestones derived from the bracket data — one per title, plus
-// the best finish for nations without a title. These are NOT presented as news:
-// no source or publication date is attached, only the tournament year and a link
-// to the official FIFA page for that edition.
-function deriveMilestones(code: string, name: string, titles: { year: number; final: string }[]): Milestone[] {
-  const milestones: Milestone[] = [];
-  const fifaUrl = (year: number) => `https://www.fifa.com/tournaments/mens/worldcup/${year}`;
+// How notable each World Cup outcome is, used to rank a nation's milestones and
+// keep the strongest ones when we cap the list. Titles rank highest; a debut
+// appearance is the gentle floor so even minnows get at least one card.
+const RUN_RANK: Partial<Record<ResultLevel, number>> = {
+  F: 90, "3RD": 80, "4TH": 70, QF: 60, R16: 50, R32: 40,
+};
 
-  if (titles.length > 0) {
-    titles.forEach((t, i) => {
-      milestones.push({
-        year: t.year,
-        headline: `World champions — ${t.year}`,
-        detail: `${name} lifted the trophy for the ${i === 0 ? "first" : ordinal(i + 1)} time after a ${t.final} final.`,
-        url: fifaUrl(t.year),
-      });
-    });
-    return milestones.sort((a, b) => b.year - a.year);
+// One-line description of a deep run, phrased per finish.
+function runDetail(name: string, year: number, result: ResultLevel): string {
+  switch (result) {
+    case "F": return `${name} finished runners-up at the ${year} World Cup.`;
+    case "3RD": return `${name} finished third at the ${year} World Cup.`;
+    case "4TH": return `${name} finished fourth at the ${year} World Cup.`;
+    case "QF": return `${name} reached the quarter-finals in ${year}.`;
+    case "R16": return `${name} reached the round of 16 in ${year}.`;
+    default: return `${name} reached the round of 32 in ${year}.`;
   }
+}
 
-  const order: ResultLevel[] = ["F", "3RD", "4TH", "QF", "R16", "R32", "GS"];
-  let bestLevel: ResultLevel | null = null;
-  let bestYear = 0;
+// Factual career milestones derived from the bracket data: every title, each
+// notable knockout run, and the nation's World Cup debut. These are NOT presented
+// as news — no source or publication date, only the tournament year and a link to
+// the official FIFA page. Ranked by notability, capped, then shown newest first.
+function deriveMilestones(code: string, name: string, titles: { year: number; final: string }[]): Milestone[] {
+  const fifaUrl = (year: number) => `https://www.fifa.com/tournaments/mens/worldcup/${year}`;
+  type Candidate = { year: number; rank: number; headline: string; detail: string };
+  const byYear = new Map<number, Candidate>();
+  // One milestone per year; if two apply (e.g. debut year that also reached a
+  // knockout round), keep the more notable framing.
+  const add = (c: Candidate) => {
+    const existing = byYear.get(c.year);
+    if (!existing || c.rank > existing.rank) byYear.set(c.year, c);
+  };
+
+  titles.forEach((t, i) => add({
+    year: t.year,
+    rank: 100,
+    headline: `World champions — ${t.year}`,
+    detail: `${name} lifted the trophy for the ${i === 0 ? "first" : ordinal(i + 1)} time after a ${t.final} final.`,
+  }));
+
+  let debutYear = Infinity;
   for (const year of EDITIONS) {
-    const t = TOURNAMENTS[year];
-    if (!t) continue;
-    const r = getResultForTeam(code, year);
-    if (r.result !== "DNE") {
-      for (const level of order) {
-        if (r.result === level) {
-          if (!bestLevel || order.indexOf(level) < order.indexOf(bestLevel)) {
-            bestLevel = level;
-            bestYear = year;
-          }
-          break;
-        }
-      }
+    if (!TOURNAMENTS[year]) continue;
+    const result = getResultForTeam(code, year).result;
+    if (result === "DNE") continue;
+    if (year < debutYear) debutYear = year;
+    const rank = RUN_RANK[result];
+    if (rank !== undefined) {
+      add({ year, rank, headline: `${RESULT_LABEL[result]} — ${year}`, detail: runDetail(name, year, result) });
     }
   }
-  if (bestLevel) {
-    milestones.push({
-      year: bestYear,
-      headline: `Best finish — ${RESULT_LABEL[bestLevel]}`,
-      detail: `${name}'s deepest World Cup run came in ${bestYear}, reaching the ${RESULT_LABEL[bestLevel].toLowerCase()}.`,
-      url: fifaUrl(bestYear),
-    });
-  }
 
-  return milestones;
+  if (debutYear !== Infinity) add({
+    year: debutYear,
+    rank: 10,
+    headline: `World Cup debut — ${debutYear}`,
+    detail: `${name} made their first World Cup appearance in ${debutYear}.`,
+  });
+
+  return Array.from(byYear.values())
+    .sort((a, b) => b.rank - a.rank) // keep the most notable when capping
+    .slice(0, 6)
+    .sort((a, b) => b.year - a.year) // display newest first
+    .map((c) => ({ year: c.year, headline: c.headline, detail: c.detail, url: fifaUrl(c.year) }));
 }
 
 function ordinal(n: number): string {
