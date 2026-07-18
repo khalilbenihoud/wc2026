@@ -154,7 +154,7 @@ export interface Highlight {
   thumbnail: string;
 }
 
-const HIGHLIGHTS: Record<string, Highlight> = {
+export const HIGHLIGHTS: Record<string, Highlight> = {
 ${entries}
 };
 

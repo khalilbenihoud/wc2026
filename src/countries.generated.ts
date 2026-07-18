@@ -556,7 +556,7 @@ function deriveVideos(code: string): VideoHighlight[] {
       url: `https://www.youtube.com/watch?v=${h.videoId}`,
       duration: "",
     });
-    if (videos.length >= 3) break;
+    if (videos.length >= 8) break;
   }
 
   return videos;
