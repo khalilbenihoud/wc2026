@@ -19,7 +19,10 @@ import { enumerateMatches, EnumeratedMatch } from "../src/matches";
 import { ROUND_NAME } from "../src/constants";
 import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
-import { tournamentEvent, matchEvent } from "../src/schema";
+import { tournamentEvent, matchEvent, breadcrumbList, videoObject, SITE_NAME } from "../src/schema";
+import { generateCountryProfiles } from "../src/countries.generated";
+import { applyMockOverrides, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
+import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 
 const BASE = "https://worldcuparchive.net";
 const DIST = resolve(process.cwd(), "dist");
@@ -184,7 +187,13 @@ function buildTournament(year: number): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    ...tournamentEvent(year, t, champ),
+    "@graph": [
+      tournamentEvent(year, t, champ),
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: `${year} FIFA World Cup`, url: canonical },
+      ]),
+    ],
   });
 
   const teams = [...new Set([...t.teams, ...(t.r32?.flatMap((m) => [m.ta, m.tb]) ?? [])])]
@@ -203,9 +212,18 @@ function buildTournament(year: number): string {
     (t.goldenGlove ? `Golden Glove: ${esc(t.goldenGlove.name)}.` : "") +
     `</p>`;
 
+  // Link each nation to its country page — this is the crawlable entry point into
+  // the country cluster (the homepage lists only tournaments), so it spreads
+  // ranking signal from the tournament pages into the 71 country pages.
   const nationsHtml =
     `<h2>Participating nations (${teams.length})</h2><ul>` +
-    teams.map((c) => `<li>${esc(getTeamName(c))}</li>`).join("") + `</ul>`;
+    teams
+      .map((c) => {
+        const cslug = slugForCode(c);
+        const name = esc(getTeamName(c));
+        return cslug ? `<li><a href="/countries/${cslug}/">${name}</a></li>` : `<li>${name}</li>`;
+      })
+      .join("") + `</ul>`;
 
   const otherHtml =
     `<h2>Every World Cup</h2><ul>` +
@@ -257,7 +275,14 @@ function buildMatch(year: number, m: EnumeratedMatch): string {
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    ...matchEvent(year, t.host, taName, tbName, roundName, m.slug),
+    "@graph": [
+      matchEvent(year, t.host, taName, tbName, roundName, m.slug),
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: `${year} FIFA World Cup`, url: `${BASE}/tournaments/${year}/` },
+        { name: `${taName} ${scoreStr} ${tbName}`, url: canonical },
+      ]),
+    ],
   });
 
   const motm = getPlayerOfMatch(year, m.ta, m.tb);
@@ -278,6 +303,123 @@ function buildMatch(year: number, m: EnumeratedMatch): string {
     goalsHtml(year, m) +
     motmHtml +
     `<p><a href="/tournaments/${year}/">All ${year} results</a> · <a href="/">World Cup Archive</a></p>` +
+    `</main>`;
+
+  return render(title, description, canonical, jsonLd, content);
+}
+
+// ── Per-country SEO + content ────────────────────────────────────────────────
+function buildCountry(code: string, p: CountryProfile): string {
+  const slug = slugForCode(code)!;
+  const canonical = `${BASE}/countries/${slug}/`;
+  const n = p.titles.length;
+
+  const title = `${p.name} World Cup History — Record, Results & Top Scorers · The Road to Glory`;
+  const description =
+    n > 0
+      ? `${p.name}: ${n}× FIFA World Cup champion${n > 1 ? "s" : ""}, ${p.appearances} appearances since ${p.firstAppearance}. All-time record, every knockout result, top scorers, and biggest rivalries.`
+      : `${p.name} at the FIFA World Cup: ${p.bestResult.toLowerCase()}, ${p.appearances} appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. All-time record, results, top scorers, and biggest rivalries.`;
+
+  const videoNodes = p.videos.map(videoObject);
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SportsTeam",
+        name: p.name,
+        sport: "Association football",
+        description: p.epithet,
+        url: canonical,
+      },
+      ...videoNodes,
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: p.name, url: canonical },
+      ]),
+    ],
+  });
+
+  const titlesHtml =
+    n > 0
+      ? `<h2>World Cup titles (${n})</h2><ul>` +
+        p.titles.map((t) => `<li>${t.year} — won ${esc(t.final)}</li>`).join("") +
+        `</ul>`
+      : `<h2>Best result</h2><p>${esc(p.bestResult)}.</p>`;
+
+  const rec = p.record;
+  const played = rec.w + rec.d + rec.l;
+  const recordHtml =
+    `<h2>All-time World Cup record</h2>` +
+    `<p>Played ${played} · Won ${rec.w} · Drawn ${rec.d} · Lost ${rec.l} · Goals ${rec.gf}–${rec.ga}` +
+    (rec.pensWon || rec.pensLost ? ` · Shootouts won ${rec.pensWon}, lost ${rec.pensLost}` : "") +
+    `.</p>`;
+
+  const scorersHtml = p.topScorers.length
+    ? `<h2>Top World Cup scorers</h2><ul>` +
+      p.topScorers
+        .map((s) => `<li>${esc(s.name)} — ${s.goals} goal${s.goals === 1 ? "" : "s"} (${esc(s.span)})</li>`)
+        .join("") +
+      `</ul>`
+    : "";
+
+  const rivalriesHtml = p.rivalries.length
+    ? `<h2>Biggest rivalries</h2><ul>` +
+      p.rivalries
+        .map((r) => {
+          const rslug = slugForCode(r.code);
+          const label = `${esc(r.name)} — played ${r.played} (W${r.w} D${r.d} L${r.l})`;
+          return rslug ? `<li><a href="/countries/${rslug}/">${label}</a></li>` : `<li>${label}</li>`;
+        })
+        .join("") +
+      `</ul>`
+    : "";
+
+  const definingHtml = p.definingMatches.length
+    ? `<h2>Defining matches</h2><ul>` +
+      p.definingMatches
+        .map((d) => `<li>${d.year} ${esc(d.round)}: ${esc(d.fixture)} — ${esc(d.note)}</li>`)
+        .join("") +
+      `</ul>`
+    : "";
+
+  const videosHtml = p.videos.length
+    ? `<h2>Video highlights</h2><ul>` +
+      p.videos
+        .map(
+          (v) =>
+            `<li><a href="${esc(v.url)}">${esc(v.title)}</a>` +
+            (v.year ? ` (${v.year})` : "") +
+            `</li>`
+        )
+        .join("") +
+      `</ul>`
+    : "";
+
+  // Tournament-by-tournament: every edition the nation entered, linking played
+  // editions to their tournament pages.
+  const timelineRows = years
+    .filter((y) => p.timeline[y])
+    .map((y) => {
+      const e = p.timeline[y]!;
+      return `<li><a href="/tournaments/${y}/">${y}</a> — ${esc(RESULT_LABEL[e.result])}${e.note ? ` (${esc(e.note)})` : ""}</li>`;
+    })
+    .join("");
+  const timelineHtml = timelineRows ? `<h2>Tournament by tournament</h2><ul>${timelineRows}</ul>` : "";
+
+  const content =
+    `<main class="prerender">` +
+    `<p><a href="/">← World Cup Archive</a></p>` +
+    `<h1>${esc(p.name)} at the FIFA World Cup</h1>` +
+    `<p>${esc(p.epithet)}</p>` +
+    `<p>${esc(p.confederation)} · ${p.appearances} appearance${p.appearances > 1 ? "s" : ""} · first in ${p.firstAppearance}.</p>` +
+    titlesHtml +
+    recordHtml +
+    scorersHtml +
+    rivalriesHtml +
+    definingHtml +
+    videosHtml +
+    timelineHtml +
+    `<p><a href="/">Explore every World Cup bracket, 1930–2026</a></p>` +
     `</main>`;
 
   return render(title, description, canonical, jsonLd, content);
@@ -333,8 +475,23 @@ for (const year of years) {
   }
 }
 
+const countryProfiles = applyMockOverrides(generateCountryProfiles());
+let nCountries = 0;
+for (const code of COUNTRY_CODES) {
+  const profile = countryProfiles[code];
+  const slug = slugForCode(code);
+  if (!profile || !slug) {
+    console.warn(`prerender: no profile/slug for ${code} — skipping country page`);
+    continue;
+  }
+  const cdir = resolve(DIST, "countries", slug);
+  mkdirSync(cdir, { recursive: true });
+  writeFileSync(resolve(cdir, "index.html"), buildCountry(code, profile));
+  nCountries++;
+}
+
 writeFileSync(resolve(DIST, "index.html"), buildHome());
 
 console.log(
-  `Prerendered homepage + ${nTournaments} tournament pages + ${nMatches} match pages → dist/`
+  `Prerendered homepage + ${nTournaments} tournament pages + ${nMatches} match pages + ${nCountries} country pages → dist/`
 );

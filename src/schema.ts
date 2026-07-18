@@ -9,6 +9,11 @@ import { getTeamName } from "./data";
 
 export const BASE_URL = "https://worldcuparchive.net";
 
+// Site/brand name — the breadcrumb root, shown in the visible breadcrumb and in
+// the BreadcrumbList structured data so the two stay identical (Google wants the
+// structured breadcrumb to mirror the one on the page).
+export const SITE_NAME = "The Road to Glory";
+
 const FIFA_ORGANIZER = {
   "@type": "Organization",
   name: "FIFA",
@@ -77,4 +82,44 @@ export function matchEvent(
     performer: [team(taName), team(tbName)],
     url: `${BASE_URL}/tournaments/${year}/matches/${slug}/`,
   };
+}
+
+// A BreadcrumbList so pages earn the breadcrumb SERP treatment and Google reads
+// the Home › Tournament › Match hierarchy. Emitted alongside the SportsEvent /
+// SportsTeam node (as a @graph) by both the static prerender and the runtime SEO
+// hook, so the crawler-served HTML and the JS-rendered DOM stay identical. The
+// last crumb is the current page (its `item` URL is still included, which Google
+// accepts). `url` values should be absolute, trailing-slash canonicals.
+export function breadcrumbList(items: { name: string; url: string }[]): Record<string, unknown> {
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: it.url,
+    })),
+  };
+}
+
+// Convert a country-page video highlight into schema.org VideoObject. Real
+// title, thumbnail, and URL are available for every clip; the edition year is
+// used as an approximate uploadDate so Google treats the page as eligible for
+// video rich results.
+export function videoObject(v: {
+  title: string;
+  thumbnail: string;
+  url: string;
+  year?: number;
+}): Record<string, unknown> {
+  const obj: Record<string, unknown> = {
+    "@type": "VideoObject",
+    name: v.title,
+    description: v.title,
+    thumbnailUrl: v.thumbnail,
+    contentUrl: v.url,
+    url: v.url,
+  };
+  if (v.year) obj.uploadDate = `${v.year}-01-01`;
+  return obj;
 }

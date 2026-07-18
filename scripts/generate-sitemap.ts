@@ -1,5 +1,6 @@
-import { TOURNAMENTS, TEAMS } from "../src/data";
+import { TOURNAMENTS } from "../src/data";
 import { COUNTRY_PAGE_ENABLED } from "../src/router";
+import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 import { analyze } from "../src/analysis";
 import { enumerateMatches } from "../src/matches";
 import { writeFileSync } from "fs";
@@ -25,25 +26,13 @@ for (const year of Object.keys(TOURNAMENTS).map(Number)) {
   }
 }
 
-const allCodes = new Set<string>();
-for (const year of Object.keys(TOURNAMENTS).map(Number)) {
-  const t = TOURNAMENTS[year];
-  for (const code of t.teams) {
-    if (code !== "TBD" && TEAMS[code]) allCodes.add(code);
-  }
-  if (t.r32) {
-    for (const m of t.r32) {
-      if (m.ta !== "TBD" && TEAMS[m.ta]) allCodes.add(m.ta);
-      if (m.tb !== "TBD" && TEAMS[m.tb]) allCodes.add(m.tb);
-    }
-  }
-}
-
-// Country pages are disabled for now — keep their URLs out of the sitemap so we
-// don't advertise routes that redirect back to the home bracket.
+// Per-nation country pages are prerendered (scripts/prerender.ts) at their
+// full-name slug; advertise the trailing-slash 200 URL, consistent with the
+// tournament/match entries above.
 if (COUNTRY_PAGE_ENABLED) {
-  for (const code of allCodes) {
-    urls.push({ loc: `/countries/${code.toLowerCase()}`, priority: 0.8, changefreq: "monthly" });
+  for (const code of COUNTRY_CODES) {
+    const slug = slugForCode(code);
+    if (slug) urls.push({ loc: `/countries/${slug}/`, priority: 0.8, changefreq: "monthly" });
   }
 }
 

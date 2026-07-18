@@ -90,12 +90,13 @@ export const TEAMS: Record<string, [string, string]> = {
   WAL: ["Wales", "🏴󠁧󠁢󠁷󠁬󠁳󠁿"],
   PRK: ["North Korea", "🇰🇵"],
   PER: ["Peru", "🇵🇪"],
-  ISR: ["Israel", "🇮🇱"],
+
   ZAI: ["Zaire", "🇨🇩"],
   GDR: ["East Germany", "🇩🇪"],
   HON: ["Honduras", "🇭🇳"],
   KUW: ["Kuwait", "🇰🇼"],
   SLV: ["El Salvador", "🇸🇻"],
+  PLE: ["Palestine", "🇵🇸"],
   TBD: ["To Be Decided", ""],
 };
 
@@ -174,12 +175,13 @@ export const COLORS: Record<string, string> = {
   WAL: "#D30731",
   PRK: "#ED1C27",
   PER: "#D91023",
-  ISR: "#00529B",
+
   ZAI: "#007FFF",
   GDR: "#C9CCD1",
   HON: "#0F3D7D",
   KUW: "#007A33",
   SLV: "#0047AB",
+  PLE: "#CE1126",
   TBD: "#71717a",
 };
 
@@ -191,6 +193,77 @@ export const getTeamFlag = (code: string): string =>
 
 export const getTeamColor = (code: string): string =>
   COLORS[code] || "#3c4658";
+
+// ── Multi-colour palettes ────────────────────────────────────────────────────
+// COLORS holds one tuned primary per nation (used for the dot, bars, etc.).
+// For the country-page ambient aurora we want 2–3 of the nation's dominant
+// flag colours. TEAM_ACCENTS lists the secondary/tertiary flag colours; nations
+// with a single-colour identity (e.g. red-and-white flags) get a harmonious
+// hue-rotated tone instead, so every page still blends multiple stops.
+export const TEAM_ACCENTS: Record<string, string[]> = {
+  GER: ["#d00000", "#ffce00"], FRG: ["#d00000", "#ffce00"], GDR: ["#d00000", "#ffce00"],
+  BRA: ["#009739", "#3d3f8f"], PAR: ["#0038a8"], USA: ["#b22234"], MEX: ["#ce1126"],
+  ESP: ["#ffc400"], IRL: ["#ff883e"], KOR: ["#0047a0"], ITA: ["#008c45", "#cd212a"],
+  ENG: ["#ce1124"], BEL: ["#c8102e"], SEN: ["#fdef42", "#e31b23"], SWE: ["#fecc00"],
+  ARG: ["#f6b40e"], ECU: ["#0072ce", "#ef3340"], POR: ["#046a38"],
+  NED: ["#21468b", "#ae1c28"], AUS: ["#00843d"], UKR: ["#0057b7"],
+  GHA: ["#fcd116", "#ce1126"], FRA: ["#ef4135"], URU: ["#f6b40e"], SVK: ["#ee1c25"],
+  CHI: ["#0039a6"], COL: ["#003893", "#ce1126"], CRC: ["#002b7f"], ALG: ["#d21034"],
+  CRO: ["#171796"], RUS: ["#0039a6"], MAR: ["#006233"], YUG: ["#c6363c"],
+  NOR: ["#00205b"], ROU: ["#002b7f", "#ce1126"], BUL: ["#d62612"], TCH: ["#11457e"],
+  CMR: ["#fcd116", "#ce1126"], URS: ["#ffd700"], RSA: ["#ffb612", "#002395"],
+  CIV: ["#009e60"], COD: ["#f7d618", "#ce1021"], BIH: ["#fecb00"],
+  CPV: ["#cf2027", "#f7d116"], IRQ: ["#007a3d"], UZB: ["#1eb53a", "#ce1126"],
+  NZL: ["#c8102e"], CZE: ["#d7141a"], CUW: ["#f9d90f"], JOR: ["#007a3d"],
+  HAI: ["#d21034"], PAN: ["#005293"], IRN: ["#da0000"], HUN: ["#477050"],
+  CUB: ["#cb1515"], IDN: ["#21468b"], BOL: ["#f9e300", "#d52b1e"], NIR: ["#cf142b"],
+  WAL: ["#00ad36"], PRK: ["#024fa2"], ZAI: ["#fdd116", "#0d9b49"], KUW: ["#ce1126"],
+  PLE: ["#009736", "#e4312b"],
+};
+
+const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
+
+function hexToHsl(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let hue = 0, s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    hue = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    hue *= 60;
+  }
+  return [hue, s * 100, l * 100];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100; l /= 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const to = (n: number) => Math.round(255 * f(n)).toString(16).padStart(2, "0");
+  return `#${to(0)}${to(8)}${to(4)}`;
+}
+
+// Rotate a colour's hue (and optionally nudge lightness) — used to synthesise a
+// second aurora tone for nations without a distinct accent colour.
+function rotateHue(hex: string, deg: number, dl = 0): string {
+  const [h, s, l] = hexToHsl(hex);
+  return hslToHex((h + deg + 360) % 360, s, clamp(l + dl));
+}
+
+// 2–3 dominant colours for a nation, primary first. Falls back to a hue-rotated
+// tone when no curated accent exists so the aurora always has depth.
+export const getTeamPalette = (code: string): string[] => {
+  const base = getTeamColor(code);
+  const accents = TEAM_ACCENTS[code];
+  const palette = accents?.length ? [base, ...accents] : [base, rotateHue(base, 26, -8)];
+  return palette.slice(0, 3);
+};
 
 export const TOURNAMENTS: Record<number, TournamentData> = {
   1930: {
@@ -386,7 +459,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       "ITA", "MEX",
       "FRG", "ENG",
       "SWE", "ROU",
-      "BEL", "ISR",
+      "BEL", "TBD",
       "BUL", "MAR",
       "TCH", "SLV",
     ],
@@ -880,7 +953,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       { ta: "GER", tb: "PAR", s: [1, 1], w: 1, p: "3-4", g: [["Kai Havertz 54'"], ["Julio Enciso 42'"]], date: "Jun 29 · 16:30" },
       { ta: "FRA", tb: "SWE", s: [3, 0], w: 0, g: [["Kylian Mbappé 45'", "Bradley Barcola 53'", "Kylian Mbappé 74'"], []], date: "Jun 30 · 17:00" },
       { ta: "RSA", tb: "CAN", s: [0, 1], w: 1, g: [[], ["Stephen Eustáquio 90+2'"]], date: "Jun 28 · 12:00" },
-      { ta: "NED", tb: "MAR", s: [1, 1], w: 1, p: "2-3", g: [["Cody Gakpo 72'"], ["Issa Diop 90+1'"]], date: "Jun 29 · 19:00" },
+      { ta: "NED", tb: "MAR", s: [1, 3], w: 1, g: [["Cody Gakpo 72'"], ["Ismael Saibari 35'", "Issa Diop 90+1'", "Ismael Saibari 90+5'"]], date: "Jun 29 · 19:00" },
       { ta: "BRA", tb: "JPN", s: [2, 1], w: 0, g: [["Casemiro 56'", "Gabriel Martinelli 90+5'"], ["Kaishū Sano 29'"]], date: "Jun 29 · 12:00" },
       { ta: "CIV", tb: "NOR", s: [1, 2], w: 1, g: [["Amad Diallo 74'"], ["Antonio Nusa 39'", "Erling Haaland 86'"]], date: "Jun 30 · 12:00" },
       { ta: "MEX", tb: "ECU", s: [2, 0], w: 0, g: [["Julián Quiñones 31'", "Raúl Jiménez 45+1'"], []], date: "Jun 30 · 19:00" },
@@ -897,7 +970,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: [
       // France 1–0 Paraguay (R16, Jul 4) — France advance
       M(0, 1, 1, null, null, [[], ["Kylian Mbappé 70' (pen.)"]]),
-      M(0, 3, 1, null, null, [[], ["Azzedine Ounahi 50'", "Azzedine Ounahi 82'", "Soufiane Rahimi 90+8'"]]),
+      M(0, 4, 1, null, null, [[], ["Ismael Saibari 23'", "Azzedine Ounahi 50'", "Azzedine Ounahi 82'", "Soufiane Rahimi 90+8'"]]),
       // Portugal 0–1 Spain (R16, Jul 6) — Spain advance on Merino's stoppage-time winner
       M(0, 1, 1, null, null, [[], ["Mikel Merino 90+1'"]]),
       // USA 1–4 Belgium (R16, Jul 6) — Belgium advance (De Ketelaere brace)

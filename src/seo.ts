@@ -5,6 +5,9 @@ interface SeoMeta {
   description: string;
   canonical?: string;
   jsonLd?: Record<string, unknown>;
+  // Additional top-level schema.org nodes emitted alongside jsonLd/breadcrumb.
+  jsonLdNodes?: Record<string, unknown>[];
+  breadcrumb?: Record<string, unknown>;
 }
 
 const BASE_URL = "https://worldcuparchive.net";
@@ -29,15 +32,23 @@ const setCanonical = (href: string) => {
   el.href = href;
 };
 
-const setJsonLd = (data: Record<string, unknown> | null) => {
+// Emits the page's JSON-LD nodes (SportsEvent/SportsTeam + BreadcrumbList) under
+// one id. A single node is written flat; multiple share one @context via @graph
+// — mirroring what scripts/prerender.ts bakes in, so the JS render replaces the
+// prerendered script with an identical payload rather than diverging.
+const setJsonLd = (nodes: Record<string, unknown>[]) => {
   const id = "seo-jsonld";
   const existing = document.getElementById(id);
   if (existing) existing.remove();
-  if (!data) return;
+  if (!nodes.length) return;
   const script = document.createElement("script");
   script.id = id;
   script.type = "application/ld+json";
-  script.textContent = JSON.stringify({ "@context": "https://schema.org", ...data });
+  script.textContent = JSON.stringify(
+    nodes.length === 1
+      ? { "@context": "https://schema.org", ...nodes[0] }
+      : { "@context": "https://schema.org", "@graph": nodes }
+  );
   document.head.appendChild(script);
 };
 
@@ -53,7 +64,11 @@ export function useSeo(meta: SeoMeta | null) {
     const url = meta.canonical ? `${BASE_URL}${meta.canonical}` : BASE_URL;
     setCanonical(url);
     setMeta("og:url", url, "property");
-    setJsonLd(meta.jsonLd ?? null);
+    setJsonLd(
+      [meta.jsonLd, ...(meta.jsonLdNodes ?? []), meta.breadcrumb].filter(
+        Boolean
+      ) as Record<string, unknown>[]
+    );
   }, [meta]);
 }
 

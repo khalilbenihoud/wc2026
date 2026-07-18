@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { codeForSlug, slugForCode } from "./countrySlug";
 
 export interface Route {
   path: string;
@@ -8,8 +9,11 @@ export interface Route {
 const matchRoute = (pathname: string): Route => {
   const p = pathname.replace(/\/+$/, "") || "/";
 
-  let m = p.match(/^\/countries\/([a-zA-Z]{3})$/);
-  if (m) return { path: "country", params: { code: m[1].toUpperCase() } };
+  let m = p.match(/^\/countries\/([a-z0-9-]+)$/i);
+  if (m) {
+    const code = codeForSlug(m[1]);
+    if (code) return { path: "country", params: { code } };
+  }
 
   m = p.match(/^\/tournaments\/(\d{4})\/matches\/(.+)$/);
   if (m) return { path: "match", params: { year: m[1], slug: m[2] } };
@@ -46,11 +50,14 @@ export function useRouter() {
   return useMemo(() => ({ route, navigate }), [route, navigate]);
 }
 
-// The country page is disabled for now (its profile data isn't ready to ship).
-// Flip to true to re-enable the page, all links to it, and the country routes.
-export const COUNTRY_PAGE_ENABLED = false;
+// Country pages are live: real per-nation profiles (record, scorers, rivalries,
+// tournament-by-tournament) prerendered for search at /countries/<name-slug>.
+export const COUNTRY_PAGE_ENABLED = true;
 
-export const countryPath = (code: string) => `/countries/${code.toLowerCase()}`;
+// Full-name slug (/countries/brazil), falling back to the lowercased code only
+// if a slug is somehow unavailable so we never emit a broken href.
+export const countryPath = (code: string) =>
+  `/countries/${slugForCode(code) ?? code.toLowerCase()}`;
 export const tournamentPath = (year: number) => `/tournaments/${year}`;
 export const matchPath = (year: number, slug: string) =>
   `/tournaments/${year}/matches/${slug}`;

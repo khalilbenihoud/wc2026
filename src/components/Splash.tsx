@@ -204,6 +204,10 @@ export default function Splash({ onEnter, exiting }: SplashProps) {
             <svg width="14" height="11" viewBox="0 0 18.5 14.8"><path d="M10.7 14.8c.24 0 .44-.09.64-.27l6.5-6.48c.19-.19.29-.41.29-.66 0-.24-.1-.47-.29-.65L11.37.29A.85.85 0 0010.71 0a.83.83 0 00-.85.84c0 .23.08.46.24.61l2.18 2.23 4.08 3.72-4.08 3.72-2.18 2.23a.85.85 0 00-.24.61.83.83 0 00.85.84zM.86 8.27h12.35l3.15-.2c.4-.02.67-.27.67-.67 0-.4-.27-.64-.67-.67l-3.15-.2H.86A.8.8 0 000 7.4c0 .51.35.87.86.87z" fill="currentColor" opacity=".85" /></svg>
           </span>
         </button>
+
+        <p className="splash-rise" style={{ marginTop: "0.5rem", fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 500, opacity: 0.32, animationDelay: "1.2s" }}>
+          Independent fan project &middot; Not affiliated with FIFA
+        </p>
       </div>
       )}
 

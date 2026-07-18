@@ -2228,47 +2228,6 @@ export const COUNTRY_STATS: Record<string, CountryStats> = {
       }
     ]
   },
-  "ISR": {
-    "record": {
-      "w": 0,
-      "d": 2,
-      "l": 1,
-      "gf": 1,
-      "ga": 3,
-      "pensWon": 0,
-      "pensLost": 0
-    },
-    "topScorers": [
-      {
-        "name": "Mordechai Spiegler",
-        "goals": 1,
-        "span": "1970"
-      }
-    ],
-    "rivalries": [
-      {
-        "code": "URU",
-        "played": 1,
-        "w": 0,
-        "d": 0,
-        "l": 1
-      },
-      {
-        "code": "SWE",
-        "played": 1,
-        "w": 0,
-        "d": 1,
-        "l": 0
-      },
-      {
-        "code": "ITA",
-        "played": 1,
-        "w": 0,
-        "d": 1,
-        "l": 0
-      }
-    ]
-  },
   "ITA": {
     "record": {
       "w": 45,

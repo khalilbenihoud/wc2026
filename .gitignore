@@ -9,3 +9,6 @@ coverage/
 
 # Local Netlify folder
 .netlify
+
+# Self-hosted Postiz social scheduler (local docker setup, not part of the app)
+postiz/
