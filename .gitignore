@@ -12,3 +12,4 @@ coverage/
 
 # Self-hosted Postiz social scheduler (local docker setup, not part of the app)
 postiz/
+.wrangler-pages/
