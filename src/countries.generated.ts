@@ -431,10 +431,10 @@ function runDetail(name: string, year: number, result: ResultLevel): string {
 
 // Factual career milestones derived from the bracket data: every title, each
 // notable knockout run, and the nation's World Cup debut. These are NOT presented
-// as news — no source or publication date, only the tournament year and a link to
-// the official FIFA page. Ranked by notability, capped, then shown newest first.
+// as news — no source or publication date, only the tournament year (each card
+// links to that edition's page on this site). Ranked by notability, capped, then
+// shown newest first.
 function deriveMilestones(code: string, name: string, titles: { year: number; final: string }[]): Milestone[] {
-  const fifaUrl = (year: number) => `https://www.fifa.com/tournaments/mens/worldcup/${year}`;
   type Candidate = { year: number; rank: number; headline: string; detail: string };
   const byYear = new Map<number, Candidate>();
   // One milestone per year; if two apply (e.g. debut year that also reached a
@@ -474,7 +474,7 @@ function deriveMilestones(code: string, name: string, titles: { year: number; fi
     .sort((a, b) => b.rank - a.rank) // keep the most notable when capping
     .slice(0, 6)
     .sort((a, b) => b.year - a.year) // display newest first
-    .map((c) => ({ year: c.year, headline: c.headline, detail: c.detail, url: fifaUrl(c.year) }));
+    .map((c) => ({ year: c.year, headline: c.headline, detail: c.detail }));
 }
 
 function ordinal(n: number): string {

@@ -33,13 +33,13 @@ export const RESULT_LABEL: Record<ResultLevel, string> = {
 
 // A factual, dataset-derived career milestone (e.g. a title or best finish).
 // Deliberately NOT modelled as a news article: these are generated from the
-// bracket data, so they carry no byline, publication date, or article URL that
-// would imply real reporting — only the year and a link to the FIFA tournament.
+// bracket data, so they carry no byline, publication date, or source that would
+// imply real reporting — only the tournament year, which links to that edition's
+// own page on this site.
 export interface Milestone {
   year: number;
   headline: string;
   detail: string;
-  url: string;
 }
 
 export interface VideoHighlight {

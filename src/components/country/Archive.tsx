@@ -11,7 +11,7 @@ import CountryMap from "../CountryMap";
 import { COUNTRY_MAPS } from "../../countryMaps.generated";
 import PlayerAvatar from "../PlayerAvatar";
 import { useWikiPhoto } from "../../wikiPhoto";
-import { countryPath } from "../../router";
+import { countryPath, tournamentPath } from "../../router";
 import { Rule, SectionKicker } from "./shared";
 
 interface ArchiveProps {
@@ -235,21 +235,26 @@ function DefiningMatches({ p }: { p: CountryProfile }) {
   );
 }
 
-function MilestonesSection({ milestones }: { milestones: Milestone[] }) {
+function MilestonesSection({ milestones, onNavigate }: { milestones: Milestone[]; onNavigate: (path: string) => void }) {
   if (milestones.length === 0) return null;
   return (
     <section className="mb-10">
       <SectionKicker>Milestones</SectionKicker>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {milestones.map((m, i) => (
-          <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-xl border border-brand-line/40 bg-brand-panel/20 hover:border-brand-gold/30 hover:bg-brand-gold/[0.03] transition-colors">
+          <button
+            key={i}
+            type="button"
+            onClick={() => onNavigate(tournamentPath(m.year))}
+            className="block w-full text-left p-4 rounded-xl border border-brand-line/40 bg-brand-panel/20 hover:border-brand-gold/30 hover:bg-brand-gold/[0.03] focus-visible:border-brand-gold/40 focus:outline-none transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-2 mb-2">
               <span className="font-mono text-[10px] tracking-wider uppercase text-brand-gold tabular-nums">{m.year}</span>
               <span className="font-mono text-[10px] tracking-wider uppercase text-brand-muted/60">World Cup</span>
             </div>
             <h3 className="text-sm font-semibold text-brand-text leading-snug mb-1">{m.headline}</h3>
             <p className="text-xs text-brand-muted leading-relaxed line-clamp-2">{m.detail}</p>
-          </a>
+          </button>
         ))}
       </div>
     </section>
@@ -322,7 +327,7 @@ function LayoutDashboard({ p, onNavigate }: { p: CountryProfile; onNavigate: (pa
       </section>
       {p.rivalries.length > 0 && <section className="mb-10"><Rivalries profile={p} onNavigate={onNavigate} /></section>}
       <DefiningMatches p={p} />
-      <MilestonesSection milestones={p.milestones} />
+      <MilestonesSection milestones={p.milestones} onNavigate={onNavigate} />
       <VideosSection videos={p.videos} />
     </div>
   );
