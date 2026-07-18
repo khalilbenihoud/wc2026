@@ -6,8 +6,11 @@ Why: the previous generators keyed matches by their position in dataset
 match-id order, which does NOT match the bracket ordering hand-authored in
 data.ts. That mis-mapped goals/cards onto the wrong fixtures. Team-code keys
 are order-independent, so the modal can look them up with the ta/tb it already
-resolves. Both orientations (TA_TB and TB_TA) are emitted so lookups work
-regardless of which side data.ts lists first.
+resolves.
+
+To keep the bundles small, only one canonical orientation is emitted per
+fixture: teams are sorted alphabetically by code, and the runtime lookup swaps
+the returned arrays when the requested order is the reverse of the stored one.
 """
 
 import csv, json, re, collections, sys
@@ -129,10 +132,12 @@ with open(f"{T}/penalty_kicks.csv", newline='', encoding='utf-8') as f:
         entry = f'{clean_name(row["given_name"], row["family_name"])} {mark}'
         pens[mid]["home" if row["home_team"] == "1" else "away"].append(entry)
 
-# ---- assemble by team-code key, both orientations ----
-def add_both(store, year, hc, ac, home_val, away_val):
-    store[f"{year}_{hc}_{ac}"] = [home_val, away_val]
-    store[f"{year}_{ac}_{hc}"] = [away_val, home_val]
+# ---- assemble by team-code key, canonical orientation only ----
+# The canonical key sorts team codes alphabetically; runtime lookups swap the
+# returned arrays when the requested order is reversed. This roughly halves the
+# emitted data compared to storing both teamA_teamB and teamB_teamA.
+def canonical_key(year, a, b):
+    return f"{year}_{min(a, b)}_{max(a, b)}"
 
 scorers_out = {}
 stats_out = {}
@@ -140,21 +145,30 @@ collisions = []
 for mid, (year, stage, hc, ac) in match_meta.items():
     g = goals.get(mid, {"home": [], "away": []})
     if g["home"] or g["away"]:
-        k = f"{year}_{hc}_{ac}"
+        k = canonical_key(year, hc, ac)
         if k in scorers_out:
             collisions.append(k)
-        add_both(scorers_out, year, hc, ac, g["home"], g["away"])
+            continue
+        if hc < ac:
+            scorers_out[k] = [g["home"], g["away"]]
+        else:
+            scorers_out[k] = [g["away"], g["home"]]
     c = cards.get(mid, {"home": [], "away": []})
     s = subs.get(mid, {"home": [], "away": []})
     p = pens.get(mid, {"home": [], "away": []})
     if c["home"] or c["away"] or s["home"] or s["away"] or p["home"] or p["away"]:
-        key = f"{year}_{hc}_{ac}"
-        stats_out[key] = {
-            "cards": [c["home"], c["away"]], "subs": [s["home"], s["away"]], "pens": [p["home"], p["away"]],
-        }
-        stats_out[f"{year}_{ac}_{hc}"] = {
-            "cards": [c["away"], c["home"]], "subs": [s["away"], s["home"]], "pens": [p["away"], p["home"]],
-        }
+        k = canonical_key(year, hc, ac)
+        if k in stats_out:
+            collisions.append(k)
+            continue
+        if hc < ac:
+            stats_out[k] = {
+                "cards": [c["home"], c["away"]], "subs": [s["home"], s["away"]], "pens": [p["home"], p["away"]],
+            }
+        else:
+            stats_out[k] = {
+                "cards": [c["away"], c["home"]], "subs": [s["away"], s["home"]], "pens": [p["away"], p["home"]],
+            }
 
 if collisions:
     print("!! KEY COLLISIONS:", collisions, file=sys.stderr)
@@ -166,7 +180,8 @@ def arr(x):
 lines = [
     "// Auto-generated from jfjelstul/worldcup dataset — DO NOT EDIT BY HAND.",
     "// Key: `${year}_${teamA}_${teamB}` -> [teamA goals, teamB goals].",
-    "// Both orientations are emitted so lookups work in either team order.",
+    "// Canonical orientation only (teams sorted alphabetically); lookup swaps",
+    "// the arrays when the requested order is reversed.",
     "",
     "const SCORERS: Record<string, [string[], string[]]> = {",
 ]
@@ -177,7 +192,11 @@ lines += [
     "};",
     "",
     "export function getScorers(year: number, teamA: string, teamB: string): [string[], string[]] | null {",
-    "  return SCORERS[`${year}_${teamA}_${teamB}`] ?? null;",
+    "  const [a, b] = [teamA, teamB].sort();",
+    "  const key = `${year}_${a}_${b}`;",
+    "  const v = SCORERS[key];",
+    "  if (!v) return null;",
+    "  return teamA === a ? v : [v[1], v[0]];",
     "}",
 ]
 open(f"{ROOT}/src/scorers.ts", "w").write("\n".join(lines) + "\n")
@@ -186,12 +205,16 @@ open(f"{ROOT}/src/scorers.ts", "w").write("\n".join(lines) + "\n")
 lines = [
     "// Auto-generated from jfjelstul/worldcup dataset — DO NOT EDIT BY HAND.",
     "// Key: `${year}_${teamA}_${teamB}` -> stats oriented [teamA, teamB].",
-    "// Both orientations are emitted so lookups work in either team order.",
+    "// Canonical orientation only (teams sorted alphabetically); lookup swaps",
+    "// the arrays when the requested order is reversed.",
     "",
     "export interface MatchStats {",
-    "  cards: [string[], string[]];  // [teamA, teamB]",
+    "  cards: [string[], string[]];",
     "  subs: [string[], string[]];",
-    "  pens: [string[], string[]];  // penalty shootouts only",
+    "  pens: [string[], string[]];",
+    "  possession?: [string, string];",
+    "  totalShots?: [number, number];",
+    "  fouls?: [number, number];",
     "}",
     "",
     "const STATS: Record<string, MatchStats> = {",
@@ -207,11 +230,20 @@ lines += [
     "};",
     "",
     "export function getStats(year: number, teamA: string, teamB: string): MatchStats | null {",
-    "  return STATS[`${year}_${teamA}_${teamB}`] ?? null;",
+    "  const [a, b] = [teamA, teamB].sort();",
+    "  const key = `${year}_${a}_${b}`;",
+    "  const base = STATS[key] as MatchStats | null;",
+    "  if (!base) return null;",
+    "  if (teamA === a) return base;",
+    "  return {",
+    "    cards: [base.cards[1], base.cards[0]],",
+    "    subs: [base.subs[1], base.subs[0]],",
+    "    pens: [base.pens[1], base.pens[0]],",
+    "  };",
     "}",
 ]
 open(f"{ROOT}/src/stats.ts", "w").write("\n".join(lines) + "\n")
 
-print(f"scorers keys: {len(scorers_out)} (={len(scorers_out)//2} matches)")
-print(f"stats keys:   {len(stats_out)} (={len(stats_out)//2} matches)")
+print(f"scorers keys: {len(scorers_out)} (={len(scorers_out)} canonical matches)")
+print(f"stats keys:   {len(stats_out)} (={len(stats_out)} canonical matches)")
 print(f"years in scope: {sorted(DATA_YEARS)}")

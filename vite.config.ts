@@ -15,6 +15,10 @@ export default defineConfig(() => {
       },
     },
     build: {
+      // Source maps roughly double the deploy size and are not useful for
+      // end-users; they are only downloaded when DevTools is open. Disable
+      // them in production to keep Netlify deploys light.
+      sourcemap: false,
       rollupOptions: {
         input: {
           app: path.resolve(__dirname, 'index.html'),
@@ -23,7 +27,6 @@ export default defineConfig(() => {
           manualChunks(id) {
             if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) return 'vendor-react';
             if (id.includes('node_modules')) return 'vendor';
-            if (id.includes('/scorers') || id.includes('/stats')) return 'data';
           },
         },
       },
