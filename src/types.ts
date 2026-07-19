@@ -25,6 +25,7 @@ export interface TournamentData {
   r16: (Match | null)[] | null;
   qf: (Match | null)[] | null;
   sf: (Match | null)[] | null;
+  tp?: Match | null; // third-place match
   final: (Match | null)[] | null;
   seeded?: boolean;
   goldenBoot?: { name: string; goals: number; photo?: string } | null;
