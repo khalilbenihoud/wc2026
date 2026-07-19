@@ -6,6 +6,7 @@ export const ROUND_NAME: Record<string, string> = {
   r16: "Round of 16",
   qf: "Quarter-final",
   sf: "Semi-final",
+  tp: "Third-place play-off",
   final: "Final",
 };
 
@@ -42,6 +43,18 @@ export function resolveCompetitors(
         analysis.w2[1] != null ? data.teams[analysis.w2[1]!] : "TBD",
       ];
     }
+    if (round === "tp") {
+      // Third-place play-off: the two semi-final losers. Here w1 holds the four
+      // semi-finalists and w2 the two finalists (semi winners).
+      const sf1Loser = analysis.w2[0] != null
+        ? [analysis.w1[0], analysis.w1[1]].find((x) => x != null && x !== analysis.w2[0]) ?? null : null;
+      const sf2Loser = analysis.w2[1] != null
+        ? [analysis.w1[2], analysis.w1[3]].find((x) => x != null && x !== analysis.w2[1]) ?? null : null;
+      return [
+        sf1Loser != null ? data.teams[sf1Loser] : "TBD",
+        sf2Loser != null ? data.teams[sf2Loser] : "TBD",
+      ];
+    }
   }
   if (round === "r16") {
     return [data.teams[2 * idx], data.teams[2 * idx + 1]];
@@ -56,6 +69,18 @@ export function resolveCompetitors(
     return [
       analysis.w2[2 * idx] != null ? data.teams[analysis.w2[2 * idx]!] : "TBD",
       analysis.w2[2 * idx + 1] != null ? data.teams[analysis.w2[2 * idx + 1]!] : "TBD",
+    ];
+  }
+  if (round === "tp") {
+    // Third-place play-off: the two semi-final losers. w2 holds the four
+    // semi-finalists and w3 the two finalists (semi winners).
+    const sf1Loser = analysis.w3[0] != null
+      ? [analysis.w2[0], analysis.w2[1]].find((x) => x != null && x !== analysis.w3[0]) ?? null : null;
+    const sf2Loser = analysis.w3[1] != null
+      ? [analysis.w2[2], analysis.w2[3]].find((x) => x != null && x !== analysis.w3[1]) ?? null : null;
+    return [
+      sf1Loser != null ? data.teams[sf1Loser] : "TBD",
+      sf2Loser != null ? data.teams[sf2Loser] : "TBD",
     ];
   }
   return [
