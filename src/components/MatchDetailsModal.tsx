@@ -8,6 +8,7 @@ import { getStats } from "../stats";
 import { getStats2026 } from "../stats2026";
 import { getHighlights } from "../highlights";
 import { getPlayerOfMatch } from "../motm";
+import { fireConfetti } from "../confetti";
 import MatchGoals from "./MatchGoals";
 
 interface MatchDetailsModalProps {
@@ -133,6 +134,13 @@ export default function MatchDetailsModal({
   useEffect(() => {
     if (isOpen && rendered) drawerRef.current?.focus();
   }, [isOpen, rendered]);
+
+  // Confetti for the Spain–Argentina 2026 final.
+  useEffect(() => {
+    if (isOpen && data._year === 2026 && round === "final" && ((ta === "ESP" && tb === "ARG") || (ta === "ARG" && tb === "ESP"))) {
+      fireConfetti();
+    }
+  }, [isOpen]);
 
   if (!rendered) return null;
 

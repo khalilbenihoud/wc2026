@@ -970,7 +970,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
   2026: {
     host: "USA · Canada · Mexico",
     hostFlag: "🇺🇸 🇨🇦 🇲🇽",
-    goldenBoot: null,
+    goldenBoot: { name: "Kylian Mbappé", goals: 6 },
+    goldenGlove: { name: "Unai Simón" },
     quote: null,
     seeded: false,
     // Sourced from openfootball (github.com/openfootball/world-cup,

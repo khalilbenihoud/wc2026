@@ -5,6 +5,7 @@ import { countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "..
 import { matchSlug } from "../matches";
 import { CHAMPION_IMAGES } from "../championImages.generated";
 import { useWikiPhoto } from "../wikiPhoto";
+import { fireConfetti } from "../confetti";
 import PlayerAvatar from "./PlayerAvatar";
 import AppLink from "./AppLink";
 import CountryMap from "./CountryMap";
@@ -54,6 +55,12 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
+  }, [year]);
+
+  useEffect(() => {
+    if (year === 2026) {
+      fireConfetti();
+    }
   }, [year]);
 
   // Fade out on close: stay mounted for one animation cycle, then navigate away

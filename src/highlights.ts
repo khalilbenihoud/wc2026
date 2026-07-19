@@ -237,7 +237,7 @@ export const HIGHLIGHTS: Record<string, Highlight> = {
   "2026_COL_GHA": { videoId: "I43WUQJFfCw", title: "Highlights | Colombia 1-0 Ghana | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/I43WUQJFfCw/hqdefault.jpg" },
   "2026_ENG_ARG": { videoId: "o6VO6xvrAwY", title: "Résumé : ANGLETERRE – ARGENTINE, MESSI en finale contre l’ESPAGNE ?", thumbnail: "https://i.ytimg.com/vi/o6VO6xvrAwY/hqdefault.jpg" },
   "2026_ENG_COD": { videoId: "T6MYUQgpCv8", title: "Highlights | England 2-1 Congo DR | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/T6MYUQgpCv8/hqdefault.jpg" },
-  "2026_ESP_ARG": { videoId: "qhGlxSPX3R0", title: "Spain 1-0 Argentina | FIFA World Cup 2026™ Final Highlights", thumbnail: "https://i.ytimg.com/vi/qhGlxSPX3R0/hqdefault.jpg" },
+  "2026_ESP_ARG": { videoId: "Xu2PZLrg3zs", title: "Spain 1-0 Argentina | FIFA World Cup 2026™ Final Highlights", thumbnail: "https://i.ytimg.com/vi/Xu2PZLrg3zs/hqdefault.jpg" },
   "2026_ESP_AUT": { videoId: "p_j4aMfNQyI", title: "Highlights | Spain 3-0 Austria | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/p_j4aMfNQyI/hqdefault.jpg" },
   "2026_ESP_BEL": { videoId: "rc1FP_YB2AM", title: "Spain vs Belgium | Match Highlights | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/rc1FP_YB2AM/hqdefault.jpg" },
   "2026_FRA_ENG": { videoId: "_5I-87kAOZk", title: "France vs. England Full Highlights | FIFA World Cup 2026™ Third-place play-off", thumbnail: "https://i.ytimg.com/vi/_5I-87kAOZk/hqdefault.jpg" },
