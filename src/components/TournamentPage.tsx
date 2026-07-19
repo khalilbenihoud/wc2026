@@ -166,6 +166,9 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                   <img
                     src={heroImage.url}
                     alt={heroImage.alt}
+                    width={1080}
+                    height={720}
+                    fetchPriority="high"
                     onLoad={() => setHeroLoaded(true)}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
                       heroLoaded ? "opacity-100" : "opacity-0"
