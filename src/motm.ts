@@ -49,6 +49,9 @@ const MOTM: Record<string, PlayerOfMatch> = {
   "2026_FRA_ESP": { name: "Pedro Porro", team: "ESP" },
   "2026_ENG_ARG": { name: "Lionel Messi", team: "ARG" },
 
+  // Third-place play-off
+  "2026_FRA_ENG": { name: "Jude Bellingham", team: "ENG" },
+
   // ─── 2022 ────────────────────────────────────────────────────────────────
   // Budweiser Player of the Match (Wikipedia)
 
