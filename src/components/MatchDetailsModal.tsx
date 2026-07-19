@@ -135,6 +135,9 @@ export default function MatchDetailsModal({
     if (isOpen && rendered) drawerRef.current?.focus();
   }, [isOpen, rendered]);
 
+  let ta = "";
+  let tb = "";
+
   // Confetti for the Spain–Argentina 2026 final.
   useEffect(() => {
     if (isOpen && data._year === 2026 && round === "final" && ((ta === "ESP" && tb === "ARG") || (ta === "ARG" && tb === "ESP"))) {
@@ -161,8 +164,6 @@ export default function MatchDetailsModal({
     ? (round === "final" ? matches[0] : matches[idx])
     : null;
 
-  let ta = "";
-  let tb = "";
   if (isR32 || (data.teams && data.teams.length)) {
     [ta, tb] = resolveCompetitors(data, analysis, round, idx);
   }
