@@ -1,7 +1,25 @@
 import confetti from "canvas-confetti";
 
 // CSP blocks blob: workers (Netlify dashboard), so render on the main thread.
-const fire = confetti.create(null, { useWorker: false });
+// The library's getCanvas() omits CSS width/height, causing a 300x150 display
+// box — we supply our own full-viewport canvas with explicit styles.
+let fire: ((opts?: confetti.Options) => Promise<null> | null) | null = null;
+
+function getFire() {
+  if (fire) return fire;
+  const canvas = document.createElement("canvas");
+  canvas.style.position = "fixed";
+  canvas.style.top = "0";
+  canvas.style.left = "0";
+  canvas.style.width = "100vw";
+  canvas.style.height = "100vh";
+  canvas.style.zIndex = "9999";
+  canvas.style.pointerEvents = "none";
+  document.body.appendChild(canvas);
+
+  fire = confetti.create(canvas, { useWorker: false, resize: true });
+  return fire;
+}
 
 export function fireConfetti() {
   const gold = "#D97706";
@@ -21,7 +39,8 @@ export function fireConfetti() {
     zIndex: 9999,
   };
 
-  fire({ ...defaults, particleCount: 80, spread: 100, origin: { y: 0.55 } });
-  fire({ ...defaults, particleCount: 40, spread: 120, origin: { y: 0.5 }, angle: 60 });
-  fire({ ...defaults, particleCount: 40, spread: 120, origin: { y: 0.5 }, angle: 120 });
+  const f = getFire();
+  f({ ...defaults, particleCount: 80, spread: 100, origin: { y: 0.55 } });
+  f({ ...defaults, particleCount: 40, spread: 120, origin: { y: 0.5 }, angle: 60 });
+  f({ ...defaults, particleCount: 40, spread: 120, origin: { y: 0.5 }, angle: 120 });
 }
