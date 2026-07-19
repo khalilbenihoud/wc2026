@@ -100,6 +100,24 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
     }
   }
 
+  // Final standings sit above Awards once the tournament is decided; while it's
+  // still being played (no champion yet) the standings aren't final, so they go
+  // below Awards instead.
+  const finalStandings = (champion || third || fourth) && (
+    <div className="mb-10">
+      <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
+        Final Standings
+      </div>
+      <Podium
+        champion={champion}
+        runnerUp={runnerUp}
+        third={third}
+        fourth={fourth}
+        onNavigate={onNavigate}
+      />
+    </div>
+  );
+
   return (
     <div
       ref={scrollRef}
@@ -201,20 +219,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           </div>
         )}
 
-        {(champion || third || fourth) && (
-          <div className="mb-10">
-            <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
-              Final Standings
-            </div>
-            <Podium
-              champion={champion}
-              runnerUp={runnerUp}
-              third={third}
-              fourth={fourth}
-              onNavigate={onNavigate}
-            />
-          </div>
-        )}
+        {champion && finalStandings}
 
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
@@ -266,6 +271,8 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
             </div>
           )}
         </div>
+
+        {!champion && finalStandings}
 
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">

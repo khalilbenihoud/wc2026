@@ -273,7 +273,10 @@ function buildTournament(year: number): string {
     `<p><a href="/">The Road to Glory — World Cup Archive</a></p>` +
     `<h1>${year} FIFA World Cup</h1>` +
     `<p>${esc(t.host)}.${t.quote ? " " + esc(t.quote) : ""}</p>` +
-    championHtml + standingsHtml + awardsHtml +
+    championHtml +
+    // Decided tournaments show standings above Awards; an in-progress one (no
+    // champion) shows them below, matching TournamentPage.
+    (champ ? standingsHtml + awardsHtml : awardsHtml + standingsHtml) +
     `<h2>Knockout results</h2>${knockout(t, year)}` +
     nationsHtml + otherHtml +
     `</main>`;
