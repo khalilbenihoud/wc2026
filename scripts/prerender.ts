@@ -84,6 +84,21 @@ function runnerUp(t: T): string | null {
   if (sf.length < 2) return null;
   return t.final[0].w === 0 ? sf[1] : sf[0];
 }
+// Bronze/fourth from the third-place play-off — mirrors getThirdFourthCodes in
+// TournamentPage so the prerendered standings match the app.
+function thirdFourth(t: T): [string | null, string | null] {
+  if (!t.tp || t.tp.w === null || !t.sf) return [null, null];
+  const qfw = qfWinners(t);
+  if (qfw.length < 4) return [null, null];
+  const s1 = t.sf[0];
+  const s2 = t.sf[1];
+  if (!s1 || s1.w === null || !s2 || s2.w === null) return [null, null];
+  const tpA = s1.w === 0 ? qfw[1] : qfw[0]; // SF1 loser
+  const tpB = s2.w === 0 ? qfw[3] : qfw[2]; // SF2 loser
+  const third = t.tp.w === 0 ? tpA : tpB;
+  const fourth = t.tp.w === 0 ? tpB : tpA;
+  return [third, fourth];
+}
 
 // Penalty / extra-time suffix for a match, from the given team's perspective.
 function matchNote(m: EnumeratedMatch): string {
@@ -206,6 +221,30 @@ function buildTournament(year: number): string {
       `.</p>`
     : `<h2>Champion</h2><p>The ${year} FIFA World Cup is currently being played — the champion is still to be decided.</p>`;
 
+  // Final standings (1st–4th) — sits between Champion and Awards, matching the
+  // app's section order so pre-hydration HTML and the client agree.
+  const [thirdCode, fourthCode] = thirdFourth(t);
+  const standingsRows: [string, string | null][] = [
+    ["Champion", champ],
+    ["Runner-up", ru],
+    ["Third place", thirdCode],
+    ["Fourth place", fourthCode],
+  ];
+  const standingsHtml =
+    champ || thirdCode || fourthCode
+      ? `<h2>Final standings</h2><ol>` +
+        standingsRows
+          .map(([label, code]) => {
+            if (!code) return `<li>${label}: to be decided</li>`;
+            const cslug = slugForCode(code);
+            const name = esc(getTeamName(code));
+            const link = cslug ? `<a href="/countries/${cslug}/">${name}</a>` : name;
+            return `<li>${label}: ${link}</li>`;
+          })
+          .join("") +
+        `</ol>`
+      : "";
+
   const awardsHtml =
     `<h2>Awards</h2><p>` +
     (t.goldenBoot ? `Golden Boot: ${esc(t.goldenBoot.name)} (${t.goldenBoot.goals} goals). ` : "Golden Boot: to be decided. ") +
@@ -234,7 +273,7 @@ function buildTournament(year: number): string {
     `<p><a href="/">The Road to Glory — World Cup Archive</a></p>` +
     `<h1>${year} FIFA World Cup</h1>` +
     `<p>${esc(t.host)}.${t.quote ? " " + esc(t.quote) : ""}</p>` +
-    championHtml + awardsHtml +
+    championHtml + standingsHtml + awardsHtml +
     `<h2>Knockout results</h2>${knockout(t, year)}` +
     nationsHtml + otherHtml +
     `</main>`;
