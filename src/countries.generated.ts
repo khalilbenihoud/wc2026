@@ -559,9 +559,12 @@ function titleIsAboutOtherTeams(code: string, title: string): boolean {
   return Object.keys(TEAMS).some((other) => other !== code && titleNamesTeam(other, title));
 }
 
+const VIDEO_LIMIT = 8;
+const VIDEO_CLASSICS = 2; // how many "very old" clips to keep alongside recent ones
+
 function deriveVideos(code: string): VideoHighlight[] {
   const seen = new Set<string>();
-  const videos: VideoHighlight[] = [];
+  const all: VideoHighlight[] = [];
 
   for (const [key, h] of Object.entries(HIGHLIGHTS)) {
     const parts = key.split("_");
@@ -571,17 +574,23 @@ function deriveVideos(code: string): VideoHighlight[] {
     if (titleIsAboutOtherTeams(code, h.title)) continue;
     if (seen.has(h.videoId)) continue;
     seen.add(h.videoId);
-    videos.push({
+    all.push({
       title: h.title,
       thumbnail: h.thumbnail,
       url: `https://www.youtube.com/watch?v=${h.videoId}`,
       duration: "",
       year: parseInt(parts[0], 10),
     });
-    if (videos.length >= 8) break;
   }
 
-  return videos;
+  // Lead with the most recent clips; keep only a couple of the very oldest as
+  // classics at the end (HIGHLIGHTS is chronological, so taking the first 8
+  // otherwise buried a nation's page under decades-old footage).
+  all.sort((a, b) => b.year - a.year);
+  if (all.length <= VIDEO_LIMIT) return all;
+  const recent = all.slice(0, VIDEO_LIMIT - VIDEO_CLASSICS);
+  const classics = all.slice(-VIDEO_CLASSICS);
+  return [...recent, ...classics];
 }
 
 const CONFEDERATION_MAP: Record<string, string> = {
