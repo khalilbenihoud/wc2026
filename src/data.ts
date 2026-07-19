@@ -1041,6 +1041,7 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       ["Kylian Mbappé 48'", "Bradley Barcola 54'", "Kylian Mbappé 66'", "Ousmane Dembélé 90+6'"],
       ["Declan Rice 3'", "Ezri Konsa 18'", "Bukayo Saka 37'", "Bukayo Saka 45+1'", "Bukayo Saka 87' (pen.)", "Jude Bellingham 90+8'"],
     ]),
-    final: null,
+    // Final: Spain 1–0 Argentina (a.e.t.) — Ferran Torres 106'; Spain's second World Cup, 10-man Argentina (Enzo Fernández sent off)
+    final: [M(1, 0, 0, null, "a.e.t.", [["Ferran Torres 106'"], []])],
   },
 };
