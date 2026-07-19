@@ -37,7 +37,9 @@ function getResultForTeam(code: string, year: number): RoundResult {
   if (reachedSemis(t, year).includes(code)) {
     if (t.tp) {
       const tpTeams = getThirdPlaceTeams(t, year);
-      if (tpTeams.length === 2) {
+      // Only assign 3RD/4TH to the two play-off teams. Other semi-finalists
+      // (e.g. finalists of an as-yet-undecided final) fall through below.
+      if (tpTeams.length === 2 && tpTeams.includes(code)) {
         return { year, result: t.tp.w === 0 ? (code === tpTeams[0] ? "3RD" : "4TH") : (code === tpTeams[1] ? "3RD" : "4TH") };
       }
     }

@@ -261,6 +261,14 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                 onNavigate={onNavigate}
               />
             )}
+            {t.tp && (
+              <KnockoutRound
+                label="Third-place play-off"
+                year={year}
+                matches={getRoundMatches(t, year, "tp")}
+                onNavigate={onNavigate}
+              />
+            )}
             {t.sf && (
               <KnockoutRound
                 label="Semi-finals"
@@ -544,7 +552,18 @@ function getR16W(t: typeof TOURNAMENTS[number]): string[] {
   return result;
 }
 
-function getRoundMatches(t: typeof TOURNAMENTS[number], year: number, round: "qf" | "sf" | "final"): KnockoutMatch[] {
+function getRoundMatches(t: typeof TOURNAMENTS[number], year: number, round: "qf" | "sf" | "tp" | "final"): KnockoutMatch[] {
+  if (round === "tp" && t.tp) {
+    // Third-place play-off: the two semi-final losers.
+    const qfW = getQFW(t, year);
+    const s1 = t.sf?.[0];
+    const s2 = t.sf?.[1];
+    if (qfW.length < 4 || !s1 || s1.w === null || !s2 || s2.w === null) return [];
+    const ta = s1.w === 0 ? qfW[1] : qfW[0];
+    const tb = s2.w === 0 ? qfW[3] : qfW[2];
+    const m = t.tp;
+    return [{ teamA: ta, teamB: tb, scoreA: m.s[0], scoreB: m.s[1], winner: m.w, pens: m.p ?? null, extra: m.x ?? null }];
+  }
   if (round === "qf" && t.qf) {
     const r16W = getR16W(t);
     return t.qf.map((m, i) => {

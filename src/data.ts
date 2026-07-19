@@ -1000,6 +1000,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       // England 1–2 Argentina (SF, Jul 15) — Argentina rally late (Messi 2 assists) to reach the final
       M(1, 2, 1, null, null, [["Anthony Gordon 55'"], ["Enzo Fernández 85'", "Lautaro Martínez 90+2'"]]),
     ],
+    // Third-place play-off: France 4–6 England (SF losers) — England take the bronze in a thriller
+    tp: M(4, 6, 1),
     final: null,
   },
 };
