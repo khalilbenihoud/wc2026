@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CountryProfile, RESULT_LABEL, ResultLevel } from "../countries.mock";
 import { TOURNAMENTS, getTeamPalette } from "../data";
 import { tournamentPath } from "../router";
+import { fireConfetti } from "../confetti";
 import Archive from "./country/Archive";
 import Breadcrumb from "./Breadcrumb";
 import { SITE_NAME } from "../schema";
@@ -33,6 +34,12 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
+  }, [profile.code]);
+
+  useEffect(() => {
+    if (profile.code === "ESP") {
+      fireConfetti();
+    }
   }, [profile.code]);
 
   const [isClosing, setIsClosing] = useState(false);

@@ -41,6 +41,9 @@ function matchAt(data: TournamentData, round: string, idx: number) {
     if (!rm || rm.s === null || rm.w === null) return null;
     return { s: rm.s, w: rm.w, p: rm.p ?? null, x: rm.x ?? null, g: rm.g ?? null };
   }
+  if (round === "tp") {
+    return data.tp ?? null;
+  }
   const matches = data[round as "r16" | "qf" | "sf" | "final"];
   const m = matches ? (round === "final" ? matches[0] : matches[idx]) : null;
   return m ?? null;
@@ -77,6 +80,7 @@ export function enumerateMatches(
   if (data.r16) data.r16.forEach((m, i) => { if (m) push("r16", i); });
   if (data.qf) data.qf.forEach((m, i) => { if (m) push("qf", i); });
   if (data.sf) data.sf.forEach((m, i) => { if (m) push("sf", i); });
+  if (data.tp) push("tp", 0);
   if (data.final?.[0]) push("final", 0);
 
   return out;

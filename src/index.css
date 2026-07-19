@@ -58,6 +58,11 @@
   --color-brand-muted: #71717a;
   --color-brand-danger: #e11d48;
   --color-brand-win: #22c55e;
+
+  /* Podium medal metals — real accent colours, not just labels. */
+  --color-medal-gold: #f6c453;
+  --color-medal-silver: #c8ccd4;
+  --color-medal-bronze: #cd7f4d;
 }
 
 :root {
@@ -108,6 +113,11 @@
   --color-brand-muted: #6b6660;
   --color-brand-danger: #c0192f;
   --color-brand-win: #187a43;
+
+  /* Darker metals so they read on the light (cream) background. */
+  --color-medal-gold: #b8790a;
+  --color-medal-silver: #8a8f96;
+  --color-medal-bronze: #a15c2b;
 }
 
 .light body {

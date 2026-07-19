@@ -34,7 +34,17 @@ function getResultForTeam(code: string, year: number): RoundResult {
   // down a stage — semi-finalists showed as "QF", R16 teams as "GS", etc.)
   if (getChampion(t, year) === code) return { year, result: "W" };
   if (getFinalist(t, year) === code) return { year, result: "F" };
-  if (reachedSemis(t, year).includes(code)) return { year, result: "3RD" };
+  if (reachedSemis(t, year).includes(code)) {
+    if (t.tp) {
+      const tpTeams = getThirdPlaceTeams(t, year);
+      // Only assign 3RD/4TH to the two play-off teams. Other semi-finalists
+      // (e.g. finalists of an as-yet-undecided final) fall through below.
+      if (tpTeams.length === 2 && tpTeams.includes(code)) {
+        return { year, result: t.tp.w === 0 ? (code === tpTeams[0] ? "3RD" : "4TH") : (code === tpTeams[1] ? "3RD" : "4TH") };
+      }
+    }
+    return { year, result: "3RD" };
+  }
   // 1930 had no quarter-finals: 4 groups → semi‑finals → final.
   // Teams that didn't reach the semis went out in the group stage.
   if (year === 1930) return { year, result: "GS" };
@@ -108,6 +118,17 @@ function getSemiFinalists(t: typeof TOURNAMENTS[number], year: number): string[]
   const champ = getChampion(t, year);
   const finalist = getFinalist(t, year);
   return sfTeams.filter((c) => c !== champ && c !== finalist);
+}
+
+// Teams in the third-place match: SF1 loser, SF2 loser.
+function getThirdPlaceTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
+  if (!t.sf || !t.tp) return [];
+  const qfw = getQFWinnerTeams(t, year);
+  if (qfw.length < 4) return [];
+  const sf1 = t.sf[0];
+  const sf2 = t.sf[1];
+  if (!sf1 || sf1.w === null || !sf2 || sf2.w === null) return [];
+  return [sf1.w === 0 ? qfw[1] : qfw[0], sf2.w === 0 ? qfw[3] : qfw[2]];
 }
 
 function getQFWinnerTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
@@ -538,9 +559,12 @@ function titleIsAboutOtherTeams(code: string, title: string): boolean {
   return Object.keys(TEAMS).some((other) => other !== code && titleNamesTeam(other, title));
 }
 
+const VIDEO_LIMIT = 8;
+const VIDEO_CLASSICS = 2; // how many "very old" clips to keep alongside recent ones
+
 function deriveVideos(code: string): VideoHighlight[] {
   const seen = new Set<string>();
-  const videos: VideoHighlight[] = [];
+  const all: VideoHighlight[] = [];
 
   for (const [key, h] of Object.entries(HIGHLIGHTS)) {
     const parts = key.split("_");
@@ -550,17 +574,23 @@ function deriveVideos(code: string): VideoHighlight[] {
     if (titleIsAboutOtherTeams(code, h.title)) continue;
     if (seen.has(h.videoId)) continue;
     seen.add(h.videoId);
-    videos.push({
+    all.push({
       title: h.title,
       thumbnail: h.thumbnail,
       url: `https://www.youtube.com/watch?v=${h.videoId}`,
       duration: "",
       year: parseInt(parts[0], 10),
     });
-    if (videos.length >= 8) break;
   }
 
-  return videos;
+  // Lead with the most recent clips; keep only a couple of the very oldest as
+  // classics at the end (HIGHLIGHTS is chronological, so taking the first 8
+  // otherwise buried a nation's page under decades-old footage).
+  all.sort((a, b) => b.year - a.year);
+  if (all.length <= VIDEO_LIMIT) return all;
+  const recent = all.slice(0, VIDEO_LIMIT - VIDEO_CLASSICS);
+  const classics = all.slice(-VIDEO_CLASSICS);
+  return [...recent, ...classics];
 }
 
 const CONFEDERATION_MAP: Record<string, string> = {

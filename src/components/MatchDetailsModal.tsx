@@ -8,6 +8,7 @@ import { getStats } from "../stats";
 import { getStats2026 } from "../stats2026";
 import { getHighlights } from "../highlights";
 import { getPlayerOfMatch } from "../motm";
+import { fireConfetti } from "../confetti";
 import MatchGoals from "./MatchGoals";
 
 interface MatchDetailsModalProps {
@@ -134,17 +135,28 @@ export default function MatchDetailsModal({
     if (isOpen && rendered) drawerRef.current?.focus();
   }, [isOpen, rendered]);
 
+  // Confetti for the Spain–Argentina 2026 final.
+  useEffect(() => {
+    if (isOpen && data._year === 2026 && round === "final" && ((ta === "ESP" && tb === "ARG") || (ta === "ARG" && tb === "ESP"))) {
+      fireConfetti();
+    }
+  }, [isOpen]);
+
   if (!rendered) return null;
 
   const isR32 = round === "r32";
+  const isTp = round === "tp";
   const isSeeded = data.seeded;
   const r32Match = isR32 ? data.r32?.[idx] ?? null : null;
   const matchDate = r32Match?.date ?? null;
-  const matches = isR32 ? null : data[round as "r16" | "qf" | "sf" | "final"];
+  // tp (third-place play-off) is a single Match object, not an indexed array.
+  const matches = isR32 || isTp ? null : data[round as "r16" | "qf" | "sf" | "final"];
   const m = isR32
     ? r32Match && r32Match.s !== null && r32Match.w !== null
       ? { s: r32Match.s, w: r32Match.w, p: r32Match.p, x: r32Match.x, g: r32Match.g }
       : null
+    : isTp
+    ? data.tp ?? null
     : matches
     ? (round === "final" ? matches[0] : matches[idx])
     : null;

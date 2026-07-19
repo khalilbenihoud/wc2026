@@ -5,10 +5,12 @@ import { countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "..
 import { matchSlug } from "../matches";
 import { CHAMPION_IMAGES } from "../championImages.generated";
 import { useWikiPhoto } from "../wikiPhoto";
+import { fireConfetti } from "../confetti";
 import PlayerAvatar from "./PlayerAvatar";
 import AppLink from "./AppLink";
 import CountryMap from "./CountryMap";
 import Breadcrumb from "./Breadcrumb";
+import Podium from "./Podium";
 import { SITE_NAME } from "../schema";
 
 interface TournamentPageProps {
@@ -34,6 +36,10 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
     return getRunnerUpCode(t, year);
   }, [t, year]);
 
+  // Bronze/fourth come from the third-place play-off (known even before the
+  // final is decided). Null when the tournament has no play-off result yet.
+  const [third, fourth] = useMemo(() => (t ? getThirdFourthCodes(t, year) : [null, null]), [t, year]);
+
   // Champion hero photo, picked at random from the committed Unsplash pool
   // (scripts/generate-champion-images.ts) — no API call at runtime, so it works
   // in production without a key. Re-picks when the tournament changes.
@@ -49,6 +55,12 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
+  }, [year]);
+
+  useEffect(() => {
+    if (year === 2026) {
+      fireConfetti();
+    }
   }, [year]);
 
   // Fade out on close: stay mounted for one animation cycle, then navigate away
@@ -94,6 +106,24 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
       if (!allTeams.includes(m.tb)) allTeams.push(m.tb);
     }
   }
+
+  // Final standings sit above Awards once the tournament is decided; while it's
+  // still being played (no champion yet) the standings aren't final, so they go
+  // below Awards instead.
+  const finalStandings = (champion || third || fourth) && (
+    <div className="mb-10">
+      <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
+        Final Standings
+      </div>
+      <Podium
+        champion={champion}
+        runnerUp={runnerUp}
+        third={third}
+        fourth={fourth}
+        onNavigate={onNavigate}
+      />
+    </div>
+  );
 
   return (
     <div
@@ -196,6 +226,8 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           </div>
         )}
 
+        {champion && finalStandings}
+
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Awards
@@ -247,6 +279,8 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           )}
         </div>
 
+        {!champion && finalStandings}
+
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Knockout Results
@@ -258,6 +292,14 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                 label="Final"
                 year={year}
                 matches={getRoundMatches(t, year, "final")}
+                onNavigate={onNavigate}
+              />
+            )}
+            {t.tp && (
+              <KnockoutRound
+                label="Third-place play-off"
+                year={year}
+                matches={getRoundMatches(t, year, "tp")}
                 onNavigate={onNavigate}
               />
             )}
@@ -504,6 +546,22 @@ function getRunnerUpCode(t: typeof TOURNAMENTS[number], year: number): string | 
   return t.final[0].w === 0 ? sfTeams[1] : sfTeams[0];
 }
 
+// Bronze and fourth from the third-place play-off. The two play-off teams are
+// the semi-final losers (SF1 loser, SF2 loser); tp.w picks which took bronze.
+function getThirdFourthCodes(t: typeof TOURNAMENTS[number], year: number): [string | null, string | null] {
+  if (!t.tp || t.tp.w === null || !t.sf) return [null, null];
+  const qfW = getQFW(t, year);
+  if (qfW.length < 4) return [null, null];
+  const s1 = t.sf[0];
+  const s2 = t.sf[1];
+  if (!s1 || s1.w === null || !s2 || s2.w === null) return [null, null];
+  const tpA = s1.w === 0 ? qfW[1] : qfW[0]; // SF1 loser
+  const tpB = s2.w === 0 ? qfW[3] : qfW[2]; // SF2 loser
+  const third = t.tp.w === 0 ? tpA : tpB;
+  const fourth = t.tp.w === 0 ? tpB : tpA;
+  return [third, fourth];
+}
+
 function getSFTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
   if (!t.sf) return [];
   const qfW = getQFW(t, year);
@@ -544,7 +602,18 @@ function getR16W(t: typeof TOURNAMENTS[number]): string[] {
   return result;
 }
 
-function getRoundMatches(t: typeof TOURNAMENTS[number], year: number, round: "qf" | "sf" | "final"): KnockoutMatch[] {
+function getRoundMatches(t: typeof TOURNAMENTS[number], year: number, round: "qf" | "sf" | "tp" | "final"): KnockoutMatch[] {
+  if (round === "tp" && t.tp) {
+    // Third-place play-off: the two semi-final losers.
+    const qfW = getQFW(t, year);
+    const s1 = t.sf?.[0];
+    const s2 = t.sf?.[1];
+    if (qfW.length < 4 || !s1 || s1.w === null || !s2 || s2.w === null) return [];
+    const ta = s1.w === 0 ? qfW[1] : qfW[0];
+    const tb = s2.w === 0 ? qfW[3] : qfW[2];
+    const m = t.tp;
+    return [{ teamA: ta, teamB: tb, scoreA: m.s[0], scoreB: m.s[1], winner: m.w, pens: m.p ?? null, extra: m.x ?? null }];
+  }
   if (round === "qf" && t.qf) {
     const r16W = getR16W(t);
     return t.qf.map((m, i) => {

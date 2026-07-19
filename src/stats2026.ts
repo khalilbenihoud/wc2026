@@ -66,6 +66,12 @@ const STATS_2026: Record<string, MatchStats> = {
   "2026_ESP_FRA": { cards: [["🟨"], ["🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["51%", "49%"], totalShots: [10, 10], fouls: [12, 11] },
   "2026_ENG_ARG": { cards: [["🟨"], ["🟨", "🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["36%", "64%"], totalShots: [5, 15], fouls: [11, 15] },
   "2026_ARG_ENG": { cards: [["🟨", "🟨", "🟨"], ["🟨"]], subs: [[], []], pens: [[], []], possession: ["64%", "36%"], totalShots: [15, 5], fouls: [15, 11] },
+  // Third-place play-off
+  "2026_FRA_ENG": { cards: [[], []], subs: [[], []], pens: [[], []], possession: ["46%", "54%"], totalShots: [19, 19], fouls: [14, 8] },
+  "2026_ENG_FRA": { cards: [[], []], subs: [[], []], pens: [[], []], possession: ["54%", "46%"], totalShots: [19, 19], fouls: [8, 14] },
+  // Final — Enzo Fernández sent off (second yellow → one red).
+  "2026_ESP_ARG": { cards: [[], ["🟨", "🟨", "🟨", "🟨", "🟥"]], subs: [[], []], pens: [[], []], possession: ["65%", "35%"], totalShots: [20, 2], fouls: [21, 25] },
+  "2026_ARG_ESP": { cards: [["🟨", "🟨", "🟨", "🟨", "🟥"], []], subs: [[], []], pens: [[], []], possession: ["35%", "65%"], totalShots: [2, 20], fouls: [25, 21] },
 };
 
 export function getStats2026(year: number, teamA: string, teamB: string): MatchStats | null {
