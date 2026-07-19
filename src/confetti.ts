@@ -15,6 +15,7 @@ export function fireConfetti() {
     startVelocity: 30,
     colors: [gold, goldHi, goldLight, red, yellow],
     origin: { y: 0.6 },
+    zIndex: 9999,
   };
 
   confetti({ ...defaults, particleCount: 80, spread: 100, origin: { y: 0.55 } });
