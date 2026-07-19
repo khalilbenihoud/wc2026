@@ -340,6 +340,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(8, 0, 0), M(2, 0, 0), M(1, 3, 1), M(2, 1, 0)],
     sf: [M(1, 5, 1), M(2, 1, 0)],
+    // Third-place play-off: Brazil 4–2 Sweden
+    tp: M(2, 4, 1),
     final: [M(2, 4, 1)],
   },
 
@@ -382,6 +384,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(2, 0, 0), M(7, 5, 0), M(4, 2, 0), M(4, 2, 0)],
     sf: [M(6, 1, 0), M(4, 2, 0, null, "a.e.t.")],
+    // Third-place play-off: Austria 3–1 Uruguay
+    tp: M(3, 1, 0),
     final: [M(3, 2, 0)],
   },
 
@@ -403,6 +407,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(1, 0, 0), M(4, 0, 0), M(2, 0, 0), M(1, 0, 0)],
     sf: [M(5, 2, 0), M(3, 1, 0)],
+    // Third-place play-off: France 6–3 West Germany
+    tp: M(6, 3, 0),
     final: [M(5, 2, 0)],
   },
 
@@ -424,6 +430,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(3, 1, 0), M(2, 1, 0), M(1, 0, 0), M(1, 0, 0)],
     sf: [M(4, 2, 0), M(3, 1, 0)],
+    // Third-place play-off: Chile 1–0 Yugoslavia
+    tp: M(1, 0, 0),
     final: [M(3, 1, 0)],
   },
 
@@ -445,6 +453,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(1, 0, 0), M(5, 3, 0), M(4, 0, 0), M(2, 1, 0)],
     sf: [M(2, 1, 0), M(2, 1, 0)],
+    // Third-place play-off: Portugal 2–1 Soviet Union
+    tp: M(2, 1, 0),
     final: [M(4, 2, 0, null, "a.e.t.")],
   },
 
@@ -466,6 +476,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(4, 2, 0), M(1, 0, 0, null, "a.e.t."), M(4, 1, 0), M(3, 2, 0, null, "a.e.t.")],
     sf: [M(3, 1, 0), M(4, 3, 0, null, "a.e.t.")],
+    // Third-place play-off: West Germany 1–0 Uruguay
+    tp: M(0, 1, 1),
     final: [M(4, 1, 0)],
   },
 
@@ -487,6 +499,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(2, 0, 0), M(1, 0, 0), M(4, 0, 0), M(1, 0, 0)],
     sf: [M(1, 0, 0), M(2, 0, 0)],
+    // Third-place play-off: Poland 1–0 Brazil
+    tp: M(1, 0, 0),
     final: [M(2, 1, 0)],
   },
 
@@ -508,6 +522,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(2, 0, 0), M(3, 0, 0), M(5, 1, 0), M(2, 1, 0)],
     sf: [M(0, 0, 0), M(2, 1, 0)],
+    // Third-place play-off: Brazil 2–1 Italy
+    tp: M(2, 1, 0),
     final: [M(3, 1, 0, null, "a.e.t.")],
   },
 
@@ -529,6 +545,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     r16: null,
     qf: [M(3, 0, 0), M(2, 1, 0), M(2, 1, 0), M(4, 1, 0)],
     sf: [M(0, 2, 1), M(3, 3, 0, "5-4")],
+    // Third-place play-off: Poland 3–2 France
+    tp: M(3, 2, 0),
     final: [M(3, 1, 0)],
   },
 
@@ -567,6 +585,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(1, 1, 0, "4-3"), M(0, 0, 0, "4-1"), M(2, 1, 0), M(1, 1, 0, "5-4")],
     sf: [M(0, 2, 1), M(2, 0, 0)],
+    // Third-place play-off: France 4–2 Belgium (a.e.t.)
+    tp: M(4, 2, 0, null, "a.e.t."),
     final: [M(2, 3, 1)],
   },
 
@@ -605,6 +625,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(0, 0, 0, "3-2"), M(1, 0, 0), M(1, 0, 0), M(3, 2, 0, null, "a.e.t.")],
     sf: [M(1, 1, 0, "4-3"), M(1, 1, 0, "4-3")],
+    // Third-place play-off: Italy 2–1 England
+    tp: M(2, 1, 0),
     final: [M(0, 1, 1)],
   },
 
@@ -644,6 +666,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(2, 1, 0), M(2, 1, 0), M(2, 3, 1), M(2, 2, 1, "4-5")],
     sf: [M(2, 1, 0), M(1, 0, 0)],
+    // Third-place play-off: Sweden 4–0 Bulgaria
+    tp: M(0, 4, 1),
     final: [M(0, 0, 1, "2-3")],
   },
 
@@ -683,6 +707,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(3, 2, 0), M(2, 1, 0), M(0, 0, 1, "3-4"), M(0, 3, 1)],
     sf: [M(1, 1, 0, "4-2"), M(2, 1, 0)],
+    // Third-place play-off: Croatia 2–1 Netherlands
+    tp: M(1, 2, 1),
     final: [M(0, 3, 1)],
   },
 
@@ -727,6 +753,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       M(0, 1, 1, null, "golden goal"),
     ],
     sf: [M(1, 0, 0), M(1, 0, 0)],
+    // Third-place play-off: Türkiye 3–2 South Korea
+    tp: M(2, 3, 1),
     final: [M(0, 2, 1)],
   },
 
@@ -766,6 +794,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(1, 1, 0, "4-2"), M(3, 0, 0), M(0, 0, 1, "1-3"), M(0, 1, 1)],
     sf: [M(0, 2, 1, null, "a.e.t."), M(0, 1, 1)],
+    // Third-place play-off: Germany 3–1 Portugal
+    tp: M(3, 1, 0),
     final: [M(1, 1, 0, "5-3")],
   },
 
@@ -810,6 +840,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       M(0, 1, 1),
     ],
     sf: [M(2, 3, 1), M(0, 1, 1)],
+    // Third-place play-off: Germany 3–2 Uruguay
+    tp: M(2, 3, 1),
     final: [M(0, 1, 1, null, "a.e.t.")],
   },
 
@@ -849,6 +881,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(2, 1, 0), M(0, 1, 1), M(0, 0, 0, "4-3"), M(1, 0, 0)],
     sf: [M(1, 7, 1), M(0, 0, 1, "2-4")],
+    // Third-place play-off: Netherlands 3–0 Brazil
+    tp: M(0, 3, 1),
     final: [M(1, 0, 0, null, "a.e.t.")],
   },
 
@@ -888,6 +922,8 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     ],
     qf: [M(0, 2, 1), M(1, 2, 1), M(0, 2, 1), M(2, 2, 1, "3-4")],
     sf: [M(1, 0, 0), M(1, 2, 1, null, "a.e.t.")],
+    // Third-place play-off: Belgium 2–0 England
+    tp: M(2, 0, 0),
     final: [M(4, 2, 0)],
   },
 

@@ -9,6 +9,7 @@ import PlayerAvatar from "./PlayerAvatar";
 import AppLink from "./AppLink";
 import CountryMap from "./CountryMap";
 import Breadcrumb from "./Breadcrumb";
+import Podium from "./Podium";
 import { SITE_NAME } from "../schema";
 
 interface TournamentPageProps {
@@ -33,6 +34,10 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
     if (!t?.final?.[0] || t.final[0].w === null) return null;
     return getRunnerUpCode(t, year);
   }, [t, year]);
+
+  // Bronze/fourth come from the third-place play-off (known even before the
+  // final is decided). Null when the tournament has no play-off result yet.
+  const [third, fourth] = useMemo(() => (t ? getThirdFourthCodes(t, year) : [null, null]), [t, year]);
 
   // Champion hero photo, picked at random from the committed Unsplash pool
   // (scripts/generate-champion-images.ts) — no API call at runtime, so it works
@@ -193,6 +198,21 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {(champion || third || fourth) && (
+          <div className="mb-10">
+            <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
+              Final Standings
+            </div>
+            <Podium
+              champion={champion}
+              runnerUp={runnerUp}
+              third={third}
+              fourth={fourth}
+              onNavigate={onNavigate}
+            />
           </div>
         )}
 
@@ -510,6 +530,22 @@ function getRunnerUpCode(t: typeof TOURNAMENTS[number], year: number): string | 
   const sfTeams = getSFTeams(t, year);
   if (sfTeams.length < 2) return null;
   return t.final[0].w === 0 ? sfTeams[1] : sfTeams[0];
+}
+
+// Bronze and fourth from the third-place play-off. The two play-off teams are
+// the semi-final losers (SF1 loser, SF2 loser); tp.w picks which took bronze.
+function getThirdFourthCodes(t: typeof TOURNAMENTS[number], year: number): [string | null, string | null] {
+  if (!t.tp || t.tp.w === null || !t.sf) return [null, null];
+  const qfW = getQFW(t, year);
+  if (qfW.length < 4) return [null, null];
+  const s1 = t.sf[0];
+  const s2 = t.sf[1];
+  if (!s1 || s1.w === null || !s2 || s2.w === null) return [null, null];
+  const tpA = s1.w === 0 ? qfW[1] : qfW[0]; // SF1 loser
+  const tpB = s2.w === 0 ? qfW[3] : qfW[2]; // SF2 loser
+  const third = t.tp.w === 0 ? tpA : tpB;
+  const fourth = t.tp.w === 0 ? tpB : tpA;
+  return [third, fourth];
 }
 
 function getSFTeams(t: typeof TOURNAMENTS[number], year: number): string[] {
