@@ -239,7 +239,7 @@ export const HIGHLIGHTS: Record<string, Highlight> = {
   "2026_ENG_COD": { videoId: "T6MYUQgpCv8", title: "Highlights | England 2-1 Congo DR | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/T6MYUQgpCv8/hqdefault.jpg" },
   "2026_ESP_AUT": { videoId: "p_j4aMfNQyI", title: "Highlights | Spain 3-0 Austria | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/p_j4aMfNQyI/hqdefault.jpg" },
   "2026_ESP_BEL": { videoId: "rc1FP_YB2AM", title: "Spain vs Belgium | Match Highlights | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/rc1FP_YB2AM/hqdefault.jpg" },
-  "2026_FRA_ENG": { videoId: "IN9JyNQL4rI", title: "France 4-6 England | FIFA World Cup 2026™ Third-place play-off Highlights", thumbnail: "https://i.ytimg.com/vi/IN9JyNQL4rI/hqdefault.jpg" },
+  "2026_FRA_ENG": { videoId: "_5I-87kAOZk", title: "France vs. England Full Highlights | FIFA World Cup 2026™ Third-place play-off", thumbnail: "https://i.ytimg.com/vi/_5I-87kAOZk/hqdefault.jpg" },
   "2026_FRA_ESP": { videoId: "xbUoFYtCoNA", title: "Highlights | France 0-2 Spain | FIFA World Cup 2026™ Semi-final", thumbnail: "https://i.ytimg.com/vi/xbUoFYtCoNA/hqdefault.jpg" },
   "2026_FRA_MAR": { videoId: "edZHheemSGg", title: "France 2-0 Morocco | FIFA World Cup 2026 Quarter-final Highlights", thumbnail: "https://i.ytimg.com/vi/edZHheemSGg/hqdefault.jpg" },
   "2026_FRA_PAR": { videoId: "4HZCeb88uSI", title: "Highlights | Paraguay 0-1 France | FIFA World Cup 2026™", thumbnail: "https://i.ytimg.com/vi/4HZCeb88uSI/hqdefault.jpg" },

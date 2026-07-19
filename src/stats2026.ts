@@ -67,8 +67,8 @@ const STATS_2026: Record<string, MatchStats> = {
   "2026_ENG_ARG": { cards: [["🟨"], ["🟨", "🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["36%", "64%"], totalShots: [5, 15], fouls: [11, 15] },
   "2026_ARG_ENG": { cards: [["🟨", "🟨", "🟨"], ["🟨"]], subs: [[], []], pens: [[], []], possession: ["64%", "36%"], totalShots: [15, 5], fouls: [15, 11] },
   // Third-place play-off
-  "2026_FRA_ENG": { cards: [["🟨", "🟨"], ["🟨"]], subs: [[], []], pens: [[], []], possession: ["48%", "52%"], totalShots: [17, 21], fouls: [12, 10] },
-  "2026_ENG_FRA": { cards: [["🟨"], ["🟨", "🟨"]], subs: [[], []], pens: [[], []], possession: ["52%", "48%"], totalShots: [21, 17], fouls: [10, 12] },
+  "2026_FRA_ENG": { cards: [[], []], subs: [[], []], pens: [[], []], possession: ["46%", "54%"], totalShots: [19, 19], fouls: [14, 8] },
+  "2026_ENG_FRA": { cards: [[], []], subs: [[], []], pens: [[], []], possession: ["54%", "46%"], totalShots: [19, 19], fouls: [8, 14] },
 };
 
 export function getStats2026(year: number, teamA: string, teamB: string): MatchStats | null {
