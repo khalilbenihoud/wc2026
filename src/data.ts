@@ -1000,10 +1000,10 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
       // England 1–2 Argentina (SF, Jul 15) — Argentina rally late (Messi 2 assists) to reach the final
       M(1, 2, 1, null, null, [["Anthony Gordon 55'"], ["Enzo Fernández 85'", "Lautaro Martínez 90+2'"]]),
     ],
-    // Third-place play-off: France 4–6 England (SF losers) — England take the bronze in a ten-goal thriller
+    // Third-place play-off: France 4–6 England (SF losers) — Saka's hat-trick seals bronze in a ten-goal thriller
     tp: M(4, 6, 1, null, null, [
-      ["Kylian Mbappé 14'", "Ousmane Dembélé 33'", "Kylian Mbappé 58'", "Michael Olise 71'"],
-      ["Jude Bellingham 9'", "Harry Kane 27' (pen.)", "Bukayo Saka 45+2'", "Harry Kane 63'", "Phil Foden 79'", "Jude Bellingham 88'"],
+      ["Kylian Mbappé 48'", "Bradley Barcola 54'", "Kylian Mbappé 66'", "Ousmane Dembélé 90+6'"],
+      ["Declan Rice 3'", "Ezri Konsa 18'", "Bukayo Saka 37'", "Bukayo Saka 45+1'", "Bukayo Saka 87' (pen.)", "Jude Bellingham 90+8'"],
     ]),
     final: null,
   },
