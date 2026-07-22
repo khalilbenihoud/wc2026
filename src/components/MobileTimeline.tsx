@@ -48,7 +48,7 @@ export default function MobileTimeline({ activeYear, onSelectYear, analyses }: P
               }`}
             >
               <span className="text-lg leading-none">{champFlag(year, analyses)}</span>
-              <span className="font-unbounded font-semibold text-[14px] tracking-tight leading-none">{year}</span>
+              <span className="font-unbounded font-semibold text-[16px] tracking-tight leading-none">{year}</span>
             </button>
           );
         })}

@@ -164,7 +164,7 @@ export default function LinearBracket({ data, analysis, onSelectMatch }: Props) 
                   </div>
                 </div>
                 {card.notes.length > 0 && (
-                  <div className="mt-0.5 font-mono text-[7px] tracking-wider uppercase text-brand-muted text-center leading-none">
+                  <div className="mt-0.5 font-mono text-[9px] tracking-wider uppercase text-brand-muted text-center leading-none">
                     {card.notes.join(" · ")}
                   </div>
                 )}

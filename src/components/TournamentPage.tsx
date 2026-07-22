@@ -87,7 +87,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
     return (
       <div className="fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto">
         <div className="max-w-[880px] mx-auto px-5 md:px-8 pt-6 pb-20">
-          <button onClick={onBack} className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer mb-8">
+          <button onClick={onBack} className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer mb-8">
             ← The Road to Glory
           </button>
           <h1 className="font-unbounded text-2xl text-brand-gold">Tournament not found</h1>
@@ -132,16 +132,18 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
         isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
     >
-      <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
-        <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between gap-4 bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
+      <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
+        <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
           <Breadcrumb
-            items={[{ label: SITE_NAME, href: "/", home: true }, { label: `${year} FIFA World Cup` }]}
+            items={[{ label: SITE_NAME, href: "/" }, { label: `${year} FIFA World Cup` }]}
             onNavigate={(href) => (href === "/" ? handleClose() : onNavigate(href))}
           />
           <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden shrink-0">
             Archive · Tournament
           </div>
         </div>
+      </div>
+      <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
 
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-3">
@@ -374,7 +376,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                 const inner = (
                   <>
                     <span className="text-base">{getTeamFlag(code)}</span>
-                    <span className="text-sm font-semibold text-brand-text truncate">{getTeamName(code)}</span>
+                    <span className="text-base font-semibold text-brand-text truncate">{getTeamName(code)}</span>
                   </>
                 );
                 const base = "flex items-center gap-2 px-3 py-2 rounded-lg border border-brand-line text-left";
@@ -442,7 +444,7 @@ function KnockoutRound({
 }) {
   return (
     <div>
-      <h3 className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted mb-2">{label}</h3>
+      <h3 className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted mb-2">{label}</h3>
       <div className="space-y-2">
         {matches.map((m, i) => {
           const wA = m.winner === 0;
@@ -507,7 +509,7 @@ function TeamSide({
 }) {
   const flag = <span className="text-sm leading-none shrink-0">{getTeamFlag(code)}</span>;
   const name = (
-    <span className={`text-sm truncate ${winner ? "font-bold text-brand-gold" : "font-semibold"}`}>
+    <span className={`text-base truncate ${winner ? "font-bold text-brand-gold" : "font-semibold"}`}>
       {getTeamName(code)}
     </span>
   );

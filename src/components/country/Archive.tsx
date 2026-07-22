@@ -69,7 +69,7 @@ function ScorerRow({ name, span, goals, max }: { name: string; span: string; goa
   return (
     <div className="flex items-center gap-3 py-2.5">
       <PlayerAvatar photo={photo} name={name} className="w-7 h-7 text-xs" />
-      <span className="text-sm text-brand-text flex-none min-w-0 truncate">{name}</span>
+      <span className="text-sm font-semibold text-brand-text flex-none min-w-0 truncate">{name}</span>
       <span className="font-mono text-[10px] text-brand-muted tracking-wider flex-none shrink-0">{span}</span>
       <span className="flex-1 mx-1 self-center h-px bg-brand-line relative overflow-visible">
         <span className="absolute inset-y-0 left-0 -top-px h-[3px] rounded bg-brand-gold/60" style={{ width: `${(goals / max) * 100}%` }} />
@@ -198,7 +198,7 @@ function StatsRow({ p }: { p: CountryProfile }) {
   return (
     <section className="mb-10">
       <Rule />
-      <div className="py-4 flex flex-wrap justify-center gap-x-8 gap-y-1.5 font-mono text-[11px] md:text-xs tracking-[0.18em] uppercase">
+      <div className="py-4 flex flex-wrap justify-center gap-x-8 gap-y-1.5 font-mono text-[11px] md:text-xs tracking-[0.22em] uppercase">
         <span className="text-brand-muted">Record <span className="text-brand-text tabular-nums normal-case">{rec.w}W {rec.d}D {rec.l}L</span></span>
         <span className="text-brand-muted">Goals <span className="text-brand-text tabular-nums normal-case">{rec.gf}–{rec.ga}</span></span>
         <span className="text-brand-muted">Shootouts <span className="text-brand-text tabular-nums normal-case">{rec.pensWon}–{rec.pensLost}</span></span>
@@ -222,7 +222,7 @@ function DefiningMatches({ p }: { p: CountryProfile }) {
           <div key={`${m.year}-${i}`} className="break-inside-avoid">
             {i > 0 && <Rule />}
             <div className="py-4">
-              <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted mb-1.5">
+              <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted mb-1.5">
                 <span className="text-brand-gold">{m.year}</span> · {m.round}
               </div>
               <div className="text-brand-text text-[15px] font-medium">{m.fixture}</div>
@@ -298,7 +298,7 @@ function VideosSection({ videos }: { videos: VideoHighlight[] }) {
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-xl border border-brand-line/40 bg-brand-panel/20 p-4 text-center">
-      <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-brand-muted mb-1">{label}</div>
+      <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted mb-1">{label}</div>
       <div className="font-unbounded font-bold text-sm md:text-base text-brand-text tracking-tight">{value}</div>
       {sub && <div className="font-mono text-[10px] text-brand-muted/60 mt-0.5">{sub}</div>}
     </div>

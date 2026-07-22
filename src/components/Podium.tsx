@@ -63,7 +63,7 @@ export default function Podium({ champion, runnerUp, third, fourth, onNavigate }
             </span>
             <div className="min-w-0 flex-1">
               <span
-                className={`block truncate text-sm ${
+                className={`block truncate text-[16px] ${
                   pos.code
                     ? isChampion
                       ? "font-bold text-brand-gold"

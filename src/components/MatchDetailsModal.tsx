@@ -32,7 +32,7 @@ function StatBar({ label, a, b }: { label: string; a: number; b: number }) {
     <div className="space-y-1.5">
       <div className="flex justify-between items-center text-[11px] font-mono">
         <span className="text-brand-text tabular-nums w-6">{a}</span>
-        <span className="text-brand-muted uppercase tracking-[0.18em] font-semibold text-[10px]">
+        <span className="text-brand-muted uppercase tracking-[0.22em] font-semibold text-[10px]">
           {label}
         </span>
         <span className="text-brand-text tabular-nums w-6 text-right">{b}</span>
@@ -366,7 +366,7 @@ export default function MatchDetailsModal({
             {played && motm && (
               <div className="mt-4 pt-4 border-t border-brand-line">
                 <div className="flex items-center justify-center gap-3">
-                  <span className="font-mono text-[9px] font-semibold tracking-[0.15em] uppercase text-brand-muted">
+                  <span className="font-mono text-[9px] font-semibold tracking-[0.22em] uppercase text-brand-muted">
                     Superior Player
                   </span>
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-gold/30 bg-brand-gold/5">
@@ -379,7 +379,7 @@ export default function MatchDetailsModal({
 
             {hasGoals && (
               <div className="mt-4 pt-4 border-t border-brand-line">
-                <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-3">
+                <div className="font-mono text-[10px] font-semibold tracking-[0.22em] uppercase text-brand-muted mb-3">
                   Goals
                 </div>
                 <MatchGoals ta={ta} tb={tb} goalsA={goalsA} goalsB={goalsB} />
@@ -400,7 +400,7 @@ export default function MatchDetailsModal({
           {played && highlight && (
             <div className="relative overflow-hidden rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6">
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
-              <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
+              <div className="font-mono text-[10px] font-semibold tracking-[0.22em] uppercase text-brand-muted mb-4">
                 Highlights
               </div>
               <a
@@ -447,7 +447,7 @@ export default function MatchDetailsModal({
           {showStatsCard && (
             <div className="relative overflow-hidden rounded-2xl border border-brand-line bg-[rgba(var(--overlay-rgb),0.02)] p-6">
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
-              <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-muted mb-4">
+              <div className="font-mono text-[10px] font-semibold tracking-[0.22em] uppercase text-brand-muted mb-4">
                 Match Statistics
               </div>
 
