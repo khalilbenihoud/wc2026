@@ -131,6 +131,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
       className={`fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar ${
         isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
+      style={{ overscrollBehavior: "contain" }}
     >
       <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
         <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
