@@ -80,16 +80,18 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
           />
         ))}
       </div>
-      <div className="relative z-10 max-w-[880px] mx-auto px-5 md:px-8 pb-20">
-        <div className="sticky top-0 z-20 -mx-5 md:-mx-8 px-5 md:px-8 py-5 mb-8 flex items-center justify-between gap-4 bg-brand-bg/80 backdrop-blur-md border-b border-brand-line/40">
+      <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
+        <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
           <Breadcrumb
-            items={[{ label: SITE_NAME, href: "/", home: true }, { label: profile.name }]}
+            items={[{ label: SITE_NAME, href: "/" }, { label: profile.name }]}
             onNavigate={handleClose}
           />
           <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden shrink-0">
             Archive · Nation
           </div>
         </div>
+      </div>
+      <div className="relative z-10 max-w-[880px] mx-auto px-5 md:px-8 pb-20">
 
         <Archive profile={profile} onNavigate={onNavigate} />
 
@@ -131,7 +133,7 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
                 <button
                   key={year}
                   onClick={() => onNavigate(tournamentPath(year))}
-                  className="px-3 py-1.5 rounded-full border border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer text-sm font-mono"
+                  className="px-3 py-1 rounded-full border border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer text-sm font-mono"
                 >
                   {year}
                 </button>

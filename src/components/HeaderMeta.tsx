@@ -18,8 +18,8 @@ export interface HeaderMetaProps {
   onNavigate?: (href: string) => void;
 }
 
-const EYEBROW = "font-mono text-[11px] uppercase tracking-[0.3em] text-brand-muted font-semibold";
-const LBL = "font-mono text-[10px] uppercase tracking-[0.3em] text-brand-muted font-semibold whitespace-nowrap";
+const EYEBROW = "font-mono text-[11px] uppercase tracking-[0.22em] text-brand-muted font-semibold";
+const LBL = "font-mono text-[10px] uppercase tracking-[0.22em] text-brand-muted font-semibold whitespace-nowrap";
 const QUOTE_FALLBACK = "The story is still being written.";
 
 // The Golden Glove (best goalkeeper) award only exists from 1994 onward, so the

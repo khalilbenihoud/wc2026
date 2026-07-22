@@ -6,16 +6,16 @@ import { TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
-import RadialBracket from "./components/RadialBracket";
+const RadialBracket = lazy(() => import("./components/RadialBracket"));
 import BracketList from "./components/BracketList";
 import Splash from "./components/Splash";
 import PlayerAvatar from "./components/PlayerAvatar";
 import { useWikiPhoto } from "./wikiPhoto";
 import HeaderMeta from "./components/HeaderMeta";
-import HeaderMetaMobile from "./components/HeaderMetaMobile";
-import MobileTimeline from "./components/MobileTimeline";
 import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
 import type { CountryProfile } from "./countries.mock";
+import HeroCard from "./components/HeroCard";
+import HomepageGrid from "./components/HomepageGrid";
 import { useRouter, countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
 
 // Heavy, interaction-/route-only surfaces are code-split so the initial home
@@ -62,8 +62,23 @@ export default function App() {
     }
   }, []);
 
+  // The radial bracket is desktop-only; phones always get the list view. Track
+  // the viewport reactively so resizing across the breakpoint stays correct.
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   const [splashDone, setSplashDone] = useState(
     () =>
+      isMobile ||
       sessionStorage.getItem("wc-splash-done") === "1" ||
       route.path !== "home"
   );
@@ -88,20 +103,6 @@ export default function App() {
 
   const [activeYear, setActiveYear] = useState<number>(2026);
   const [viewMode, setViewMode] = useState<"radial" | "list">("radial");
-
-  // The radial bracket is desktop-only; phones always get the list view. Track
-  // the viewport reactively so resizing across the breakpoint stays correct.
-  const [isMobile, setIsMobile] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 767px)").matches
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
 
   // On mobile we force the list view regardless of the stored preference.
   const effectiveViewMode = isMobile ? "list" : viewMode;
@@ -472,10 +473,7 @@ export default function App() {
         inert={selectedMatch !== null}
         className="relative z-[1] min-h-screen md:h-screen md:overflow-hidden text-brand-text flex flex-col"
       >
-        {/* Mobile notice */}
-      <div className="flex-none md:hidden text-center text-[11px] tracking-wide text-brand-gold/80 bg-brand-gold/[0.06] border-b border-brand-gold/15 py-2 px-4">
-        Best viewed on desktop
-      </div>
+  
       {/* Dynamic Background Layout Frame */}
       <div className="app relative grid grid-cols-1 md:grid-cols-[300px_1fr] md:min-h-0 md:flex-1 items-stretch">
         {/* Sidebar divider — pinned to the full height of the app frame, gradient effect */}
@@ -485,7 +483,7 @@ export default function App() {
         />
 
         {/* Left Rail: Brand + Timeline */}
-        <aside className="rail relative z-20 flex flex-col md:min-h-0 px-4 pt-4 pb-3 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both] max-md:border-b border-brand-line/40">
+        <aside className="rail relative z-20 flex flex-col md:min-h-0 px-5 pt-7 pb-6 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both] max-md:border-b border-brand-line/40">
           <div className="brand relative mb-4 md:mb-6 max-md:text-center">
             {/* Light/dark toggle — hidden via SHOW_THEME_TOGGLE, code kept intact */}
             {SHOW_THEME_TOGGLE && (
@@ -501,7 +499,7 @@ export default function App() {
             <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[11px] text-brand-gold md:mb-3.5 max-md:mb-2">
               FIFA World Cup Archive
             </div>
-            <h1 className="relative m-0 font-unbounded font-bold text-2xl md:text-3xl lg:text-4xl leading-none tracking-tight">
+            <h1 className="relative m-0 font-unbounded font-bold text-[2.5rem] leading-[1.08] md:text-3xl md:leading-none lg:text-4xl tracking-tight">
               <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-brand-gold-hi via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
                 The Road to Glory
               </span>
@@ -511,25 +509,7 @@ export default function App() {
             </p>
           </div>
 
-          {/* View toggle */}
-
-          {/* Mobile summary — the desktop header is hidden on phones, so surface
-              the same host / champion / awards here, in the chosen variant. */}
-          <HeaderMetaMobile
-            year={activeYear}
-            host={currentData.host}
-            hostFlag={currentData.hostFlag}
-            quote={currentData.quote ?? null}
-            champFlag={champCode ? getTeamFlag(champCode) : null}
-            champName={champCode ? getTeamName(champCode) : null}
-            gbName={gbName}
-            gbGoals={gbGoals}
-            gbPhoto={gbPhoto}
-            ggName={ggName}
-            ggPhoto={ggPhoto}
-          />
-
-          <div className="md:hidden flex justify-center mb-2">
+          <div className="md:hidden flex items-center justify-center gap-2 mt-4">
             <ChampionsTrigger onClick={openChampions} />
           </div>
 
@@ -547,7 +527,7 @@ export default function App() {
         </aside>
 
         {/* Right Main Panel: Interactive Bracket */}
-        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center md:pt-9 px-0 md:px-6 pb-28 md:pb-4">
+        <main className="main relative z-10 flex flex-col md:min-h-0 items-center max-md:justify-start md:justify-center md:pt-9 px-0 md:px-6 pb-4 md:pb-4">
           {/* Header Metadata */}
           <HeaderMeta
             year={activeYear}
@@ -566,8 +546,21 @@ export default function App() {
             onNavigate={navigate}
           />
 
-          {/* Bracket Stage */}
-          {effectiveViewMode === "radial" ? (
+          {/* Mobile homepage: Champions hero + grid / Desktop bracket stage */}
+          {isMobile ? (
+            <div className="w-full">
+              <div className="w-full max-w-[680px] px-5 mx-auto mb-5">
+                <HeroCard
+                  year={activeYear}
+                  champCode={champCode}
+                  champName={champCode ? getTeamName(champCode) : ""}
+                  onNavigate={() => navigate(`${tournamentPath(activeYear)}/`)}
+                />
+              </div>
+              <HomepageGrid embedded excludeYear={activeYear} onNavigate={navigate} analyses={analyses} />
+            </div>
+          ) : effectiveViewMode === "radial" ? (
+            <Suspense fallback={<div className="flex-1" />}>
             <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto max-md:overflow-hidden">
               <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
                 <RadialBracket
@@ -582,6 +575,7 @@ export default function App() {
                 />
               </div>
             </div>
+            </Suspense>
           ) : (
             <div className="flex-1 w-full min-h-0">
               <BracketList
@@ -626,13 +620,6 @@ export default function App() {
           </p>
         </main>
       </div>
-
-      {/* Mobile tournament picker — fixed to bottom on mobile */}
-      <MobileTimeline
-        activeYear={activeYear}
-        onSelectYear={handleSelectYear}
-        analyses={analyses}
-      />
 
       {/* Floating Tooltip */}
       {tooltip.visible && tooltipContent && (

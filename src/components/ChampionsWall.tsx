@@ -72,7 +72,7 @@ function Ledger({ list, onNavigateCountry }: { list: Champion[]; onNavigateCount
           />
           <div className="relative h-full flex items-end min-h-[320px] md:min-h-[400px] pt-12 pb-8 md:pb-10 pl-6 md:pl-10 pr-6">
             <div className="max-w-[58%] text-left">
-              <div className="font-mono text-[10px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">
+              <div className="font-mono text-[10px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] whitespace-nowrap">
                 Champion of Champions
               </div>
               <button
@@ -97,7 +97,7 @@ function Ledger({ list, onNavigateCountry }: { list: Champion[]; onNavigateCount
             href="https://unsplash.com/photos/man-wearing-cap-and-jersey-aANIrjIFRKE"
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute bottom-2 right-3 font-mono text-[9px] tracking-[0.2em] uppercase text-white/50 hover:text-white/90 transition-colors drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]"
+            className="absolute bottom-2 right-3 font-mono text-[9px] tracking-[0.22em] uppercase text-white/50 hover:text-white/90 transition-colors drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]"
           >
             Photo · Unsplash
           </a>
@@ -113,7 +113,7 @@ function Ledger({ list, onNavigateCountry }: { list: Champion[]; onNavigateCount
             aria-hidden
             className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/60 to-transparent"
           />
-          <div className="font-mono text-[9px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3">
+          <div className="font-mono text-[10px] tracking-[0.4em] uppercase text-brand-gold-hi mb-3 whitespace-nowrap">
             Champion of Champions
           </div>
           <button
@@ -156,7 +156,7 @@ function Ledger({ list, onNavigateCountry }: { list: Champion[]; onNavigateCount
             </span>
             <span className="flex items-center gap-2.5 min-w-0">
               <span className="text-base leading-none select-none">{c.flag}</span>
-              <span className="text-sm text-brand-text truncate">{c.name}</span>
+              <span className="text-sm text-brand-text truncate font-bold">{c.name}</span>
             </span>
             <StarRow n={c.stars} max={c.stars} />
             <span className="font-mono text-[10px] text-brand-muted tabular-nums w-12 text-right">
@@ -181,10 +181,10 @@ export function ChampionsTrigger({
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-full border border-brand-gold/40 bg-brand-gold/5 px-3 py-1.5 font-mono text-[10px] font-semibold tracking-[0.2em] uppercase text-brand-gold-hi hover:bg-brand-gold/15 hover:border-brand-gold/70 transition-colors cursor-pointer ${className}`}
+      className={`inline-flex items-center gap-2.5 md:gap-2 rounded-full border px-5 py-3 md:px-3 md:py-1.5 font-mono text-xs md:text-[10px] font-semibold tracking-[0.22em] uppercase text-brand-gold-hi border-brand-gold/50 md:border-brand-gold/40 bg-brand-gold/10 md:bg-brand-gold/5 shadow-[0_4px_18px_rgba(246,196,83,0.14)] md:shadow-none hover:bg-brand-gold/20 hover:border-brand-gold/70 transition-colors cursor-pointer ${className}`}
       aria-label="Open Hall of Champions"
     >
-      <span aria-hidden>🏆</span>
+      <span aria-hidden className="text-sm md:text-[10px] leading-none">🏆</span>
       <span>Hall of Champions</span>
     </button>
   );
