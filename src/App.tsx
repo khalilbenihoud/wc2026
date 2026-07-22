@@ -484,7 +484,7 @@ export default function App() {
 
         {/* Left Rail: Brand + Timeline */}
         <aside className="rail relative z-20 flex flex-col md:min-h-0 px-5 pt-7 pb-6 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
-          <div className="brand relative mb-4 md:mb-6 max-md:text-center">
+          <div className="brand relative mb-4 md:mb-6 max-md:text-left">
             {/* Light/dark toggle — hidden via SHOW_THEME_TOGGLE, code kept intact */}
             {SHOW_THEME_TOGGLE && (
               <button
@@ -499,7 +499,7 @@ export default function App() {
             <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[11px] text-brand-gold md:mb-3.5 max-md:mb-2">
               FIFA World Cup Archive
             </div>
-            <h1 className="relative m-0 font-unbounded font-bold text-[2.2rem] leading-[1.08] md:text-3xl md:leading-none lg:text-4xl tracking-tight">
+            <h1 className="relative m-0 font-unbounded font-bold text-[2.0rem] leading-[1.08] md:text-3xl md:leading-none lg:text-4xl tracking-tight">
               <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-brand-gold-hi via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
                 The Road to Glory
               </span>
