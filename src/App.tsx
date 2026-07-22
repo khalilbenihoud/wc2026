@@ -483,7 +483,7 @@ export default function App() {
         />
 
         {/* Left Rail: Brand + Timeline */}
-        <aside className="rail relative z-20 flex flex-col md:min-h-0 px-5 pt-7 pb-6 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both] max-md:border-b border-brand-line/40">
+        <aside className="rail relative z-20 flex flex-col md:min-h-0 px-5 pt-7 pb-6 md:p-6 md:py-9 md:pr-6 md:pl-9 bg-gradient-to-b from-[rgba(var(--overlay-rgb),0.016)] to-transparent max-md:animate-none md:animate-[riseIn_0.8s_cubic-bezier(0.2,0.7,0.2,1)_both]">
           <div className="brand relative mb-4 md:mb-6 max-md:text-center">
             {/* Light/dark toggle — hidden via SHOW_THEME_TOGGLE, code kept intact */}
             {SHOW_THEME_TOGGLE && (
@@ -499,18 +499,19 @@ export default function App() {
             <div className="kicker inline-flex items-center gap-2.5 font-mono font-semibold tracking-[0.3em] uppercase text-[11px] text-brand-gold md:mb-3.5 max-md:mb-2">
               FIFA World Cup Archive
             </div>
-            <h1 className="relative m-0 font-unbounded font-bold text-[2.5rem] leading-[1.08] md:text-3xl md:leading-none lg:text-4xl tracking-tight">
+            <h1 className="relative m-0 font-unbounded font-bold text-[2.2rem] leading-[1.08] md:text-3xl md:leading-none lg:text-4xl tracking-tight">
               <span className="tt bg-clip-text text-transparent bg-gradient-to-b from-brand-gold-hi via-brand-gold to-brand-gold-deep filter drop-shadow-[0_6px_22px_rgba(246,196,83,0.2)]">
                 The Road to Glory
               </span>
             </h1>
-            <p className="sub text-brand-muted text-sm mt-2 md:mt-3 leading-relaxed max-w-[280px] max-md:mx-auto">
+            {/* Mobile leads with the champion timeline (cards), so the copy
+                differs from the desktop radial-map line. */}
+            <p className="sub text-brand-muted text-sm mt-2 leading-relaxed md:hidden">
+              Every World Cup since 1930 — the champions, and the road each of them walked.
+            </p>
+            <p className="sub text-brand-muted text-sm md:mt-3 leading-relaxed max-w-[280px] max-md:hidden">
               Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
-          </div>
-
-          <div className="md:hidden flex items-center justify-center gap-2 mt-4">
-            <ChampionsTrigger onClick={openChampions} />
           </div>
 
           <Timeline
@@ -557,7 +558,14 @@ export default function App() {
                   onNavigate={() => navigate(`${tournamentPath(activeYear)}/`)}
                 />
               </div>
-              <HomepageGrid embedded excludeYear={activeYear} onNavigate={navigate} analyses={analyses} />
+              <HomepageGrid
+                embedded
+                excludeYear={activeYear}
+                onNavigate={navigate}
+                analyses={analyses}
+              />
+              {/* Clearance so the last cards aren't hidden behind the sticky pill. */}
+              <div aria-hidden className="h-24" />
             </div>
           ) : effectiveViewMode === "radial" ? (
             <Suspense fallback={<div className="flex-1" />}>
@@ -620,6 +628,18 @@ export default function App() {
           </p>
         </main>
       </div>
+
+      {/* Hall of Champions — floating sticky variant (mobile homepage only).
+          z-30 sits below the full-screen overlays (z-40), so opening a
+          tournament/match hides it. */}
+      {isMobile && route.path === "home" && (
+        <div
+          className="md:hidden fixed bottom-0 inset-x-0 z-30 flex justify-center px-5 pt-10 bg-gradient-to-t from-brand-bg via-brand-bg/90 to-transparent backdrop-blur-xl pointer-events-none"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
+        >
+          <ChampionsTrigger onClick={openChampions} className="pointer-events-auto shadow-[0_8px_30px_rgba(0,0,0,0.5)]" />
+        </div>
+      )}
 
       {/* Floating Tooltip */}
       {tooltip.visible && tooltipContent && (
