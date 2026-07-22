@@ -1,0 +1,42 @@
+schema: spec-driven
+
+context: |
+  Project: "The Road to Glory" (worldcuparchive.net) — an interactive archive of
+  every FIFA World Cup knockout stage since 1930, visualized as a radial bracket.
+  An independent, non-commercial fan project (not affiliated with FIFA).
+
+  Tech stack: React 19 · TypeScript · Vite 6 · Tailwind CSS 4 · SVG. No backend —
+  a client-rendered SPA deployed as static assets on Netlify, with a Cloudflare
+  Pages Function (functions/index.ts) for agent content negotiation.
+
+  Data: tournament results live in src/data.ts. Goal scorers, match stats, MOTM,
+  and country stats are generated from the jfjelstul/worldcup + ESPN/openfootball
+  datasets by scripts in scripts/ (see npm run gen:*). 2026 is the live edition.
+
+  SEO is load-bearing: routes are prerendered to static HTML at build time
+  (scripts/prerender.ts) with per-page title/meta/canonical/OG/JSON-LD, plus a
+  generated sitemap. Fonts are self-hosted (do not re-add Google Fonts links).
+
+  Conventions: functional React components with hooks; heavy/route-only surfaces
+  are code-split via React.lazy; data files use terse single-letter keys
+  (see src/types.ts). Team codes are 3-letter (e.g. BRA, ARG).
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

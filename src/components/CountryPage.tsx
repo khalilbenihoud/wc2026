@@ -63,6 +63,7 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
       className={`fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto custom-scrollbar ${
         isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
+      style={{ overscrollBehavior: "contain" }}
     >
       {/* Ambient aurora — one drifting gradient per dominant flag colour */}
       <div
