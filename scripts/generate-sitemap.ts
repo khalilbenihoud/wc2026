@@ -11,6 +11,8 @@ const today = new Date().toISOString().slice(0, 10);
 
 const urls: { loc: string; priority: number; changefreq: string }[] = [
   { loc: "/", priority: 1.0, changefreq: "weekly" },
+  // Countries hub — high-priority index linking every nation.
+  { loc: "/countries/", priority: 0.9, changefreq: "monthly" },
 ];
 
 for (const year of Object.keys(TOURNAMENTS).map(Number)) {
