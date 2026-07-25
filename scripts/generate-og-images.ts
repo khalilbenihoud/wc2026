@@ -69,7 +69,8 @@ function mapUri(code: string): string | null {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">` +
     `<g transform="${map.transform}">` +
-    map.paths.map((d) => `<path d="${d}" fill="none" stroke="${GOLD}" stroke-width="34" stroke-linejoin="round"/>`).join("") +
+    // stroke-width matches the canonical 1:1 map transform (was 34 for scale 0.1).
+    map.paths.map((d) => `<path d="${d}" fill="none" stroke="${GOLD}" stroke-width="3.4" stroke-linejoin="round"/>`).join("") +
     `</g></svg>`;
   return dataUri(Buffer.from(svg), "image/svg+xml");
 }

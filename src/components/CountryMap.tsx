@@ -37,12 +37,14 @@ export default function CountryMap({ code, className }: { code: string; classNam
       <defs>
         <pattern
           id={`map-hatch-${code}`}
-          width="8"
-          height="8"
+          // Sized against the canonical 1:1 map transform (was 8 / 1.1 for the
+          // old scale-0.1 space); keeps the engraved hatch at its prior density.
+          width="0.8"
+          height="0.8"
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(45)"
         >
-          <line x1="0" y1="0" x2="0" y2="8" stroke="var(--color-brand-gold)" strokeWidth="1.1" strokeOpacity="0.5" />
+          <line x1="0" y1="0" x2="0" y2="0.8" stroke="var(--color-brand-gold)" strokeWidth="0.11" strokeOpacity="0.5" />
         </pattern>
       </defs>
       <g transform={map.transform}>
