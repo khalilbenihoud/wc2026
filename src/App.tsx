@@ -16,7 +16,7 @@ import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
 import type { CountryProfile } from "./countries.mock";
 import HeroCard from "./components/HeroCard";
 import HomepageGrid from "./components/HomepageGrid";
-import { useRouter, countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
+import { useRouter, countryPath, countriesPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
 
 // Heavy, interaction-/route-only surfaces are code-split so the initial home
 // bracket doesn't ship their JS + data. MatchDetailsModal pulls in the big
@@ -25,6 +25,7 @@ import { useRouter, countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED
 const MatchDetailsModal = lazy(() => import("./components/MatchDetailsModal"));
 const TournamentPage = lazy(() => import("./components/TournamentPage"));
 const CountryRoute = lazy(() => import("./components/CountryRoute"));
+const CountriesHub = lazy(() => import("./components/CountriesHub"));
 import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
@@ -125,7 +126,7 @@ export default function App() {
   // nation on the tournament page), that fade would briefly reveal the home
   // bracket underneath. Track the route we came from so the incoming overlay can
   // skip the intro and appear opaque instead, swapping seamlessly.
-  const OVERLAY_ROUTES = ["tournament", "match", "country"];
+  const OVERLAY_ROUTES = ["tournament", "match", "country", "countries"];
   const prevPathRef = useRef(route.path);
   const fromOverlay =
     prevPathRef.current !== route.path && OVERLAY_ROUTES.includes(prevPathRef.current);
@@ -406,7 +407,25 @@ export default function App() {
         jsonLdNodes: videoNodes,
         breadcrumb: breadcrumbList([
           { name: SITE_NAME, url: `${BASE_URL}/` },
+          { name: "Countries", url: `${BASE_URL}${countriesPath}/` },
           { name: p.name, url: `${BASE_URL}${countryPath(p.code)}/` },
+        ]),
+      };
+    }
+    if (route.path === "countries") {
+      return {
+        title: "World Cup Nations — All 71 Teams, Titles & Records · The Road to Glory",
+        description:
+          "Every nation to play a FIFA World Cup, 1930–2026 — champions ranked by titles and all teams by confederation, each linking to its full record, results and top scorers.",
+        canonical: `${countriesPath}/`,
+        jsonLd: {
+          "@type": "CollectionPage",
+          name: "World Cup Nations",
+          url: `${BASE_URL}${countriesPath}/`,
+        },
+        breadcrumb: breadcrumbList([
+          { name: SITE_NAME, url: `${BASE_URL}/` },
+          { name: "Countries", url: `${BASE_URL}${countriesPath}/` },
         ]),
       };
     }
@@ -512,6 +531,17 @@ export default function App() {
             <p className="sub text-brand-muted text-sm md:mt-3 leading-relaxed max-w-[280px] max-md:hidden">
               Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
+            <a
+              href={`${countriesPath}/`}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(`${countriesPath}/`);
+              }}
+              className="inline-flex items-center gap-1.5 mt-3 font-mono text-[11px] font-medium tracking-[0.18em] uppercase text-brand-gold hover:text-brand-gold-hi transition-colors cursor-pointer max-md:justify-center"
+            >
+              Browse all nations
+              <span aria-hidden>→</span>
+            </a>
           </div>
 
           <Timeline
@@ -681,6 +711,12 @@ export default function App() {
             onNavigate={navigate}
             instant={fromOverlay}
           />
+        </Suspense>
+      )}
+
+      {route.path === "countries" && (
+        <Suspense fallback={null}>
+          <CountriesHub onNavigate={navigate} instant={fromOverlay} />
         </Suspense>
       )}
 

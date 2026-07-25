@@ -9,6 +9,8 @@ export interface Route {
 const matchRoute = (pathname: string): Route => {
   const p = pathname.replace(/\/+$/, "") || "/";
 
+  if (p === "/countries") return { path: "countries", params: {} };
+
   let m = p.match(/^\/countries\/([a-z0-9-]+)$/i);
   if (m) {
     const code = codeForSlug(m[1]);
@@ -56,6 +58,7 @@ export const COUNTRY_PAGE_ENABLED = true;
 
 // Full-name slug (/countries/brazil), falling back to the lowercased code only
 // if a slug is somehow unavailable so we never emit a broken href.
+export const countriesPath = "/countries";
 export const countryPath = (code: string) =>
   `/countries/${slugForCode(code) ?? code.toLowerCase()}`;
 export const tournamentPath = (year: number) => `/tournaments/${year}`;

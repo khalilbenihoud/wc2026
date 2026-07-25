@@ -11,6 +11,7 @@ import AppLink from "./AppLink";
 import CountryMap from "./CountryMap";
 import Breadcrumb from "./Breadcrumb";
 import Podium from "./Podium";
+import ShareButton from "./ShareButton";
 import { SITE_NAME } from "../schema";
 
 interface TournamentPageProps {
@@ -138,8 +139,11 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
             items={[{ label: SITE_NAME, href: "/" }, { label: `${year} FIFA World Cup` }]}
             onNavigate={(href) => (href === "/" ? handleClose() : onNavigate(href))}
           />
-          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden shrink-0">
-            Archive · Tournament
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden">
+              Archive · Tournament
+            </div>
+            <ShareButton path={tournamentPath(year)} />
           </div>
         </div>
       </div>
@@ -409,7 +413,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                   key={y}
                   href={`${tournamentPath(y)}/`}
                   onNavigate={onNavigate}
-                  className="px-3 py-1.5 rounded-full border text-sm transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
+                  className="px-3 py-1 rounded-full border text-sm font-mono transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
                 >
                   {y}
                 </AppLink>

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { CountryProfile, RESULT_LABEL, ResultLevel } from "../countries.mock";
 import { TOURNAMENTS, getTeamPalette } from "../data";
-import { tournamentPath } from "../router";
+import { countryPath, countriesPath, tournamentPath } from "../router";
 import { fireConfetti } from "../confetti";
 import Archive from "./country/Archive";
 import Breadcrumb from "./Breadcrumb";
+import ShareButton from "./ShareButton";
 import { SITE_NAME } from "../schema";
 
 const RESULT_BADGE_CLASS: Record<ResultLevel, string> = {
@@ -83,11 +84,18 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
       <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
         <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
           <Breadcrumb
-            items={[{ label: SITE_NAME, href: "/" }, { label: profile.name }]}
-            onNavigate={handleClose}
+            items={[
+              { label: SITE_NAME, href: "/" },
+              { label: "Countries", href: countriesPath },
+              { label: profile.name },
+            ]}
+            onNavigate={(href) => (href === "/" ? handleClose() : onNavigate(href))}
           />
-          <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden shrink-0">
-            Archive · Nation
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted select-none max-md:hidden">
+              Archive · Nation
+            </div>
+            <ShareButton path={countryPath(profile.code)} />
           </div>
         </div>
       </div>

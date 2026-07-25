@@ -11,6 +11,23 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve } from "path";
+import SvgPath from "svgpath";
+
+// Canonical transform for every committed map. We bake each source outline's own
+// transform into its coordinates and re-express them against this one 1:1 space,
+// so coords carry ~1px (not 0.1px) precision — invisible at the render size, but
+// ~40% smaller. The outline stroke is vector-effect:non-scaling-stroke, so the
+// scale change doesn't affect it (see .country-map-path); the hatch pattern in
+// CountryMap.tsx is sized to match this scale.
+const CANONICAL_TRANSFORM = "translate(0,1024) scale(1,-1)";
+function toCanonical(map: CountryMap): CountryMap {
+  const paths = map.paths.map((d) => {
+    let s = SvgPath(d);
+    if (map.transform && map.transform.trim()) s = s.transform(map.transform);
+    return s.scale(1, -1).translate(0, 1024).round(0).toString();
+  });
+  return { transform: CANONICAL_TRANSFORM, paths };
+}
 
 // App team code → ISO 3166-1 alpha-2 (mapsicon folder). England has no separate
 // outline in the set, so it borrows the UK ("gb"). Historical nations map to
@@ -104,7 +121,7 @@ async function main() {
   const outDir = resolve(process.cwd(), "src", "countryMaps");
   mkdirSync(outDir, { recursive: true });
   for (const [code, map] of Object.entries(out)) {
-    writeFileSync(resolve(outDir, `${code}.json`), JSON.stringify(map));
+    writeFileSync(resolve(outDir, `${code}.json`), JSON.stringify(toCanonical(map)));
   }
   console.log(`\nWrote ${Object.keys(out).length} map files to ${outDir}`);
 }

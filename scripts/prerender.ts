@@ -23,6 +23,8 @@ import { tournamentEvent, matchEvent, breadcrumbList, videoObject, SITE_NAME } f
 import { generateCountryProfiles } from "../src/countries.generated";
 import { applyMockOverrides, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
+import { champion, runnerUp, thirdFourth } from "./tournament-result";
+import { getHubData } from "../src/countriesHub";
 
 const BASE = "https://worldcuparchive.net";
 const DIST = resolve(process.cwd(), "dist");
@@ -37,69 +39,6 @@ const esc = (s: string) =>
 // ── Bracket resolution (mirrors TournamentPage helpers) ──────────────────────
 type T = (typeof TOURNAMENTS)[number];
 
-function r16Winners(t: T): string[] {
-  if (!t.r16) return [];
-  const out: string[] = [];
-  for (let i = 0; i < 8; i++) {
-    const m = t.r16[i];
-    if (!m || m.w === null) continue;
-    out.push(m.w === 0 ? t.teams[2 * i] : t.teams[2 * i + 1]);
-  }
-  return out;
-}
-function qfWinners(t: T): string[] {
-  if (!t.qf) return [];
-  const r16w = r16Winners(t);
-  const out: string[] = [];
-  for (let i = 0; i < 4; i++) {
-    const m = t.qf[i];
-    if (!m || m.w === null) continue;
-    const a = r16w.length >= 8 ? r16w[2 * i] : t.teams[2 * i];
-    const b = r16w.length >= 8 ? r16w[2 * i + 1] : t.teams[2 * i + 1];
-    out.push(m.w === 0 ? a : b);
-  }
-  return out;
-}
-function sfTeams(t: T): string[] {
-  if (!t.sf) return [];
-  const qfw = qfWinners(t);
-  if (qfw.length < 4) return [];
-  const out: string[] = [];
-  for (let i = 0; i < 2; i++) {
-    const m = t.sf[i];
-    if (!m || m.w === null) continue;
-    out.push(m.w === 0 ? qfw[2 * i] : qfw[2 * i + 1]);
-  }
-  return out;
-}
-function champion(t: T): string | null {
-  if (!t.final?.[0] || t.final[0].w === null) return null;
-  const sf = sfTeams(t);
-  if (sf.length < 2) return null;
-  return t.final[0].w === 0 ? sf[0] : sf[1];
-}
-function runnerUp(t: T): string | null {
-  if (!t.final?.[0] || t.final[0].w === null) return null;
-  const sf = sfTeams(t);
-  if (sf.length < 2) return null;
-  return t.final[0].w === 0 ? sf[1] : sf[0];
-}
-// Bronze/fourth from the third-place play-off — mirrors getThirdFourthCodes in
-// TournamentPage so the prerendered standings match the app.
-function thirdFourth(t: T): [string | null, string | null] {
-  if (!t.tp || t.tp.w === null || !t.sf) return [null, null];
-  const qfw = qfWinners(t);
-  if (qfw.length < 4) return [null, null];
-  const s1 = t.sf[0];
-  const s2 = t.sf[1];
-  if (!s1 || s1.w === null || !s2 || s2.w === null) return [null, null];
-  const tpA = s1.w === 0 ? qfw[1] : qfw[0]; // SF1 loser
-  const tpB = s2.w === 0 ? qfw[3] : qfw[2]; // SF2 loser
-  const third = t.tp.w === 0 ? tpA : tpB;
-  const fourth = t.tp.w === 0 ? tpB : tpA;
-  return [third, fourth];
-}
-
 // Penalty / extra-time suffix for a match, from the given team's perspective.
 function matchNote(m: EnumeratedMatch): string {
   if (m.pens) return ` (${m.pens} pens)`;
@@ -113,7 +52,11 @@ function render(
   description: string,
   canonical: string,
   jsonLd: string,
-  content: string
+  content: string,
+  // Absolute URL of this page's generated OG card + its alt text. When omitted,
+  // the page keeps the generic og-image.webp baked into the template.
+  ogImage?: string,
+  ogImageAlt?: string
 ): string {
   let html = template;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
@@ -124,6 +67,14 @@ function render(
   html = html.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${canonical}$2`);
   html = html.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${esc(title)}$2`);
   html = html.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
+  if (ogImage) {
+    html = html.replace(/(<meta property="og:image" content=")[^"]*(")/, `$1${esc(ogImage)}$2`);
+    html = html.replace(/(<meta name="twitter:image" content=")[^"]*(")/, `$1${esc(ogImage)}$2`);
+    if (ogImageAlt) {
+      html = html.replace(/(<meta property="og:image:alt" content=")[^"]*(")/, `$1${esc(ogImageAlt)}$2`);
+      html = html.replace(/(<meta name="twitter:image:alt" content=")[^"]*(")/, `$1${esc(ogImageAlt)}$2`);
+    }
+  }
   if (jsonLd) {
     html = html.replace(
       "</head>",
@@ -141,10 +92,16 @@ function render(
     `<div class="loading" style="position:fixed;inset:0;z-index:50">` +
     `<div class="kicker">FIFA World Cup Archive</div>` +
     `<h1>The Road to Glory</h1></div>`;
-  html = html.replace(
-    /<div id="root">[\s\S]*?<\/div>\s*<\/body>/,
-    `<div id="root">${content}${overlay}</div>\n</body>`
-  );
+  // Replace the whole #root placeholder. Anchor on the closing </div> that
+  // precedes the first trailing <script>/<\/body> (rather than requiring </div>
+  // to sit directly before </body>) — the built index.html has inline scripts
+  // (e.g. PostHog) between #root and </body>, so the old </body>-adjacent match
+  // silently failed and shipped every page with no prerendered content.
+  const rootBlock = /<div id="root">[\s\S]*?<\/div>\s*(?=<script|<\/body>)/;
+  if (!rootBlock.test(html)) {
+    throw new Error("prerender: could not locate #root block to inject content — check index.html structure");
+  }
+  html = html.replace(rootBlock, `<div id="root">${content}${overlay}</div>\n`);
   return html;
 }
 
@@ -281,7 +238,11 @@ function buildTournament(year: number): string {
     nationsHtml + otherHtml +
     `</main>`;
 
-  return render(title, description, canonical, jsonLd, content);
+  const ogImage = `${BASE}/og/tournaments/${year}.png`;
+  const ogAlt = champName
+    ? `${year} FIFA World Cup — ${champName} champions`
+    : `${year} FIFA World Cup`;
+  return render(title, description, canonical, jsonLd, content, ogImage, ogAlt);
 }
 
 // ── Per-match SEO + content ──────────────────────────────────────────────────
@@ -376,6 +337,7 @@ function buildCountry(code: string, p: CountryProfile): string {
       ...videoNodes,
       breadcrumbList([
         { name: SITE_NAME, url: `${BASE}/` },
+        { name: "Countries", url: `${BASE}/countries/` },
         { name: p.name, url: canonical },
       ]),
     ],
@@ -464,7 +426,9 @@ function buildCountry(code: string, p: CountryProfile): string {
     `<p><a href="/">Explore every World Cup bracket, 1930–2026</a></p>` +
     `</main>`;
 
-  return render(title, description, canonical, jsonLd, content);
+  const ogImage = `${BASE}/og/countries/${slug}.png`;
+  const ogAlt = `${p.name} at the FIFA World Cup — record and honours`;
+  return render(title, description, canonical, jsonLd, content, ogImage, ogAlt);
 }
 
 // ── Homepage ─────────────────────────────────────────────────────────────────
@@ -491,11 +455,57 @@ function buildHome(): string {
     `radial bracket. Browse all ${years.length} tournaments — hosts, champions, golden boots, ` +
     `and full knockout results from the Round of 16 to the Final.</p>` +
     `<h2>All World Cups</h2><ul>${list}</ul>` +
+    `<p><a href="/countries/">Browse all World Cup nations</a> — every team by confederation, with titles and records.</p>` +
     `</main>`;
 
   // The homepage keeps its own canonical/OG (already correct in the template);
   // no page-specific JSON-LD (the WebSite schema in the template head stands).
   return render(title, description, canonical, "", content);
+}
+
+// ── /countries hub — links every nation, grouped like the client component ───
+function buildCountriesHub(): string {
+  const { total, champions, groups } = getHubData();
+  const canonical = `${BASE}/countries/`;
+  const title = `World Cup Nations — All ${total} Teams, Titles & Records · ${SITE_NAME}`;
+  const description =
+    `Every nation to play a FIFA World Cup, 1930–2026 — champions ranked by titles and all ` +
+    `teams by confederation, each linking to its full record, results and top scorers.`;
+
+  const stat = (n: (typeof champions)[number]) =>
+    n.titles > 0
+      ? `${n.titles}× champion${n.titles > 1 ? "s" : ""}`
+      : `${n.appearances} appearance${n.appearances === 1 ? "" : "s"}`;
+  const li = (n: (typeof champions)[number]) =>
+    `<li><a href="/countries/${n.slug}/">${esc(n.name)}</a> — ${esc(stat(n))}</li>`;
+
+  const honour = `<h2>Roll of honour</h2><ul>${champions.map(li).join("")}</ul>`;
+  const grouped = groups
+    .map((g) => `<h2>${esc(g.label)} (${g.nations.length})</h2><ul>${g.nations.map(li).join("")}</ul>`)
+    .join("");
+
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "CollectionPage", name: "World Cup Nations", url: canonical },
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: "Countries", url: canonical },
+      ]),
+    ],
+  });
+
+  const content =
+    `<main class="prerender">` +
+    `<p><a href="/">← The Road to Glory — World Cup Archive</a></p>` +
+    `<h1>World Cup Nations</h1>` +
+    `<p>Every one of the ${total} nations to grace a FIFA World Cup, 1930–2026 — the champions ` +
+    `ranked by titles, and all teams grouped by confederation.</p>` +
+    honour + grouped +
+    `</main>`;
+
+  const ogImage = `${BASE}/og/countries.png`;
+  return render(title, description, canonical, jsonLd, content, ogImage, "World Cup Nations — every team, 1930–2026");
 }
 
 // ── Emit ─────────────────────────────────────────────────────────────────────
@@ -534,6 +544,11 @@ for (const code of COUNTRY_CODES) {
 
 writeFileSync(resolve(DIST, "index.html"), buildHome());
 
+// Countries hub at dist/countries/index.html — must run after the per-country
+// loop above so it never clobbers a dist/countries/<slug>/index.html.
+mkdirSync(resolve(DIST, "countries"), { recursive: true });
+writeFileSync(resolve(DIST, "countries", "index.html"), buildCountriesHub());
+
 console.log(
-  `Prerendered homepage + ${nTournaments} tournament pages + ${nMatches} match pages + ${nCountries} country pages → dist/`
+  `Prerendered homepage + countries hub + ${nTournaments} tournament pages + ${nMatches} match pages + ${nCountries} country pages → dist/`
 );
