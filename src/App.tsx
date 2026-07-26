@@ -134,6 +134,15 @@ export default function App() {
     prevPathRef.current = route.path;
   });
 
+  // While an incoming overlay's lazy chunk is still loading, cover the homepage
+  // base layer so an overlay→overlay swap (e.g. tapping a nation on the
+  // tournament page) doesn't flash the radial bracket underneath. Only when we
+  // came from another overlay — arriving from home, seeing home during the load
+  // is fine. Matches the overlays' own `fixed inset-0 z-40 bg-brand-bg`.
+  const overlayFallback = fromOverlay ? (
+    <div className="fixed inset-0 z-40 bg-brand-bg" />
+  ) : null;
+
   // Preload the sibling overlay's code-split chunk so navigating between them is
   // instant — otherwise the Suspense fallback (null) flashes the home bracket
   // while the chunk downloads. From a tournament/match, the next tap is usually a
@@ -149,7 +158,9 @@ export default function App() {
     };
     const ric = window.requestIdleCallback;
     if (ric) {
-      const id = ric(preload);
+      // timeout so a busy main thread (e.g. the champion confetti) can't starve
+      // the preload — otherwise the chunk isn't ready when the user taps through.
+      const id = ric(preload, { timeout: 200 });
       return () => window.cancelIdleCallback?.(id);
     }
     const id = window.setTimeout(preload, 400);
@@ -704,7 +715,7 @@ export default function App() {
       <ChampionsWall isOpen={championsOpen} onClose={closeChampions} onNavigateCountry={handleNavigateCountry} />
 
       {COUNTRY_PAGE_ENABLED && countryCode && (
-        <Suspense fallback={null}>
+        <Suspense fallback={overlayFallback}>
           <CountryRoute
             code={countryCode}
             onBack={() => navigate("/")}
@@ -715,13 +726,13 @@ export default function App() {
       )}
 
       {route.path === "countries" && (
-        <Suspense fallback={null}>
+        <Suspense fallback={overlayFallback}>
           <CountriesHub onNavigate={navigate} instant={fromOverlay} />
         </Suspense>
       )}
 
       {pageYear !== null && TOURNAMENTS[pageYear] && (
-        <Suspense fallback={null}>
+        <Suspense fallback={overlayFallback}>
           <TournamentPage
             year={pageYear}
             onBack={() => navigate("/")}
