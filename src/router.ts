@@ -20,14 +20,8 @@ const matchRoute = (pathname: string): Route => {
   m = p.match(/^\/tournaments\/(\d{4})\/matches\/(.+)$/);
   if (m) return { path: "match", params: { year: m[1], slug: m[2] } };
 
-  m = p.match(/^\/tournaments\/(\d{4})\/group\/([a-zA-Z])$/);
-  if (m) return { path: "group", params: { year: m[1], group: m[2].toUpperCase() } };
-
   m = p.match(/^\/tournaments\/(\d{4})$/);
   if (m) return { path: "tournament", params: { year: m[1] } };
-
-  m = p.match(/^\/players\/(.+)$/);
-  if (m) return { path: "player", params: { slug: m[1] } };
 
   return { path: "home", params: {} };
 };
@@ -64,6 +58,3 @@ export const countryPath = (code: string) =>
 export const tournamentPath = (year: number) => `/tournaments/${year}`;
 export const matchPath = (year: number, slug: string) =>
   `/tournaments/${year}/matches/${slug}`;
-export const groupPath = (year: number, group: string) =>
-  `/tournaments/${year}/group/${group.toLowerCase()}`;
-export const playerPath = (slug: string) => `/players/${slug}`;
