@@ -127,12 +127,18 @@ export default function App() {
   // bracket underneath. Track the route we came from so the incoming overlay can
   // skip the intro and appear opaque instead, swapping seamlessly.
   const OVERLAY_ROUTES = ["tournament", "match", "country", "countries"];
+  // Track the route we navigated FROM, computed during render and updated only on
+  // an actual route change — so it stays stable across re-renders (chunk load,
+  // StrictMode double-render, etc.). An effect-based ref would flip this to false
+  // mid-Suspense and drop the cover, which flashed the home bracket.
   const prevPathRef = useRef(route.path);
-  const fromOverlay =
-    prevPathRef.current !== route.path && OVERLAY_ROUTES.includes(prevPathRef.current);
-  useEffect(() => {
+  const cameFromRef = useRef<string | null>(null);
+  if (prevPathRef.current !== route.path) {
+    cameFromRef.current = prevPathRef.current;
     prevPathRef.current = route.path;
-  });
+  }
+  const fromOverlay =
+    cameFromRef.current !== null && OVERLAY_ROUTES.includes(cameFromRef.current);
 
   // While an incoming overlay's lazy chunk is still loading, cover the homepage
   // base layer so an overlay→overlay swap (e.g. tapping a nation on the
@@ -152,8 +158,12 @@ export default function App() {
     const preload = () => {
       if (route.path === "tournament" || route.path === "match") {
         import("./components/CountryRoute");
+        import("./components/CountriesHub");
       } else if (route.path === "country") {
         import("./components/TournamentPage");
+        import("./components/CountriesHub"); // reachable via the "Countries" crumb
+      } else if (route.path === "countries") {
+        import("./components/CountryRoute");
       }
     };
     const ric = window.requestIdleCallback;
