@@ -16,6 +16,7 @@ import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
 import type { CountryProfile } from "./countries.mock";
 import HeroCard from "./components/HeroCard";
 import HomepageGrid from "./components/HomepageGrid";
+import ExploreCards from "./components/ExploreCards";
 import { useRouter, countryPath, countriesPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
 
 // Heavy, interaction-/route-only surfaces are code-split so the initial home
@@ -588,6 +589,7 @@ export default function App() {
             quote={currentData.quote ?? null}
             champFlag={champCode ? getTeamFlag(champCode) : null}
             champName={champCode ? getTeamName(champCode) : null}
+            champCode={champCode}
             gbName={gbName}
             gbGoals={gbGoals}
             gbPhoto={gbPhoto}
@@ -644,6 +646,15 @@ export default function App() {
                 onNavigateCountry={handleNavigateCountry}
               />
             </div>
+          )}
+
+          {/* Explore gateway cards — only on the homepage, desktop and mobile */}
+          {route.path === "home" && (
+            <ExploreCards
+              onNavigate={navigate}
+              onOpenChampions={openChampions}
+              activeYear={activeYear}
+            />
           )}
 
           {/* View toggle + legend — desktop only; phones are locked to list view */}

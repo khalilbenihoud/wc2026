@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
-import { getMatchNotes } from "../constants";
+import { getMatchNotes, TOURNAMENT_YEARS } from "../constants";
 import { countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "../router";
 import { matchSlug } from "../matches";
 import { CHAMPION_IMAGES } from "../championImages.generated";
@@ -133,7 +133,8 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
         isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
     >
-      <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
+      <div className={skipIntro ? "animate-[fadeIn_0.15s_ease]" : ""}>
+        <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
         <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
           <Breadcrumb
             items={[{ label: SITE_NAME, href: "/" }, { label: `${year} FIFA World Cup` }]}
@@ -403,6 +404,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Other Tournaments
           </div>
+          <TournamentNav year={year} onNavigate={onNavigate} />
           <div className="flex flex-wrap gap-2">
             {Object.keys(TOURNAMENTS)
               .map(Number)
@@ -420,6 +422,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
               ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -651,4 +654,31 @@ function getRoundMatches(t: typeof TOURNAMENTS[number], year: number, round: "qf
     }).filter(Boolean) as KnockoutMatch[];
   }
   return [];
+}
+
+function TournamentNav({ year, onNavigate }: { year: number; onNavigate: (path: string) => void }) {
+  const years = [...TOURNAMENT_YEARS].sort((a, b) => a - b); // ascending: 1930…2026
+  const idx = years.indexOf(year);
+  const prevYear = idx > 0 ? years[idx - 1] : null;
+  const nextYear = idx < years.length - 1 ? years[idx + 1] : null;
+
+  if (!prevYear && !nextYear) return null;
+
+  const btn =
+    "flex items-center gap-1 px-3 py-1.5 rounded-lg border border-brand-line bg-brand-panel/40 text-sm font-mono text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer";
+
+  return (
+    <div className="flex items-center justify-between gap-4 mb-4">
+      {prevYear ? (
+        <button onClick={() => onNavigate(`${tournamentPath(prevYear)}/`)} className={btn}>
+          ← {prevYear}
+        </button>
+      ) : <span />}
+      {nextYear ? (
+        <button onClick={() => onNavigate(`${tournamentPath(nextYear)}/`)} className={btn}>
+          {nextYear} →
+        </button>
+      ) : <span />}
+    </div>
+  );
 }

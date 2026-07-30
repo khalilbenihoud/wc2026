@@ -1,5 +1,6 @@
 import PlayerAvatar from "./PlayerAvatar";
 import AppLink from "./AppLink";
+import { countryPath, COUNTRY_PAGE_ENABLED } from "../router";
 
 export interface HeaderMetaProps {
   year: number;
@@ -8,6 +9,7 @@ export interface HeaderMetaProps {
   quote: string | null;
   champFlag: string | null;
   champName: string | null;
+  champCode: string | null;
   gbName?: string;
   gbGoals?: number;
   gbPhoto: string | null;
@@ -29,7 +31,7 @@ export const GLOVE_SINCE = 1994;
 // Desktop header: an inline ledger — edition + editorial quote on the left, the
 // tournament's facts as one quiet hairline-separated stat line on the right.
 export default function HeaderMeta({
-  year, host, hostFlag, quote, champFlag, champName,
+  year, host, hostFlag, quote, champFlag, champName, champCode,
   gbName, gbGoals, gbPhoto, ggName, ggPhoto, editionsCount, resultsHref, onNavigate,
 }: HeaderMetaProps) {
   const cell = "flex flex-col justify-center gap-2 px-6 [&:not(:first-child)]:border-l border-brand-line";
@@ -66,9 +68,18 @@ export default function HeaderMeta({
           </div>
           <div className={cell}>
             <span className={LBL}>Champion</span>
-            <span className="font-bold text-sm uppercase tracking-wide text-brand-gold whitespace-nowrap">
-              {champName ? `${champFlag} ${champName}` : "TBD"}
-            </span>
+            {champName && champCode && COUNTRY_PAGE_ENABLED && onNavigate ? (
+              <button
+                onClick={() => onNavigate(countryPath(champCode))}
+                className="font-bold text-sm uppercase tracking-wide text-brand-gold hover:text-brand-gold-hi transition-colors cursor-pointer whitespace-nowrap"
+              >
+                {champFlag} {champName}
+              </button>
+            ) : (
+              <span className="font-bold text-sm uppercase tracking-wide text-brand-gold whitespace-nowrap">
+                {champName ? `${champFlag} ${champName}` : "TBD"}
+              </span>
+            )}
           </div>
           <div className={cell}>
             <span className={LBL}>Golden Boot</span>
