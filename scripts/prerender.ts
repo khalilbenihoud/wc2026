@@ -19,7 +19,8 @@ import { enumerateMatches, EnumeratedMatch } from "../src/matches";
 import { ROUND_NAME } from "../src/constants";
 import { getScorers } from "../src/scorers";
 import { getPlayerOfMatch } from "../src/motm";
-import { tournamentEvent, matchEvent, breadcrumbList, videoObject, SITE_NAME } from "../src/schema";
+import { getHighlights } from "../src/highlights";
+import { tournamentEvent, matchEvent, breadcrumbList, videoObject, faqPage, profilePage, itemList, videoObjectForMatch, SITE_NAME } from "../src/schema";
 import { generateCountryProfiles } from "../src/countries.generated";
 import { applyMockOverrides, RESULT_LABEL, CountryProfile } from "../src/countries.mock";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
@@ -161,6 +162,12 @@ function buildTournament(year: number): string {
     "@context": "https://schema.org",
     "@graph": [
       tournamentEvent(year, t, champ),
+      faqPage([
+        { question: `Who won the ${year} FIFA World Cup?`, answer: champName ?? "Not yet decided" },
+        { question: `Where was the ${year} World Cup held?`, answer: t.host },
+        { question: `Who was the top scorer of the ${year} World Cup?`, answer: t.goldenBoot ? `${t.goldenBoot.name} with ${t.goldenBoot.goals} goals` : "Not yet decided" },
+        { question: `How many teams participated in the ${year} World Cup?`, answer: `${t.teams.length} teams` },
+      ]),
       breadcrumbList([
         { name: SITE_NAME, url: `${BASE}/` },
         { name: `${year} FIFA World Cup`, url: canonical },
@@ -280,6 +287,14 @@ function buildMatch(year: number, m: EnumeratedMatch): string {
     "@context": "https://schema.org",
     "@graph": [
       matchEvent(year, t.host, taName, tbName, roundName, m.slug),
+      ...(getHighlights(year, m.ta, m.tb)
+        ? [videoObjectForMatch({
+            videoId: getHighlights(year, m.ta, m.tb)!.videoId,
+            title: getHighlights(year, m.ta, m.tb)!.title,
+            thumbnail: getHighlights(year, m.ta, m.tb)!.thumbnail,
+            year,
+          })]
+        : []),
       breadcrumbList([
         { name: SITE_NAME, url: `${BASE}/` },
         { name: `${year} FIFA World Cup`, url: `${BASE}/tournaments/${year}/` },
@@ -324,16 +339,19 @@ function buildCountry(code: string, p: CountryProfile): string {
       : `${p.name} at the FIFA World Cup: ${p.bestResult.toLowerCase()}, ${p.appearances} appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. All-time record, results, top scorers, and biggest rivalries.`;
 
   const videoNodes = p.videos.map(videoObject);
+  const sportsTeam = {
+    "@type": "SportsTeam",
+    name: p.name,
+    sport: "Association football",
+    description: p.epithet,
+    url: canonical,
+  };
+  const buildDate = "2026-07-30";
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "SportsTeam",
-        name: p.name,
-        sport: "Association football",
-        description: p.epithet,
-        url: canonical,
-      },
+      sportsTeam,
+      profilePage(sportsTeam, buildDate, buildDate),
       ...videoNodes,
       breadcrumbList([
         { name: SITE_NAME, url: `${BASE}/` },
@@ -488,6 +506,14 @@ function buildCountriesHub(): string {
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "CollectionPage", name: "World Cup Nations", url: canonical },
+      itemList(
+        groups.flatMap((g) =>
+          g.nations.map((n) => ({
+            name: n.name,
+            url: `${BASE}/countries/${n.slug}/`,
+          }))
+        )
+      ),
       breadcrumbList([
         { name: SITE_NAME, url: `${BASE}/` },
         { name: "Countries", url: canonical },

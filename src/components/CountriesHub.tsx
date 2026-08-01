@@ -51,7 +51,8 @@ export default function CountriesHub({ onNavigate, instant }: Props) {
         skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
     >
-      <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
+      <div className={skipIntro ? "animate-[fadeIn_0.15s_ease]" : ""}>
+        <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
         <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
           <Breadcrumb
             items={[{ label: SITE_NAME, href: "/" }, { label: "Countries" }]}
@@ -101,6 +102,7 @@ export default function CountriesHub({ onNavigate, instant }: Props) {
             </div>
           </section>
         ))}
+      </div>
       </div>
     </div>
   );

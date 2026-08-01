@@ -57,7 +57,7 @@ export default function Timeline({
             />
 
             <span
-              className={`tl-year font-unbounded font-semibold text-base tracking-tight transition-colors duration-200 ${
+              className={`tl-year font-unbounded font-semibold text-sm tracking-tight transition-colors duration-200 ${
                 isActive
                   ? "text-brand-gold-hi font-bold"
                   : "text-brand-muted hover:text-brand-text"

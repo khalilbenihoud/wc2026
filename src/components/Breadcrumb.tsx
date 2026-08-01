@@ -10,11 +10,11 @@ export interface Crumb {
   href?: string;
 }
 
-function Separator() {
+function Separator({ className = "" }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className="flex items-center justify-center w-[18px] h-[18px] rounded-[6px] bg-[rgba(var(--overlay-rgb),0.06)] text-brand-muted shrink-0"
+      className={`flex items-center justify-center w-[18px] h-[18px] rounded-[6px] bg-[rgba(var(--overlay-rgb),0.06)] text-brand-muted shrink-0 ${className}`}
     >
       <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" focusable="false">
         <path d="M9 6l6 6-6 6" />
@@ -35,10 +35,13 @@ export default function Breadcrumb({
       <ol className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.12em] min-w-0">
         {items.map((c, i) => {
           const last = i === items.length - 1;
+          // On mobile the current-page crumb is redundant with the page's H1 and
+          // makes the trail overflow, so hide it (and its separator) below md.
+          const hideOnMobile = last && items.length > 1;
           return (
             <Fragment key={i}>
-              {i > 0 && <Separator />}
-              <li className="flex items-center min-w-0">
+              {i > 0 && <Separator className={hideOnMobile ? "max-md:hidden" : ""} />}
+              <li className={`flex items-center min-w-0 ${hideOnMobile ? "max-md:hidden" : ""}`}>
                 {c.href && !last ? (
                   <button
                     type="button"

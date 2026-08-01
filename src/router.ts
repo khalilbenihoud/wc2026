@@ -23,6 +23,13 @@ const matchRoute = (pathname: string): Route => {
   m = p.match(/^\/tournaments\/(\d{4})$/);
   if (m) return { path: "tournament", params: { year: m[1] } };
 
+  m = p.match(/^\/compare\/(.+)-vs-(.+)$/);
+  if (m) {
+    const codeA = codeForSlug(m[1]);
+    const codeB = codeForSlug(m[2]);
+    if (codeA && codeB) return { path: "compare", params: { codeA, codeB } };
+  }
+
   return { path: "home", params: {} };
 };
 
@@ -58,3 +65,9 @@ export const countryPath = (code: string) =>
 export const tournamentPath = (year: number) => `/tournaments/${year}`;
 export const matchPath = (year: number, slug: string) =>
   `/tournaments/${year}/matches/${slug}`;
+export const comparePath = (codeA: string, codeB: string) => {
+  const slugA = slugForCode(codeA) ?? codeA.toLowerCase();
+  const slugB = slugForCode(codeB) ?? codeB.toLowerCase();
+  const [first, second] = slugA < slugB ? [slugA, slugB] : [slugB, slugA];
+  return `/compare/${first}-vs-${second}`;
+};

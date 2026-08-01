@@ -123,3 +123,70 @@ export function videoObject(v: {
   if (v.year) obj.uploadDate = `${v.year}-01-01`;
   return obj;
 }
+
+// FAQPage with auto-generated Q&A pairs for tournament pages. Questions are
+// data-driven (champion, top scorer, host) so they require zero maintenance.
+export function faqPage(
+  questions: { question: string; answer: string }[]
+): Record<string, unknown> {
+  return {
+    "@type": "FAQPage",
+    mainEntity: questions.map((q) => ({
+      "@type": "Question",
+      name: q.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: q.answer,
+      },
+    })),
+  };
+}
+
+// ProfilePage wraps a SportsTeam (or similar) mainEntity with creation/modified
+// metadata so the page is eligible for profile rich results.
+export function profilePage(
+  mainEntity: Record<string, unknown>,
+  dateCreated: string,
+  dateModified: string
+): Record<string, unknown> {
+  return {
+    "@type": "ProfilePage",
+    dateCreated,
+    dateModified,
+    mainEntity,
+  };
+}
+
+// ItemList for hub/index pages listing grouped items.
+export function itemList(
+  items: { name: string; url: string }[]
+): Record<string, unknown> {
+  return {
+    "@type": "ItemList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      url: it.url,
+    })),
+  };
+}
+
+// VideoObject for match pages using YouTube highlight data from
+// src/highlights.ts. Includes embed URL and optional upload date.
+export function videoObjectForMatch(params: {
+  videoId: string;
+  title: string;
+  thumbnail: string;
+  year: number;
+}): Record<string, unknown> {
+  return {
+    "@type": "VideoObject",
+    name: params.title,
+    description: params.title,
+    thumbnailUrl: params.thumbnail,
+    embedUrl: `https://www.youtube.com/embed/${params.videoId}`,
+    contentUrl: `https://www.youtube.com/watch?v=${params.videoId}`,
+    uploadDate: `${params.year}-01-01`,
+  };
+}
