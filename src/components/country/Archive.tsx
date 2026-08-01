@@ -11,7 +11,7 @@ import CountryMap from "../CountryMap";
 import { COUNTRY_MAP_CODES } from "../../countryMaps";
 import PlayerAvatar from "../PlayerAvatar";
 import { useWikiPhoto } from "../../wikiPhoto";
-import { countryPath, tournamentPath } from "../../router";
+import { countryPath, tournamentPath, comparePath } from "../../router";
 import { Rule, SectionKicker } from "./shared";
 
 interface ArchiveProps {
@@ -97,6 +97,29 @@ function TopScorers({ profile }: { profile: CountryProfile }) {
   );
 }
 
+function RecentTournament({ profile, onNavigate }: { profile: CountryProfile; onNavigate: (path: string) => void }) {
+  const years = Object.keys(profile.timeline).map(Number);
+  if (years.length === 0) return null;
+  const latest = Math.max(...years);
+  return (
+    <section className="mb-10">
+      <SectionKicker>Recent Tournament</SectionKicker>
+      <button
+        type="button"
+        onClick={() => onNavigate(`${tournamentPath(latest)}/`)}
+        className="w-full flex items-center gap-3 py-2.5 -mx-2 px-2 rounded-md cursor-pointer text-left hover:bg-brand-gold/[0.04] focus-visible:bg-brand-gold/[0.06] focus:outline-none transition-colors"
+      >
+        <span className="text-sm font-semibold text-brand-text flex-1">
+          {latest} FIFA World Cup
+        </span>
+        <span className="font-mono text-[11px] tabular-nums tracking-wider text-brand-muted">
+          {RESULT_LABEL[profile.timeline[latest]!.result]}
+        </span>
+      </button>
+    </section>
+  );
+}
+
 function Rivalries({ profile, onNavigate }: { profile: CountryProfile; onNavigate: (path: string) => void }) {
   if (profile.rivalries.length === 0) return null;
   return (
@@ -108,7 +131,7 @@ function Rivalries({ profile, onNavigate }: { profile: CountryProfile; onNavigat
             {i > 0 && <Rule />}
             <button
               type="button"
-              onClick={() => onNavigate(countryPath(r.code))}
+              onClick={() => onNavigate(`${comparePath(profile.code, r.code)}/`)}
               className="w-full flex items-center gap-3 py-2.5 -mx-2 px-2 rounded-md cursor-pointer text-left hover:bg-brand-gold/[0.04] focus-visible:bg-brand-gold/[0.06] focus:outline-none transition-colors"
             >
               <span aria-hidden className="text-base leading-none">{r.flag}</span>
@@ -326,6 +349,7 @@ function LayoutDashboard({ p, onNavigate }: { p: CountryProfile; onNavigate: (pa
         </div>
       </section>
       {p.rivalries.length > 0 && <section className="mb-10"><Rivalries profile={p} onNavigate={onNavigate} /></section>}
+      <RecentTournament profile={p} onNavigate={onNavigate} />
       <DefiningMatches p={p} />
       <MilestonesSection milestones={p.milestones} onNavigate={onNavigate} />
       <VideosSection videos={p.videos} />

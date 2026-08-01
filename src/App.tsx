@@ -17,21 +17,24 @@ import type { CountryProfile } from "./countries.mock";
 import HeroCard from "./components/HeroCard";
 import HomepageGrid from "./components/HomepageGrid";
 import ExploreCards from "./components/ExploreCards";
-import { useRouter, countryPath, countriesPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "./router";
+import { useRouter, countryPath, countriesPath, tournamentPath, matchPath, comparePath, COUNTRY_PAGE_ENABLED } from "./router";
 
 // Heavy, interaction-/route-only surfaces are code-split so the initial home
 // bracket doesn't ship their JS + data. MatchDetailsModal pulls in the big
 // scorers/stats/highlights datasets; TournamentPage pulls champion images and
-// country maps; CountryRoute pulls the generated country profiles/stats.
+// country maps; CountryRoute pulls the generated country profiles/stats;
+// ComparePage pulls the country comparison logic.
 const MatchDetailsModal = lazy(() => import("./components/MatchDetailsModal"));
 const TournamentPage = lazy(() => import("./components/TournamentPage"));
 const CountryRoute = lazy(() => import("./components/CountryRoute"));
 const CountriesHub = lazy(() => import("./components/CountriesHub"));
+const ComparePage = lazy(() => import("./components/ComparePage"));
 import { useSeo } from "./seo";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
 import { findMatchBySlug } from "./matches";
-import { tournamentEvent, matchEvent, breadcrumbList, videoObject, BASE_URL, SITE_NAME } from "./schema";
+import { getHighlights } from "./highlights";
+import { tournamentEvent, matchEvent, breadcrumbList, videoObject, faqPage, profilePage, itemList, videoObjectForMatch, BASE_URL, SITE_NAME } from "./schema";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -114,6 +117,9 @@ export default function App() {
   // (COUNTRY_PAGE_ENABLED === false) so nothing here needs the full dataset.
   const countryProfile: CountryProfile | undefined = undefined;
 
+  const compareCodeA = route.path === "compare" ? route.params.codeA : null;
+  const compareCodeB = route.path === "compare" ? route.params.codeB : null;
+
   const tournamentYear = route.path === "tournament" ? Number(route.params.year) : null;
 
   // A match URL (/tournaments/<year>/matches/<slug>) shows the tournament page
@@ -127,7 +133,7 @@ export default function App() {
   // nation on the tournament page), that fade would briefly reveal the home
   // bracket underneath. Track the route we came from so the incoming overlay can
   // skip the intro and appear opaque instead, swapping seamlessly.
-  const OVERLAY_ROUTES = ["tournament", "match", "country", "countries"];
+  const OVERLAY_ROUTES = ["tournament", "match", "country", "countries", "compare"];
   // Track the route we navigated FROM, computed during render and updated only on
   // an actual route change — so it stays stable across re-renders (chunk load,
   // StrictMode double-render, etc.). An effect-based ref would flip this to false
@@ -160,11 +166,16 @@ export default function App() {
       if (route.path === "tournament" || route.path === "match") {
         import("./components/CountryRoute");
         import("./components/CountriesHub");
+        import("./components/ComparePage");
       } else if (route.path === "country") {
         import("./components/TournamentPage");
-        import("./components/CountriesHub"); // reachable via the "Countries" crumb
+        import("./components/CountriesHub");
+        import("./components/ComparePage"); // reachable via rivalry links
       } else if (route.path === "countries") {
         import("./components/CountryRoute");
+      } else if (route.path === "compare") {
+        import("./components/CountryRoute");
+        import("./components/TournamentPage");
       }
     };
     const ric = window.requestIdleCallback;
@@ -462,6 +473,15 @@ export default function App() {
         const scoreStr = found.score ? `${found.score[0]}–${found.score[1]}` : null;
         const resultTitle = scoreStr ? `${taName} ${scoreStr} ${tbName}` : `${taName} vs ${tbName}`;
         const winnerName = found.winner ? getTeamName(found.winner) : null;
+        const highlight = getHighlights(matchYear, found.ta, found.tb);
+        const videoNode = highlight
+          ? videoObjectForMatch({
+              videoId: highlight.videoId,
+              title: highlight.title,
+              thumbnail: highlight.thumbnail,
+              year: matchYear,
+            })
+          : null;
         return {
           title: `${resultTitle} — ${matchYear} FIFA World Cup ${roundName} · The Road to Glory`,
           description:
@@ -472,6 +492,7 @@ export default function App() {
             `Goalscorers, result, and match details.`,
           canonical: `${matchPath(matchYear, found.slug)}/`,
           jsonLd: matchEvent(matchYear, t.host, taName, tbName, roundName, found.slug),
+          jsonLdNodes: videoNode ? [videoNode] : undefined,
           breadcrumb: breadcrumbList([
             { name: SITE_NAME, url: `${BASE_URL}/` },
             { name: `${matchYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(matchYear)}/` },
@@ -484,11 +505,18 @@ export default function App() {
       const t = TOURNAMENTS[tournamentYear];
       const champ = tournamentYear ? getChampionForYear(tournamentYear) : null;
       const champName = champ ? getTeamName(champ) : "TBD";
+      const faqNodes = faqPage([
+        { question: `Who won the ${tournamentYear} FIFA World Cup?`, answer: champName },
+        { question: `Where was the ${tournamentYear} World Cup held?`, answer: t.host },
+        { question: `Who was the top scorer of the ${tournamentYear} World Cup?`, answer: t.goldenBoot ? `${t.goldenBoot.name} with ${t.goldenBoot.goals} goals` : "Not yet decided" },
+        { question: `How many teams participated in the ${tournamentYear} World Cup?`, answer: `${t.teams.length} teams` },
+      ]);
       return {
         title: `${tournamentYear} FIFA World Cup Results — ${champName} Champion · The Road to Glory`,
         description: `${tournamentYear} FIFA World Cup in ${t.host}. ${t.quote || ""} Full knockout results, golden boot, and all participating nations.`,
-        canonical: `${tournamentPath(tournamentYear)}/`, // trailing slash = Netlify's 200 URL
+        canonical: `${tournamentPath(tournamentYear)}/`,
         jsonLd: tournamentEvent(tournamentYear, t, champ),
+        jsonLdNodes: [faqNodes],
         breadcrumb: breadcrumbList([
           { name: SITE_NAME, url: `${BASE_URL}/` },
           { name: `${tournamentYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(tournamentYear)}/` },
@@ -749,6 +777,18 @@ export default function App() {
       {route.path === "countries" && (
         <Suspense fallback={overlayFallback}>
           <CountriesHub onNavigate={navigate} instant={fromOverlay} />
+        </Suspense>
+      )}
+
+      {compareCodeA && compareCodeB && (
+        <Suspense fallback={overlayFallback}>
+          <ComparePage
+            codeA={compareCodeA}
+            codeB={compareCodeB}
+            onBack={() => navigate("/")}
+            onNavigate={navigate}
+            instant={fromOverlay}
+          />
         </Suspense>
       )}
 

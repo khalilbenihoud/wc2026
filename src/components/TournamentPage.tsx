@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
 import { getMatchNotes, TOURNAMENT_YEARS } from "../constants";
-import { countryPath, tournamentPath, matchPath, COUNTRY_PAGE_ENABLED } from "../router";
+import { countryPath, tournamentPath, matchPath, comparePath, COUNTRY_PAGE_ENABLED } from "../router";
 import { matchSlug } from "../matches";
 import { CHAMPION_IMAGES } from "../championImages.generated";
 import { useWikiPhoto } from "../wikiPhoto";
@@ -13,6 +13,22 @@ import Breadcrumb from "./Breadcrumb";
 import Podium from "./Podium";
 import ShareButton from "./ShareButton";
 import { SITE_NAME } from "../schema";
+
+function ArrowLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 18.4961 14.8145" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M7.42188 14.8047C7.90039 14.8047 8.28125 14.4531 8.28125 13.9648C8.28125 13.7305 8.19336 13.4961 8.03711 13.3496L5.84961 11.123L1.77734 7.40234L5.84961 3.68164L8.03711 1.45508C8.19336 1.29883 8.28125 1.07422 8.28125 0.839844C8.28125 0.351562 7.90039 0 7.42188 0C7.1875 0 6.98242 0.078125 6.76758 0.292969L0.302734 6.74805C0.107422 6.93359 0 7.1582 0 7.40234C0 7.64648 0.107422 7.87109 0.302734 8.05664L6.78711 14.5312C6.98242 14.7168 7.1875 14.8047 7.42188 14.8047ZM4.92188 8.27148L17.2754 8.27148C17.7832 8.27148 18.1348 7.91016 18.1348 7.40234C18.1348 6.89453 17.7832 6.5332 17.2754 6.5332L4.92188 6.5332L1.77734 6.72852C1.37695 6.72852 1.10352 7.00195 1.10352 7.40234C1.10352 7.80273 1.37695 8.07617 1.77734 8.07617Z" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 18.4961 14.8145" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M10.7129 14.8047C10.9473 14.8047 11.1523 14.7168 11.3477 14.5312L17.8418 8.05664C18.0371 7.87109 18.1348 7.64648 18.1348 7.40234C18.1348 7.1582 18.0371 6.93359 17.8418 6.74805L11.3672 0.292969C11.1523 0.078125 10.9473 0 10.7129 0C10.2344 0 9.86328 0.351562 9.86328 0.839844C9.86328 1.07422 9.94141 1.29883 10.0977 1.45508L12.2852 3.68164L16.3574 7.40234L12.2852 11.123L10.0977 13.3496C9.94141 13.4961 9.86328 13.7305 9.86328 13.9648C9.86328 14.4531 10.2344 14.8047 10.7129 14.8047ZM0.859375 8.27148L13.2129 8.27148L16.3574 8.07617C16.7578 8.04688 17.0312 7.80273 17.0312 7.40234C17.0312 7.00195 16.7578 6.75781 16.3574 6.72852L13.2129 6.5332L0.859375 6.5332C0.351562 6.5332 0 6.89453 0 7.40234C0 7.91016 0.351562 8.27148 0.859375 8.27148Z" />
+    </svg>
+  );
+}
 
 interface TournamentPageProps {
   year: number;
@@ -93,9 +109,51 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           </button>
           <h1 className="font-unbounded text-2xl text-brand-gold">Tournament not found</h1>
         </div>
+    </div>
+  );
+}
+
+function TournamentRelated({ champion, runnerUp, onNavigate }: {
+  champion: string | null;
+  runnerUp: string | null;
+  onNavigate: (path: string) => void;
+}) {
+  if (!champion && !runnerUp) return null;
+
+  return (
+    <div className="mb-10">
+      <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
+        Related
       </div>
-    );
-  }
+      <div className="flex flex-wrap gap-2">
+        {champion && COUNTRY_PAGE_ENABLED && (
+          <button
+            onClick={() => onNavigate(`${countryPath(champion)}/`)}
+            className="px-3 py-1 rounded-full border text-sm font-mono transition-colors cursor-pointer border-brand-gold/40 text-brand-gold hover:bg-brand-gold/[0.08]"
+          >
+            {getTeamFlag(champion)} {getTeamName(champion)} profile
+          </button>
+        )}
+        {runnerUp && COUNTRY_PAGE_ENABLED && (
+          <button
+            onClick={() => onNavigate(`${countryPath(runnerUp)}/`)}
+            className="px-3 py-1 rounded-full border text-sm font-mono transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
+          >
+            {getTeamFlag(runnerUp)} {getTeamName(runnerUp)} profile
+          </button>
+        )}
+        {champion && runnerUp && COUNTRY_PAGE_ENABLED && (
+          <button
+            onClick={() => onNavigate(`${comparePath(champion, runnerUp)}/`)}
+            className="px-3 py-1 rounded-full border text-sm font-mono transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
+          >
+            {getTeamName(champion)} vs {getTeamName(runnerUp)} history
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
   const finalMatch = t.final?.[0];
   const score = finalMatch ? `${finalMatch.s[0]}–${finalMatch.s[1]}` : "TBD";
@@ -126,6 +184,12 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
     </div>
   );
 
+  // Adjacent tournaments for sequential prev/next navigation.
+  const navYears = [...TOURNAMENT_YEARS].sort((a, b) => a - b); // 1930…2026
+  const navIdx = navYears.indexOf(year);
+  const prevYear = navIdx > 0 ? navYears[navIdx - 1] : null;
+  const nextYear = navIdx < navYears.length - 1 ? navYears[navIdx + 1] : null;
+
   return (
     <div
       ref={scrollRef}
@@ -134,6 +198,66 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
       }`}
     >
       <div className={skipIntro ? "animate-[fadeIn_0.15s_ease]" : ""}>
+        {/* Desktop: floating edge arrows that reveal the year on hover. */}
+        {prevYear && (
+          <button
+            onClick={() => onNavigate(`${tournamentPath(prevYear)}/`)}
+            aria-label={`Previous tournament: ${prevYear} ${TOURNAMENTS[prevYear]?.host}`}
+            className="nav-arrow-btn nav-arrow-btn--prev max-md:hidden flex items-center rounded-full bg-brand-panel/80 backdrop-blur text-brand-muted hover:text-brand-gold transition-colors cursor-pointer overflow-hidden"
+          >
+            <span className="flex items-center justify-center h-11 w-11 shrink-0">
+              <ArrowLeftIcon className="h-3.5 w-auto" />
+            </span>
+            <span className="nav-arrow-label font-mono text-sm text-brand-gold">{prevYear}</span>
+          </button>
+        )}
+        {nextYear && (
+          <button
+            onClick={() => onNavigate(`${tournamentPath(nextYear)}/`)}
+            aria-label={`Next tournament: ${nextYear} ${TOURNAMENTS[nextYear]?.host}`}
+            className="nav-arrow-btn nav-arrow-btn--next max-md:hidden flex items-center rounded-full bg-brand-panel/80 backdrop-blur text-brand-muted hover:text-brand-gold transition-colors cursor-pointer overflow-hidden"
+          >
+            <span className="nav-arrow-label font-mono text-sm text-brand-gold">{nextYear}</span>
+            <span className="flex items-center justify-center h-11 w-11 shrink-0">
+              <ArrowRightIcon className="h-3.5 w-auto" />
+            </span>
+          </button>
+        )}
+
+        {/* Mobile: connected bottom pagination bar. Grid (not flex) so the two
+            halves stay a strict 50/50 and each can shrink + truncate a long host. */}
+        {(prevYear || nextYear) && (
+          <div
+            className="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-2 border-t border-brand-line bg-brand-panel/85 backdrop-blur-xl"
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+          >
+            {prevYear ? (
+              <button
+                onClick={() => onNavigate(`${tournamentPath(prevYear)}/`)}
+                className="min-w-0 flex items-center gap-2.5 px-4 py-3 border-r border-brand-line text-brand-muted active:bg-brand-gold/[0.06] transition-colors cursor-pointer text-left"
+              >
+                <ArrowLeftIcon className="h-3 w-auto shrink-0 text-brand-gold" />
+                <span className="flex flex-col leading-tight min-w-0">
+                  <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-brand-muted/70">Previous</span>
+                  <span className="font-mono text-sm text-brand-text truncate">{prevYear} · {TOURNAMENTS[prevYear]?.host}</span>
+                </span>
+              </button>
+            ) : <span className="border-r border-brand-line" />}
+            {nextYear ? (
+              <button
+                onClick={() => onNavigate(`${tournamentPath(nextYear)}/`)}
+                className="min-w-0 flex items-center justify-end gap-2.5 px-4 py-3 text-brand-muted active:bg-brand-gold/[0.06] transition-colors cursor-pointer text-right"
+              >
+                <span className="flex flex-col leading-tight min-w-0 text-right">
+                  <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-brand-muted/70">Next</span>
+                  <span className="font-mono text-sm text-brand-text truncate">{nextYear} · {TOURNAMENTS[nextYear]?.host}</span>
+                </span>
+                <ArrowRightIcon className="h-3 w-auto shrink-0 text-brand-gold" />
+              </button>
+            ) : <span />}
+          </div>
+        )}
+
         <div className="sticky top-0 z-20 w-full py-5 mb-8 bg-gradient-to-b from-brand-bg to-transparent">
         <div className="max-w-[880px] mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
           <Breadcrumb
@@ -148,7 +272,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           </div>
         </div>
       </div>
-      <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20">
+      <div className="max-w-[880px] mx-auto px-5 md:px-8 pb-20 max-md:pb-28">
 
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-3">
@@ -249,7 +373,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                 <PlayerAvatar photo={gbPhoto} name={t.goldenBoot.name} className="w-12 h-12 text-xl" />
                 <div className="min-w-0">
                   <div className="text-brand-muted text-[10px] font-mono tracking-wider uppercase mb-1">Golden Boot</div>
-                  <div className="text-brand-text font-semibold truncate">
+                  <div className="text-sm text-brand-text font-semibold truncate">
                     {t.goldenBoot.name}
                     <span className="text-brand-gold font-normal"> · {t.goldenBoot.goals} goals</span>
                   </div>
@@ -261,7 +385,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                 <PlayerAvatar photo={ggPhoto} name={t.goldenGlove.name} className="w-12 h-12 text-xl" />
                 <div className="min-w-0">
                   <div className="text-brand-muted text-[10px] font-mono tracking-wider uppercase mb-1">Golden Glove</div>
-                  <div className="text-brand-text font-semibold truncate">{t.goldenGlove.name}</div>
+                  <div className="text-sm text-brand-text font-semibold truncate">{t.goldenGlove.name}</div>
                 </div>
               </div>
             )}
@@ -279,7 +403,7 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
                   </span>
                 ))}
               </div>
-              <div className="text-brand-text font-semibold">Still up for grabs</div>
+              <div className="text-sm text-brand-text font-semibold">Still up for grabs</div>
               <p className="text-brand-muted text-sm mt-1.5 leading-relaxed">
                 No Golden Boot or Glove handed out yet.
                 <br />
@@ -380,8 +504,8 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
               .map((code) => {
                 const inner = (
                   <>
-                    <span className="text-base">{getTeamFlag(code)}</span>
-                    <span className="text-base font-semibold text-brand-text truncate">{getTeamName(code)}</span>
+                    <span className="text-sm">{getTeamFlag(code)}</span>
+                    <span className="text-sm font-semibold text-brand-text truncate">{getTeamName(code)}</span>
                   </>
                 );
                 const base = "flex items-center gap-2 px-3 py-2 rounded-lg border border-brand-line text-left";
@@ -400,26 +524,38 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
           </div>
         </div>
 
+        <TournamentRelated
+          champion={champion}
+          runnerUp={runnerUp}
+          onNavigate={onNavigate}
+        />
+
         <div className="mb-10">
           <div className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4">
             Other Tournaments
           </div>
-          <TournamentNav year={year} onNavigate={onNavigate} />
           <div className="flex flex-wrap gap-2">
             {Object.keys(TOURNAMENTS)
               .map(Number)
               .sort((a, b) => b - a)
               .filter((y) => y !== year)
-              .map((y) => (
-                <AppLink
-                  key={y}
-                  href={`${tournamentPath(y)}/`}
-                  onNavigate={onNavigate}
-                  className="px-3 py-1 rounded-full border text-sm font-mono transition-colors cursor-pointer border-brand-line text-brand-muted hover:text-brand-gold hover:border-brand-gold/40"
-                >
-                  {y}
-                </AppLink>
-              ))}
+              .map((y) => {
+                const adjacent = y === prevYear || y === nextYear;
+                return (
+                  <AppLink
+                    key={y}
+                    href={`${tournamentPath(y)}/`}
+                    onNavigate={onNavigate}
+                    className={`px-3 py-1 rounded-full border text-sm font-mono transition-colors cursor-pointer hover:text-brand-gold hover:border-brand-gold/40 ${
+                      adjacent
+                        ? "border-brand-gold/30 text-brand-text"
+                        : "border-brand-line text-brand-muted"
+                    }`}
+                  >
+                    {y}
+                  </AppLink>
+                );
+              })}
           </div>
         </div>
       </div>
@@ -516,7 +652,7 @@ function TeamSide({
 }) {
   const flag = <span className="text-sm leading-none shrink-0">{getTeamFlag(code)}</span>;
   const name = (
-    <span className={`text-base truncate ${winner ? "font-bold text-brand-gold" : "font-semibold"}`}>
+    <span className={`text-sm truncate ${winner ? "font-bold text-brand-gold" : "font-semibold"}`}>
       {getTeamName(code)}
     </span>
   );
@@ -656,29 +792,3 @@ function getRoundMatches(t: typeof TOURNAMENTS[number], year: number, round: "qf
   return [];
 }
 
-function TournamentNav({ year, onNavigate }: { year: number; onNavigate: (path: string) => void }) {
-  const years = [...TOURNAMENT_YEARS].sort((a, b) => a - b); // ascending: 1930…2026
-  const idx = years.indexOf(year);
-  const prevYear = idx > 0 ? years[idx - 1] : null;
-  const nextYear = idx < years.length - 1 ? years[idx + 1] : null;
-
-  if (!prevYear && !nextYear) return null;
-
-  const btn =
-    "flex items-center gap-1 px-3 py-1.5 rounded-lg border border-brand-line bg-brand-panel/40 text-sm font-mono text-brand-muted hover:text-brand-gold hover:border-brand-gold/40 transition-colors cursor-pointer";
-
-  return (
-    <div className="flex items-center justify-between gap-4 mb-4">
-      {prevYear ? (
-        <button onClick={() => onNavigate(`${tournamentPath(prevYear)}/`)} className={btn}>
-          ← {prevYear}
-        </button>
-      ) : <span />}
-      {nextYear ? (
-        <button onClick={() => onNavigate(`${tournamentPath(nextYear)}/`)} className={btn}>
-          {nextYear} →
-        </button>
-      ) : <span />}
-    </div>
-  );
-}

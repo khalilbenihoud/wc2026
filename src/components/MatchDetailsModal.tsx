@@ -305,7 +305,7 @@ export default function MatchDetailsModal({
                     <div className="text-[44px] leading-none mb-2">{getTeamFlag(ta)}</div>
                   </button>
                   <div
-                    className={`font-unbounded text-base tracking-wide break-words leading-snug ${
+                    className={`font-unbounded text-sm tracking-wide break-words leading-snug ${
                       winTop ? "text-brand-gold-hi" : "text-brand-text"
                     }`}
                   >
@@ -335,7 +335,7 @@ export default function MatchDetailsModal({
                     <div className="text-[44px] leading-none mb-2">{getTeamFlag(tb)}</div>
                   </button>
                   <div
-                    className={`font-unbounded text-base tracking-wide break-words leading-snug ${
+                    className={`font-unbounded text-sm tracking-wide break-words leading-snug ${
                       !winTop && played ? "text-brand-gold-hi" : "text-brand-text"
                     }`}
                   >
@@ -347,7 +347,7 @@ export default function MatchDetailsModal({
                 </div>
               </div>
             ) : (
-              <div className="text-center font-unbounded text-base text-brand-text py-4">
+              <div className="text-center font-unbounded text-sm text-brand-text py-4">
                 Not yet played
               </div>
             )}

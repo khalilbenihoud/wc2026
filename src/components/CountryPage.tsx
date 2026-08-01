@@ -65,7 +65,8 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
         isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
       }`}
     >
-      {/* Ambient aurora — one drifting gradient per dominant flag colour */}
+      <div className={skipIntro ? "animate-[fadeIn_0.15s_ease]" : ""}>
+        {/* Ambient aurora — one drifting gradient per dominant flag colour */}
       <div
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         aria-hidden
@@ -148,6 +149,7 @@ export default function CountryPage({ profile, onBack, onNavigate, instant }: Co
               ))}
           </div>
         </section>
+      </div>
       </div>
     </div>
   );
