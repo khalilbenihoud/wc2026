@@ -30,6 +30,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
     "satori": "^0.29.0",
+    "sharp": "^0.35.3",
     "svgpath": "^2.6.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
