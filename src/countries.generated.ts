@@ -617,7 +617,12 @@ const CONFEDERATION_MAP: Record<string, string> = {
   GDR: "UEFA", HON: "CONCACAF", KUW: "AFC", PLE: "AFC", SLV: "CONCACAF",
 };
 
+// The profiles are a pure function of the static datasets, so compute once and
+// reuse — the compare/prerender paths call this hundreds of times.
+let _profilesCache: Record<string, CountryProfile> | null = null;
+
 export function generateCountryProfiles(): Record<string, CountryProfile> {
+  if (_profilesCache) return _profilesCache;
   const profiles: Record<string, CountryProfile> = {};
   const allCodes = new Set<string>();
 
@@ -790,6 +795,7 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
     };
   }
 
+  _profilesCache = profiles;
   return profiles;
 }
 

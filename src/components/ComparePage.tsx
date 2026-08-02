@@ -1,14 +1,11 @@
 import { useMemo, useRef, useEffect, useState } from "react";
-import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
-import { analyze } from "../analysis";
-import { enumerateMatches, EnumeratedMatch, STATS_DATASET_THROUGH } from "../matches";
-import { ROUND_NAME, TOURNAMENT_YEARS } from "../constants";
-import { tournamentPath, countryPath, matchPath, comparePath } from "../router";
+import { getTeamName, getTeamFlag } from "../data";
+import { countryPath, matchPath, comparePath } from "../router";
+import { computeComparison, comparisonMeta, comparisonJsonLd } from "../compare";
 import { generateCountryProfiles } from "../countries.generated";
-import { WC_MEETINGS } from "../countryH2H.generated";
 import Breadcrumb from "./Breadcrumb";
 import AppLink from "./AppLink";
-import { SITE_NAME, BASE_URL, matchEvent, breadcrumbList } from "../schema";
+import { SITE_NAME, BASE_URL } from "../schema";
 
 interface Props {
   codeA: string;
@@ -17,24 +14,6 @@ interface Props {
   onNavigate: (path: string) => void;
   instant?: boolean;
 }
-
-interface Meeting {
-  year: number;
-  round: string;       // stage label
-  scoreA: number;      // goals for team A (canonical, alphabetically-first code)
-  scoreB: number;
-  winner: string | null; // team name, or null for a draw (shootouts count as draws)
-  slug: string | null;   // match-detail slug when a page exists (knockout ties)
-  pens: string | null;   // shootout score "a-b" oriented to A, or null
-  aet: boolean;          // decided after extra time
-}
-
-// Chronological-within-year ordering across every stage format the archive uses.
-const STAGE_RANK: Record<string, number> = {
-  "Group stage": 0, "Final round": 1, "Second group stage": 2,
-  "Round of 32": 3, "Round of 16": 4, "Quarter-final": 5,
-  "Semi-final": 6, "Third-place play-off": 7, Final: 8,
-};
 
 const KICKER = "font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4";
 
@@ -61,89 +40,18 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 0 }); }, [canonicalCodeA, canonicalCodeB]);
 
-  // --- Comparison data ---
-  const comparison = useMemo(() => {
-    // Trophy counts
-    const profiles = generateCountryProfiles();
-    const profileA = profiles[canonicalCodeA];
-    const profileB = profiles[canonicalCodeB];
-    const titlesA = profileA?.titles.length ?? 0;
-    const titlesB = profileB?.titles.length ?? 0;
-
-    // Resolve the knockout matches for a year once, so historical knockout ties
-    // can borrow a real match-detail slug and 2026 can be read from the bracket.
-    const enumCache = new Map<number, EnumeratedMatch[]>();
-    const knockoutMatch = (year: number): EnumeratedMatch | undefined => {
-      if (!enumCache.has(year)) {
-        const t = TOURNAMENTS[year];
-        enumCache.set(year, t ? enumerateMatches(t, analyze(t)) : []);
-      }
-      return enumCache.get(year)!.find(
-        (m) => m.played &&
-          ((m.ta === canonicalCodeA && m.tb === canonicalCodeB) ||
-           (m.ta === canonicalCodeB && m.tb === canonicalCodeA))
-      );
-    };
-
-    // Every World Cup meeting between the two teams. History (1930–2022, group +
-    // knockout) comes from the complete jfjelstul log; 2026+ from the live
-    // bracket in data.ts. Both sources are keyed/oriented to the canonical A<B.
-    const meetings: Meeting[] = [];
-    const key = `${canonicalCodeA}|${canonicalCodeB}`;
-    for (const m of WC_MEETINGS[key] ?? []) {
-      meetings.push({
-        year: m.year,
-        round: m.stage,
-        scoreA: m.ga,
-        scoreB: m.gb,
-        pens: m.pens ? `${m.pens[0]}-${m.pens[1]}` : null,
-        aet: m.aet,
-        // Shootouts are official draws; a clean result decides the winner.
-        winner: m.pens ? null : m.ga > m.gb ? nameA : m.gb > m.ga ? nameB : null,
-        slug: m.knockout ? knockoutMatch(m.year)?.slug ?? null : null,
-      });
-    }
-    for (const year of TOURNAMENT_YEARS) {
-      if (year <= STATS_DATASET_THROUGH) continue;
-      const km = knockoutMatch(year);
-      if (!km || !km.score) continue;
-      const flipped = km.ta === canonicalCodeB;
-      const scoreA = flipped ? km.score[1] : km.score[0];
-      const scoreB = flipped ? km.score[0] : km.score[1];
-      const pens = km.pens ? (flipped ? km.pens.split("-").reverse().join("-") : km.pens) : null;
-      meetings.push({
-        year,
-        round: ROUND_NAME[km.round] ?? km.round,
-        scoreA,
-        scoreB,
-        pens,
-        aet: !!km.extra,
-        winner: pens ? null : scoreA > scoreB ? nameA : scoreB > scoreA ? nameB : null,
-        slug: km.slug,
-      });
-    }
-    meetings.sort((a, b) => a.year - b.year || (STAGE_RANK[a.round] ?? 9) - (STAGE_RANK[b.round] ?? 9));
-
-    // Head-to-head record, derived from the full meeting list above.
-    const h2h = { played: meetings.length, wA: 0, d: 0, lA: 0, wB: 0, lB: 0 };
-    for (const m of meetings) {
-      if (m.winner === nameA) { h2h.wA++; h2h.lB++; }
-      else if (m.winner === nameB) { h2h.wB++; h2h.lA++; }
-      else { h2h.d++; }
-    }
-
-    return { h2h, titlesA, titlesB, titlesYearsA: profileA?.titles.map((t) => t.year) ?? [], titlesYearsB: profileB?.titles.map((t) => t.year) ?? [], meetings };
-  }, [canonicalCodeA, canonicalCodeB, nameA, nameB]);
+  // --- Comparison data (shared with the prerender/sitemap build) ---
+  const comparison = useMemo(
+    () => computeComparison(canonicalCodeA, canonicalCodeB),
+    [canonicalCodeA, canonicalCodeB]
+  );
 
   const { h2h, titlesA, titlesB, titlesYearsA, titlesYearsB, meetings } = comparison;
   const hasMeetings = h2h.played > 0;
   const canonicalUrl = comparePath(canonicalCodeA, canonicalCodeB);
 
-  // SEO metadata
-  const seoTitle = `${nameA} vs ${nameB} World Cup Record · Head-to-Head History`;
-  const seoDesc = hasMeetings
-    ? `${nameA} vs ${nameB} all-time FIFA World Cup record: ${h2h.played} meetings, ${nameA} ${h2h.wA}W ${h2h.d}D ${h2h.lA}L. Every World Cup meeting between ${nameA} and ${nameB}, 1930 to today.`
-    : `No World Cup meetings between ${nameA} and ${nameB}. Compare their records, titles, and tournament history.`;
+  // SEO metadata — identical to what the prerender bakes in, from src/compare.ts.
+  const { title: seoTitle, description: seoDesc } = comparisonMeta(comparison);
 
   useEffect(() => {
     if (!seoTitle) return;
@@ -161,18 +69,14 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
     let canonicalEl = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonicalEl) { canonicalEl = document.createElement("link"); canonicalEl.rel = "canonical"; document.head.appendChild(canonicalEl); }
     canonicalEl.href = `${BASE_URL}${canonicalUrl}/`;
-    const jsonLdNodes = [breadcrumbList([
-      { name: SITE_NAME, url: `${BASE_URL}/` },
-      { name: `${nameA} vs ${nameB}`, url: `${BASE_URL}${canonicalUrl}/` },
-    ])];
     let ld = document.getElementById("seo-jsonld");
     if (ld) ld.remove();
     const script = document.createElement("script");
     script.id = "seo-jsonld";
     script.type = "application/ld+json";
-    script.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": jsonLdNodes });
+    script.textContent = JSON.stringify(comparisonJsonLd(comparison));
     document.head.appendChild(script);
-  }, [seoTitle, seoDesc, canonicalUrl, nameA, nameB]);
+  }, [seoTitle, seoDesc, canonicalUrl, comparison]);
 
   if (!nameA || !nameB) {
     return (

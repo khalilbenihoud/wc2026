@@ -1,8 +1,9 @@
 import { TOURNAMENTS } from "../src/data";
-import { COUNTRY_PAGE_ENABLED } from "../src/router";
+import { COUNTRY_PAGE_ENABLED, comparePath } from "../src/router";
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 import { analyze } from "../src/analysis";
 import { enumerateMatches } from "../src/matches";
+import { pairsWithMeetings } from "../src/compare";
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
@@ -36,6 +37,12 @@ if (COUNTRY_PAGE_ENABLED) {
     const slug = slugForCode(code);
     if (slug) urls.push({ loc: `/countries/${slug}/`, priority: 0.8, changefreq: "monthly" });
   }
+}
+
+// Head-to-head compare pages — prerendered for every pair that has met at a
+// World Cup (scripts/prerender.ts). High-intent "X vs Y" queries.
+for (const [a, b] of pairsWithMeetings()) {
+  urls.push({ loc: `${comparePath(a, b)}/`, priority: 0.6, changefreq: "monthly" });
 }
 
 urls.sort((a, b) => b.priority - a.priority || a.loc.localeCompare(b.loc));
