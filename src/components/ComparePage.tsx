@@ -1,11 +1,11 @@
 import { useMemo, useRef, useEffect, useState } from "react";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
 import { analyze } from "../analysis";
-import { enumerateMatches, matchSlug } from "../matches";
+import { enumerateMatches, EnumeratedMatch, STATS_DATASET_THROUGH } from "../matches";
 import { ROUND_NAME, TOURNAMENT_YEARS } from "../constants";
 import { tournamentPath, countryPath, matchPath, comparePath } from "../router";
 import { generateCountryProfiles } from "../countries.generated";
-import { COUNTRY_STATS } from "../countryStats.generated";
+import { WC_MEETINGS } from "../countryH2H.generated";
 import Breadcrumb from "./Breadcrumb";
 import AppLink from "./AppLink";
 import { SITE_NAME, BASE_URL, matchEvent, breadcrumbList } from "../schema";
@@ -20,16 +20,21 @@ interface Props {
 
 interface Meeting {
   year: number;
-  round: string;
-  taCode: string;
-  tbCode: string;
-  scoreA: number;
+  round: string;       // stage label
+  scoreA: number;      // goals for team A (canonical, alphabetically-first code)
   scoreB: number;
-  winner: string | null;
-  slug: string;
-  pens: string | null;
-  extra: string | null;
+  winner: string | null; // team name, or null for a draw (shootouts count as draws)
+  slug: string | null;   // match-detail slug when a page exists (knockout ties)
+  pens: string | null;   // shootout score "a-b" oriented to A, or null
+  aet: boolean;          // decided after extra time
 }
+
+// Chronological-within-year ordering across every stage format the archive uses.
+const STAGE_RANK: Record<string, number> = {
+  "Group stage": 0, "Final round": 1, "Second group stage": 2,
+  "Round of 32": 3, "Round of 16": 4, "Quarter-final": 5,
+  "Semi-final": 6, "Third-place play-off": 7, Final: 8,
+};
 
 const KICKER = "font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-gold mb-4";
 
@@ -58,15 +63,6 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
 
   // --- Comparison data ---
   const comparison = useMemo(() => {
-    const statsA = COUNTRY_STATS[canonicalCodeA];
-    const statsB = COUNTRY_STATS[canonicalCodeB];
-
-    // H2H from rivalry data
-    const rivalry = statsA?.rivalries.find((r) => r.code === canonicalCodeB);
-    const h2h = rivalry
-      ? { played: rivalry.played, wA: rivalry.w, d: rivalry.d, lA: rivalry.l, wB: rivalry.l, lB: rivalry.w }
-      : { played: 0, wA: 0, d: 0, lA: 0, wB: 0, lB: 0 };
-
     // Trophy counts
     const profiles = generateCountryProfiles();
     const profileA = profiles[canonicalCodeA];
@@ -74,38 +70,70 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
     const titlesA = profileA?.titles.length ?? 0;
     const titlesB = profileB?.titles.length ?? 0;
 
-    // All World Cup meetings between these two teams
-    const meetings: Meeting[] = [];
-    for (const year of TOURNAMENT_YEARS) {
-      const t = TOURNAMENTS[year];
-      if (!t) continue;
-      const analysis = analyze(t);
-      for (const m of enumerateMatches(t, analysis)) {
-        if (!m.played) continue;
-        if (!m.score) continue;
-        if ((m.ta === canonicalCodeA && m.tb === canonicalCodeB) ||
-            (m.ta === canonicalCodeB && m.tb === canonicalCodeA)) {
-          const isFlipped = m.ta === canonicalCodeB;
-          const winner = m.winner ? getTeamName(m.winner) : null;
-          meetings.push({
-            year,
-            round: ROUND_NAME[m.round] ?? m.round,
-            taCode: isFlipped ? m.tb : m.ta,
-            tbCode: isFlipped ? m.ta : m.tb,
-            scoreA: isFlipped ? m.score[1] : m.score[0],
-            scoreB: isFlipped ? m.score[0] : m.score[1],
-            winner,
-            slug: m.slug,
-            pens: m.pens ?? null,
-            extra: m.extra ?? null,
-          });
-        }
+    // Resolve the knockout matches for a year once, so historical knockout ties
+    // can borrow a real match-detail slug and 2026 can be read from the bracket.
+    const enumCache = new Map<number, EnumeratedMatch[]>();
+    const knockoutMatch = (year: number): EnumeratedMatch | undefined => {
+      if (!enumCache.has(year)) {
+        const t = TOURNAMENTS[year];
+        enumCache.set(year, t ? enumerateMatches(t, analyze(t)) : []);
       }
+      return enumCache.get(year)!.find(
+        (m) => m.played &&
+          ((m.ta === canonicalCodeA && m.tb === canonicalCodeB) ||
+           (m.ta === canonicalCodeB && m.tb === canonicalCodeA))
+      );
+    };
+
+    // Every World Cup meeting between the two teams. History (1930–2022, group +
+    // knockout) comes from the complete jfjelstul log; 2026+ from the live
+    // bracket in data.ts. Both sources are keyed/oriented to the canonical A<B.
+    const meetings: Meeting[] = [];
+    const key = `${canonicalCodeA}|${canonicalCodeB}`;
+    for (const m of WC_MEETINGS[key] ?? []) {
+      meetings.push({
+        year: m.year,
+        round: m.stage,
+        scoreA: m.ga,
+        scoreB: m.gb,
+        pens: m.pens ? `${m.pens[0]}-${m.pens[1]}` : null,
+        aet: m.aet,
+        // Shootouts are official draws; a clean result decides the winner.
+        winner: m.pens ? null : m.ga > m.gb ? nameA : m.gb > m.ga ? nameB : null,
+        slug: m.knockout ? knockoutMatch(m.year)?.slug ?? null : null,
+      });
     }
-    meetings.sort((a, b) => a.year - b.year);
+    for (const year of TOURNAMENT_YEARS) {
+      if (year <= STATS_DATASET_THROUGH) continue;
+      const km = knockoutMatch(year);
+      if (!km || !km.score) continue;
+      const flipped = km.ta === canonicalCodeB;
+      const scoreA = flipped ? km.score[1] : km.score[0];
+      const scoreB = flipped ? km.score[0] : km.score[1];
+      const pens = km.pens ? (flipped ? km.pens.split("-").reverse().join("-") : km.pens) : null;
+      meetings.push({
+        year,
+        round: ROUND_NAME[km.round] ?? km.round,
+        scoreA,
+        scoreB,
+        pens,
+        aet: !!km.extra,
+        winner: pens ? null : scoreA > scoreB ? nameA : scoreB > scoreA ? nameB : null,
+        slug: km.slug,
+      });
+    }
+    meetings.sort((a, b) => a.year - b.year || (STAGE_RANK[a.round] ?? 9) - (STAGE_RANK[b.round] ?? 9));
+
+    // Head-to-head record, derived from the full meeting list above.
+    const h2h = { played: meetings.length, wA: 0, d: 0, lA: 0, wB: 0, lB: 0 };
+    for (const m of meetings) {
+      if (m.winner === nameA) { h2h.wA++; h2h.lB++; }
+      else if (m.winner === nameB) { h2h.wB++; h2h.lA++; }
+      else { h2h.d++; }
+    }
 
     return { h2h, titlesA, titlesB, titlesYearsA: profileA?.titles.map((t) => t.year) ?? [], titlesYearsB: profileB?.titles.map((t) => t.year) ?? [], meetings };
-  }, [canonicalCodeA, canonicalCodeB]);
+  }, [canonicalCodeA, canonicalCodeB, nameA, nameB]);
 
   const { h2h, titlesA, titlesB, titlesYearsA, titlesYearsB, meetings } = comparison;
   const hasMeetings = h2h.played > 0;
@@ -114,7 +142,7 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
   // SEO metadata
   const seoTitle = `${nameA} vs ${nameB} World Cup Record · Head-to-Head History`;
   const seoDesc = hasMeetings
-    ? `${nameA} vs ${nameB} all-time FIFA World Cup record: ${h2h.played} meetings, ${nameA} ${h2h.wA}W ${h2h.d}D ${h2h.lA}L. Every knockout match between ${nameA} and ${nameB} at the World Cup.`
+    ? `${nameA} vs ${nameB} all-time FIFA World Cup record: ${h2h.played} meetings, ${nameA} ${h2h.wA}W ${h2h.d}D ${h2h.lA}L. Every World Cup meeting between ${nameA} and ${nameB}, 1930 to today.`
     : `No World Cup meetings between ${nameA} and ${nameB}. Compare their records, titles, and tournament history.`;
 
   useEffect(() => {
@@ -195,7 +223,7 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
             </h1>
             <p className="text-brand-muted text-sm">
               {hasMeetings
-                ? `${h2h.played} World Cup meeting${h2h.played > 1 ? "s" : ""} — ${nameA} leads ${h2h.wA}W ${h2h.d}D ${h2h.lA}L`
+                ? `${h2h.played} World Cup meeting${h2h.played > 1 ? "s" : ""} — ${nameA} ${h2h.wA}W ${h2h.d}D ${h2h.lA}L`
                 : "No World Cup meetings — yet."}
             </p>
           </div>
@@ -278,35 +306,47 @@ export default function ComparePage({ codeA, codeB, onBack, onNavigate, instant 
             <section className="mb-10">
               <div className={KICKER}>World Cup Meetings ({meetings.length})</div>
               <div className="space-y-3">
-                {meetings.map((m) => (
-                  <AppLink
-                    key={`${m.year}-${m.slug}`}
-                    href={`${matchPath(m.year, m.slug)}/`}
-                    onNavigate={onNavigate}
-                    className="block p-4 rounded-xl border border-brand-line/40 bg-brand-panel/30 hover:border-brand-gold/30 hover:bg-brand-panel/50 transition-all"
-                  >
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <span className="font-mono text-xs tracking-wider text-brand-muted">{m.year} · {m.round}</span>
-                      {m.winner && (
-                        <span className="font-mono text-[10px] tracking-wider text-brand-gold uppercase">
-                          {m.winner} won
+                {meetings.map((m, i) => {
+                  const pensWinner = m.pens
+                    ? Number(m.pens.split("-")[0]) > Number(m.pens.split("-")[1]) ? nameA : nameB
+                    : null;
+                  const goldA = m.winner === nameA || pensWinner === nameA;
+                  const goldB = m.winner === nameB || pensWinner === nameB;
+                  const label = m.winner ? `${m.winner} won` : pensWinner ? `${pensWinner} won on pens` : "Draw";
+                  const suffix = m.pens ? ` (${m.pens} pens)` : m.aet ? " a.e.t." : "";
+                  const inner = (
+                    <>
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <span className="font-mono text-xs tracking-wider text-brand-muted">{m.year} · {m.round}</span>
+                        <span className="font-mono text-[10px] tracking-wider text-brand-gold uppercase">{label}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`text-sm font-semibold ${goldA ? "text-brand-gold" : "text-brand-text"}`}>
+                          {flagA} {nameA}
                         </span>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className={`text-sm font-semibold ${m.winner === nameA ? "text-brand-gold" : "text-brand-text"}`}>
-                        {getTeamFlag(m.taCode)} {getTeamName(m.taCode)}
-                      </span>
-                      <span className="font-unbounded text-lg font-bold text-brand-gold">
-                        {m.scoreA}–{m.scoreB}
-                        {m.pens ? ` (${m.pens} pens)` : m.extra ? ` ${m.extra}` : ""}
-                      </span>
-                      <span className={`text-sm font-semibold text-right ${m.winner === nameB ? "text-brand-gold" : "text-brand-text"}`}>
-                        {getTeamName(m.tbCode)} {getTeamFlag(m.tbCode)}
-                      </span>
-                    </div>
-                  </AppLink>
-                ))}
+                        <span className="font-unbounded text-lg font-bold text-brand-gold whitespace-nowrap">
+                          {m.scoreA}–{m.scoreB}{suffix}
+                        </span>
+                        <span className={`text-sm font-semibold text-right ${goldB ? "text-brand-gold" : "text-brand-text"}`}>
+                          {nameB} {flagB}
+                        </span>
+                      </div>
+                    </>
+                  );
+                  const cls = "block p-4 rounded-xl border border-brand-line/40 bg-brand-panel/30 transition-all";
+                  return m.slug ? (
+                    <AppLink
+                      key={`${m.year}-${m.round}-${i}`}
+                      href={`${matchPath(m.year, m.slug)}/`}
+                      onNavigate={onNavigate}
+                      className={`${cls} hover:border-brand-gold/30 hover:bg-brand-panel/50`}
+                    >
+                      {inner}
+                    </AppLink>
+                  ) : (
+                    <div key={`${m.year}-${m.round}-${i}`} className={cls}>{inner}</div>
+                  );
+                })}
               </div>
             </section>
           )}
