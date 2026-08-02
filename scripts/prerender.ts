@@ -392,7 +392,12 @@ function buildCountry(code: string, p: CountryProfile): string {
         .map((r) => {
           const rslug = slugForCode(r.code);
           const label = `${esc(r.name)} — played ${r.played} (W${r.w} D${r.d} L${r.l})`;
-          return rslug ? `<li><a href="/countries/${rslug}/">${label}</a></li>` : `<li>${label}</li>`;
+          if (!rslug) return `<li>${label}</li>`;
+          // Link both the rival's profile and their head-to-head compare page, so
+          // crawlers reach the prerendered /compare/ pages from country pages
+          // (not just via the sitemap). A rivalry always has a played meeting and
+          // both codes have slugs, so the compare page exists.
+          return `<li><a href="/countries/${rslug}/">${label}</a> · <a href="${comparePath(p.code, r.code)}/">head-to-head</a></li>`;
         })
         .join("") +
       `</ul>`
