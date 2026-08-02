@@ -26,6 +26,8 @@ import { applyMockOverrides, RESULT_LABEL, CountryProfile } from "../src/countri
 import { COUNTRY_CODES, slugForCode } from "../src/countrySlug";
 import { champion, runnerUp, thirdFourth } from "./tournament-result";
 import { getHubData } from "../src/countriesHub";
+import { comparePath } from "../src/router";
+import { computeComparison, comparisonMeta, comparisonJsonLd, pairsWithMeetings, Comparison } from "../src/compare";
 
 const BASE = "https://worldcuparchive.net";
 const DIST = resolve(process.cwd(), "dist");
@@ -449,6 +451,68 @@ function buildCountry(code: string, p: CountryProfile): string {
   return render(title, description, canonical, jsonLd, content, ogImage, ogAlt);
 }
 
+// ── Head-to-head compare pages ───────────────────────────────────────────────
+function buildCompare(c: Comparison): string {
+  const canonical = `${BASE}${comparePath(c.codeA, c.codeB)}/`;
+  const { title, description } = comparisonMeta(c);
+  const jsonLd = JSON.stringify(comparisonJsonLd(c));
+  const { nameA, nameB, h2h, meetings, titlesYearsA, titlesYearsB } = c;
+
+  const recordHtml =
+    h2h.played > 0
+      ? `<h2>World Cup head-to-head record</h2>` +
+        `<p>Played ${h2h.played} · ${esc(nameA)} ${h2h.wA} · Draws ${h2h.d} · ${esc(nameB)} ${h2h.wB}.</p>`
+      : `<h2>World Cup head-to-head record</h2>` +
+        `<p>${esc(nameA)} and ${esc(nameB)} have never met at a FIFA World Cup.</p>`;
+
+  const titleLine = (name: string, years: number[]) =>
+    years.length > 0
+      ? `${esc(name)} — ${years.length}× champion${years.length > 1 ? "s" : ""} (${years.join(", ")})`
+      : `${esc(name)} — no World Cup title`;
+  const titlesHtml =
+    `<h2>World Cup titles</h2><ul>` +
+    `<li>${titleLine(nameA, titlesYearsA)}</li>` +
+    `<li>${titleLine(nameB, titlesYearsB)}</li>` +
+    `</ul>`;
+
+  const meetingsHtml = meetings.length
+    ? `<h2>Every World Cup meeting (${meetings.length})</h2><ul>` +
+      meetings
+        .map((m) => {
+          const suffix = m.pens ? ` (${m.pens} pens)` : m.aet ? " a.e.t." : "";
+          const outcome = m.winner ? `${esc(m.winner)} won` : "draw";
+          const label =
+            `${m.year} ${esc(m.round)}: ${esc(nameA)} ${m.scoreA}–${m.scoreB} ${esc(nameB)}${suffix} — ${outcome}`;
+          return m.slug
+            ? `<li><a href="/tournaments/${m.year}/matches/${m.slug}/">${label}</a></li>`
+            : `<li>${label}</li>`;
+        })
+        .join("") +
+      `</ul>`
+    : "";
+
+  const slugA = slugForCode(c.codeA);
+  const slugB = slugForCode(c.codeB);
+  const profileLinks =
+    `<p>` +
+    (slugA ? `<a href="/countries/${slugA}/">${esc(nameA)} profile</a>` : esc(nameA)) +
+    ` · ` +
+    (slugB ? `<a href="/countries/${slugB}/">${esc(nameB)} profile</a>` : esc(nameB)) +
+    `</p>`;
+
+  const content =
+    `<main class="prerender">` +
+    `<p><a href="/">← World Cup Archive</a></p>` +
+    `<h1>${esc(nameA)} vs ${esc(nameB)} — World Cup Head-to-Head</h1>` +
+    recordHtml +
+    titlesHtml +
+    meetingsHtml +
+    profileLinks +
+    `</main>`;
+
+  return render(title, description, canonical, jsonLd, content);
+}
+
 // ── Homepage ─────────────────────────────────────────────────────────────────
 function buildHome(): string {
   const title = "The Road to Glory — World Cup Radial Knockout Bracket, 1930–2026";
@@ -568,6 +632,18 @@ for (const code of COUNTRY_CODES) {
   nCountries++;
 }
 
+// Head-to-head compare pages, for every pair that has actually met (1930–2026).
+let nCompare = 0;
+for (const [a, b] of pairsWithMeetings()) {
+  const c = computeComparison(a, b);
+  // Dir segment mirrors the canonical /compare/<first>-vs-<second>/ URL.
+  const seg = comparePath(c.codeA, c.codeB).replace(/^\/compare\//, "");
+  const dir = resolve(DIST, "compare", seg);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(resolve(dir, "index.html"), buildCompare(c));
+  nCompare++;
+}
+
 writeFileSync(resolve(DIST, "index.html"), buildHome());
 
 // Countries hub at dist/countries/index.html — must run after the per-country
@@ -576,5 +652,5 @@ mkdirSync(resolve(DIST, "countries"), { recursive: true });
 writeFileSync(resolve(DIST, "countries", "index.html"), buildCountriesHub());
 
 console.log(
-  `Prerendered homepage + countries hub + ${nTournaments} tournament pages + ${nMatches} match pages + ${nCountries} country pages → dist/`
+  `Prerendered homepage + countries hub + ${nTournaments} tournament pages + ${nMatches} match pages + ${nCountries} country pages + ${nCompare} compare pages → dist/`
 );
