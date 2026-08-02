@@ -4,19 +4,18 @@
 import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { TournamentAnalysis } from "./types";
 import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
-import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
 const RadialBracket = lazy(() => import("./components/RadialBracket"));
 import Splash from "./components/Splash";
-import PlayerAvatar from "./components/PlayerAvatar";
 import { useWikiPhoto } from "./wikiPhoto";
 import HeaderMeta from "./components/HeaderMeta";
+import BracketTooltip from "./components/BracketTooltip";
 import ChampionsWall from "./components/ChampionsWall";
 import type { CountryProfile } from "./countries.mock";
 import HeroCard from "./components/HeroCard";
 import HomepageGrid from "./components/HomepageGrid";
 import ExploreCards from "./components/ExploreCards";
-import { useRouter, countryPath, countriesPath, tournamentPath, matchPath, comparePath, COUNTRY_PAGE_ENABLED } from "./router";
+import { useRouter, countryPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "./router";
 
 // Heavy, interaction-/route-only surfaces are code-split so the initial home
 // bracket doesn't ship their JS + data. MatchDetailsModal pulls in the big
@@ -29,11 +28,11 @@ const CountryRoute = lazy(() => import("./components/CountryRoute"));
 const CountriesHub = lazy(() => import("./components/CountriesHub"));
 const ComparePage = lazy(() => import("./components/ComparePage"));
 import { useSeo } from "./seo";
+import { buildSeoMeta } from "./seoMeta";
+import { useIsMobile, useOverlayPreload, useYearToolContext } from "./appHooks";
 import { useSeoTracking } from "./seoTracking";
 import { analyze } from "./analysis";
 import { findMatchBySlug } from "./matches";
-import { getHighlights } from "./highlights";
-import { tournamentEvent, matchEvent, breadcrumbList, videoObject, faqPage, profilePage, itemList, videoObjectForMatch, BASE_URL, SITE_NAME } from "./schema";
 
 // Light/dark toggle is currently hidden on all breakpoints — flip to true to
 // bring the ☀️/🌙 button back (the theme logic underneath is left intact).
@@ -66,20 +65,7 @@ export default function App() {
     }
   }, []);
 
-  // The radial bracket is desktop-only; phones get the champion-timeline grid
-  // instead. Track the viewport reactively so resizing across the breakpoint
-  // stays correct.
-  const [isMobile, setIsMobile] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 767px)").matches
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const isMobile = useIsMobile();
 
   const [splashDone, setSplashDone] = useState(
     () =>
@@ -152,77 +138,8 @@ export default function App() {
     <div className="fixed inset-0 z-40 bg-brand-bg" />
   ) : null;
 
-  // Preload the sibling overlay's code-split chunk so navigating between them is
-  // instant — otherwise the Suspense fallback (null) flashes the home bracket
-  // while the chunk downloads. From a tournament/match, the next tap is usually a
-  // nation (CountryRoute); from a country, it's a tournament. Deferred to idle so
-  // it doesn't contend with the current overlay's own load.
-  useEffect(() => {
-    const preload = () => {
-      if (route.path === "tournament" || route.path === "match") {
-        import("./components/CountryRoute");
-        import("./components/CountriesHub");
-        import("./components/ComparePage");
-      } else if (route.path === "country") {
-        import("./components/TournamentPage");
-        import("./components/CountriesHub");
-        import("./components/ComparePage"); // reachable via rivalry links
-      } else if (route.path === "countries") {
-        import("./components/CountryRoute");
-      } else if (route.path === "compare") {
-        import("./components/CountryRoute");
-        import("./components/TournamentPage");
-      }
-    };
-    const ric = window.requestIdleCallback;
-    if (ric) {
-      // timeout so a busy main thread (e.g. the champion confetti) can't starve
-      // the preload — otherwise the chunk isn't ready when the user taps through.
-      const id = ric(preload, { timeout: 200 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    const id = window.setTimeout(preload, 400);
-    return () => window.clearTimeout(id);
-  }, [route.path]);
-
-  // WebMCP: expose "switch tournament year" as an agent-invokable tool, when
-  // the browser supports it. Experimental API (navigator.modelContext isn't
-  // in the DOM lib yet), feature-detected so this is a no-op everywhere else.
-  useEffect(() => {
-    const modelContext = (
-      navigator as unknown as {
-        modelContext?: { provideContext: (options: unknown) => void };
-      }
-    ).modelContext;
-    if (!modelContext) return;
-
-    modelContext.provideContext({
-      tools: [
-        {
-          name: "select_world_cup_year",
-          description:
-            "Switch the displayed bracket to a specific FIFA World Cup year, to view that tournament's host, champion, and knockout results.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              year: {
-                type: "number",
-                enum: Object.keys(TOURNAMENTS).map(Number),
-                description: "The tournament year to display, e.g. 2022.",
-              },
-            },
-            required: ["year"],
-          },
-          execute: async ({ year }: { year: number }) => {
-            setActiveYear(year);
-            return {
-              content: [{ type: "text", text: `Now showing the ${year} World Cup bracket.` }],
-            };
-          },
-        },
-      ],
-    });
-  }, []);
+  useOverlayPreload(route.path);
+  useYearToolContext(setActiveYear);
 
   const [championsOpen, setChampionsOpen] = useState(false);
   const openChampions = useCallback(() => setChampionsOpen(true), []);
@@ -321,85 +238,10 @@ export default function App() {
     if (route.path === "match") navigate(`${tournamentPath(Number(route.params.year))}/`);
   }, [route, navigate]);
 
-  const getTooltipContent = useCallback(() => {
-    if (!tooltip.visible || !tooltip.round) return null;
-    const d = TOURNAMENTS[activeYear];
-    const analysis = analyses[activeYear];
-    const round = tooltip.round;
-    const idx = tooltip.idx;
-
-    if (round !== "r16" && !d[round as "qf" | "sf" | "final"]) return null;
-
-    const [ta, tb] = resolveCompetitors(d, analysis, round, idx);
-    const matches = d[round as "r16" | "qf" | "sf" | "final"];
-    const m = matches ? (round === "final" ? matches[0] : matches[idx]) : null;
-    const wA = m && m.w === 0;
-    const wB = m && m.w === 1;
-    const score = m ? `${m.s[0]}–${m.s[1]}` : "vs";
-    const notes = getMatchNotes(m);
-
-    return (
-      <div className="text-center font-sans">
-        <div className="tt-round font-mono text-[10px] text-brand-gold tracking-widest uppercase mb-1.5 select-none font-medium">
-          {ROUND_NAME[round]}
-        </div>
-        <div className="tt-row flex items-center justify-center gap-2.5 whitespace-nowrap">
-          <span
-            className={`tt-side flex items-center gap-1.5 text-xs transition-colors duration-200 ${
-              wA ? "text-brand-gold-hi font-bold" : "text-brand-muted"
-            }`}
-          >
-            <span className="fg text-base select-none">{getTeamFlag(ta)}</span>
-            {getTeamName(ta)}
-          </span>
-          <span className="tt-sc font-unbounded text-sm tracking-wide text-brand-text select-none px-1">
-            {score}
-          </span>
-          <span
-            className={`tt-side flex items-center gap-1.5 text-xs transition-colors duration-200 ${
-              wB ? "text-brand-gold-hi font-bold" : "text-brand-muted"
-            }`}
-          >
-            {getTeamName(tb)}
-            <span className="fg text-base select-none">{getTeamFlag(tb)}</span>
-          </span>
-        </div>
-        {notes.length > 0 ? (
-          <div className="tt-note mt-2 font-mono text-[9px] tracking-wider uppercase text-brand-muted select-none">
-            {notes.map((n, i) => (
-              <span key={i}>
-                {i > 0 && <span className="mx-1 text-brand-steel">·</span>}
-                <b className="text-brand-gold font-semibold">{n}</b>
-              </span>
-            ))}
-          </div>
-        ) : (
-          !m && (
-            <div className="tt-note mt-1.5 font-mono text-[9px] tracking-wider uppercase text-brand-muted select-none font-medium">
-              not yet played
-            </div>
-          )
-        )}
-      </div>
-    );
-  }, [tooltip, activeYear, analyses]);
-
-  const tooltipContent = useMemo(
-    () => (tooltip.visible && tooltip.round ? getTooltipContent() : null),
-    [tooltip, activeYear, analyses, getTooltipContent]
-  );
-
   const champCode =
     currentAnalysis.champ !== null
       ? currentData.teams[currentAnalysis.champ]
       : null;
-
-  function getChampionForYear(year: number): string | null {
-    const a = analyses[year];
-    const d = TOURNAMENTS[year];
-    if (!a || !d || a.champ === null) return null;
-    return d.teams[a.champ] ?? null;
-  }
 
   const gbName = currentData.goldenBoot?.name;
   const gbGoals = currentData.goldenBoot?.goals;
@@ -414,117 +256,10 @@ export default function App() {
   // timeline (all >= 1986, stepping by 4).
   const editionsCount = Math.floor((activeYear - 1930) / 4) + 1 - (activeYear > 1938 ? 2 : 0);
 
-  const seoMeta = useMemo(() => {
-    if (route.path === "country" && countryProfile) {
-      const p = countryProfile;
-      const desc = p.titles.length > 0
-        ? `${p.name} — ${p.titles.length}× World Cup champion${p.titles.length > 1 ? "s" : ""}. ${p.appearances} tournament appearances since ${p.firstAppearance}. ${p.epithet}`
-        : `${p.name} — ${p.bestResult}. ${p.appearances} World Cup appearance${p.appearances > 1 ? "s" : ""} since ${p.firstAppearance}. ${p.epithet}`;
-      const videoNodes = p.videos.map(videoObject);
-      return {
-        title: `${p.name} World Cup History — Record, Results & Top Scorers · The Road to Glory`,
-        description: desc,
-        // Trailing slash = the prerendered 200 URL Netlify serves.
-        canonical: `${countryPath(p.code)}/`,
-        jsonLd: {
-          "@type": "SportsTeam",
-          name: p.name,
-          sport: "Association football",
-          description: p.epithet,
-          url: `${BASE_URL}${countryPath(p.code)}/`,
-        },
-        jsonLdNodes: videoNodes,
-        breadcrumb: breadcrumbList([
-          { name: SITE_NAME, url: `${BASE_URL}/` },
-          { name: "Countries", url: `${BASE_URL}${countriesPath}/` },
-          { name: p.name, url: `${BASE_URL}${countryPath(p.code)}/` },
-        ]),
-      };
-    }
-    if (route.path === "countries") {
-      return {
-        title: "World Cup Nations — All 71 Teams, Titles & Records · The Road to Glory",
-        description:
-          "Every nation to play a FIFA World Cup, 1930–2026 — champions ranked by titles and all teams by confederation, each linking to its full record, results and top scorers.",
-        canonical: `${countriesPath}/`,
-        jsonLd: {
-          "@type": "CollectionPage",
-          name: "World Cup Nations",
-          url: `${BASE_URL}${countriesPath}/`,
-        },
-        breadcrumb: breadcrumbList([
-          { name: SITE_NAME, url: `${BASE_URL}/` },
-          { name: "Countries", url: `${BASE_URL}${countriesPath}/` },
-        ]),
-      };
-    }
-    if (route.path === "match" && matchYear && TOURNAMENTS[matchYear]) {
-      const t = TOURNAMENTS[matchYear];
-      const analysis = analyses[matchYear];
-      const found = analysis ? findMatchBySlug(t, analysis, route.params.slug) : null;
-      if (found) {
-        const taName = getTeamName(found.ta);
-        const tbName = getTeamName(found.tb);
-        const roundName = ROUND_NAME[found.round];
-        const scoreStr = found.score ? `${found.score[0]}–${found.score[1]}` : null;
-        const resultTitle = scoreStr ? `${taName} ${scoreStr} ${tbName}` : `${taName} vs ${tbName}`;
-        const winnerName = found.winner ? getTeamName(found.winner) : null;
-        const highlight = getHighlights(matchYear, found.ta, found.tb);
-        const videoNode = highlight
-          ? videoObjectForMatch({
-              videoId: highlight.videoId,
-              title: highlight.title,
-              thumbnail: highlight.thumbnail,
-              year: matchYear,
-            })
-          : null;
-        return {
-          title: `${resultTitle} — ${matchYear} FIFA World Cup ${roundName} · The Road to Glory`,
-          description:
-            `${taName} vs ${tbName}, ${matchYear} FIFA World Cup ${roundName} in ${t.host}. ` +
-            (scoreStr
-              ? `Final score ${scoreStr}${found.pens ? ` (${found.pens} pens)` : found.extra ? ` ${found.extra}` : ""}.${winnerName ? ` ${winnerName} advanced.` : ""} `
-              : "") +
-            `Goalscorers, result, and match details.`,
-          canonical: `${matchPath(matchYear, found.slug)}/`,
-          jsonLd: matchEvent(matchYear, t.host, taName, tbName, roundName, found.slug),
-          jsonLdNodes: videoNode ? [videoNode] : undefined,
-          breadcrumb: breadcrumbList([
-            { name: SITE_NAME, url: `${BASE_URL}/` },
-            { name: `${matchYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(matchYear)}/` },
-            { name: resultTitle, url: `${BASE_URL}${matchPath(matchYear, found.slug)}/` },
-          ]),
-        };
-      }
-    }
-    if (route.path === "tournament" && tournamentYear && TOURNAMENTS[tournamentYear]) {
-      const t = TOURNAMENTS[tournamentYear];
-      const champ = tournamentYear ? getChampionForYear(tournamentYear) : null;
-      const champName = champ ? getTeamName(champ) : "TBD";
-      const faqNodes = faqPage([
-        { question: `Who won the ${tournamentYear} FIFA World Cup?`, answer: champName },
-        { question: `Where was the ${tournamentYear} World Cup held?`, answer: t.host },
-        { question: `Who was the top scorer of the ${tournamentYear} World Cup?`, answer: t.goldenBoot ? `${t.goldenBoot.name} with ${t.goldenBoot.goals} goals` : "Not yet decided" },
-        { question: `How many teams participated in the ${tournamentYear} World Cup?`, answer: `${t.teams.length} teams` },
-      ]);
-      return {
-        title: `${tournamentYear} FIFA World Cup Results — ${champName} Champion · The Road to Glory`,
-        description: `${tournamentYear} FIFA World Cup in ${t.host}. ${t.quote || ""} Full knockout results, golden boot, and all participating nations.`,
-        canonical: `${tournamentPath(tournamentYear)}/`,
-        jsonLd: tournamentEvent(tournamentYear, t, champ),
-        jsonLdNodes: [faqNodes],
-        breadcrumb: breadcrumbList([
-          { name: SITE_NAME, url: `${BASE_URL}/` },
-          { name: `${tournamentYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(tournamentYear)}/` },
-        ]),
-      };
-    }
-    return {
-      title: `${activeYear} World Cup Bracket — ${champCode ? getTeamName(champCode) : "TBD"} · The Road to Glory`,
-      description: "Every FIFA World Cup knockout stage since 1930, drawn as one interactive radial bracket.",
-      canonical: "/",
-    };
-  }, [route, countryProfile, tournamentYear, matchYear, analyses, activeYear, champCode]);
+  const seoMeta = useMemo(
+    () => buildSeoMeta({ route, countryProfile, tournamentYear, matchYear, analyses, activeYear, champCode }),
+    [route, countryProfile, tournamentYear, matchYear, analyses, activeYear, champCode]
+  );
 
   useSeo(seoMeta);
 
@@ -677,17 +412,7 @@ export default function App() {
       </div>
 
       {/* Floating Tooltip */}
-      {tooltip.visible && tooltipContent && (
-        <div
-          className="tip fixed z-50 pointer-events-none select-none -translate-x-1/2 -translate-y-[118%] bg-gradient-to-b from-brand-panel to-brand-bg border border-brand-line rounded-xl py-2 px-3.5 min-w-[180px] shadow-[0_16px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(246,196,83,0.05)] after:content-[''] after:absolute after:left-1/2 after:-bottom-1.5 after:-translate-x-1/2 after:rotate-45 after:w-2.5 after:h-2.5 after:bg-brand-bg after:border-r after:border-b after:border-brand-line transition-all duration-100 ease-out"
-          style={{
-            left: `${Math.max(100, Math.min(tooltip.x, window.innerWidth - 100))}px`,
-            top: `${Math.max(60, Math.min(tooltip.y, window.innerHeight - 60))}px`,
-          }}
-        >
-          {tooltipContent}
-        </div>
-      )}
+      <BracketTooltip tooltip={tooltip} activeYear={activeYear} analyses={analyses} />
 
       {/* Overlay modal detail wrapper (code-split; mounts on first open) */}
       {modalMounted && (
