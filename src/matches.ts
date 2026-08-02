@@ -1,6 +1,7 @@
 import { TournamentData, TournamentAnalysis } from "./types";
-import { TEAMS, getTeamName } from "./data";
+import { TEAMS, getTeamName, TOURNAMENTS } from "./data";
 import { resolveCompetitors } from "./constants";
+import { analyze } from "./analysis";
 
 // A knockout match, identified by its (round, idx) slot, with both competitors
 // resolved to concrete team codes and a stable, human/SEO-friendly URL slug.
@@ -92,4 +93,46 @@ export function findMatchBySlug(
   slug: string
 ): EnumeratedMatch | null {
   return enumerateMatches(data, analysis).find((m) => m.slug === slug) ?? null;
+}
+
+// The generated country stats (record + rivalries, from the jfjelstul dataset)
+// cover World Cups through 2022. Editions after this year live only in
+// TOURNAMENTS, so any figure sourced from that dataset must fold these in.
+export const STATS_DATASET_THROUGH = 2022;
+
+export interface PostDatasetMatch {
+  year: number;
+  opponent: string; // opponent team code
+  gf: number;
+  ga: number;
+  result: "W" | "D" | "L"; // from `code`'s perspective
+}
+
+// Every knockout match a team played in editions after STATS_DATASET_THROUGH,
+// oriented so gf/ga/result are from `code`'s point of view. Penalty shootouts
+// count as draws (official FIFA record), matching the jfjelstul-derived stats
+// these get folded into.
+export function postDatasetMatchesForTeam(
+  code: string,
+  throughYear = STATS_DATASET_THROUGH
+): PostDatasetMatch[] {
+  const out: PostDatasetMatch[] = [];
+  for (const year of Object.keys(TOURNAMENTS).map(Number)) {
+    if (year <= throughYear) continue;
+    const t = TOURNAMENTS[year];
+    if (!t) continue;
+    for (const m of enumerateMatches(t, analyze(t))) {
+      if (!m.played || !m.score) continue;
+      if (m.ta !== code && m.tb !== code) continue;
+      const isA = m.ta === code;
+      out.push({
+        year,
+        opponent: isA ? m.tb : m.ta,
+        gf: isA ? m.score[0] : m.score[1],
+        ga: isA ? m.score[1] : m.score[0],
+        result: m.pens ? "D" : m.winner === code ? "W" : m.winner === null ? "D" : "L",
+      });
+    }
+  }
+  return out;
 }

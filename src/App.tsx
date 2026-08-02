@@ -7,12 +7,11 @@ import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
 import { ROUND_NAME, resolveCompetitors, getMatchNotes } from "./constants";
 import Timeline from "./components/Timeline";
 const RadialBracket = lazy(() => import("./components/RadialBracket"));
-import BracketList from "./components/BracketList";
 import Splash from "./components/Splash";
 import PlayerAvatar from "./components/PlayerAvatar";
 import { useWikiPhoto } from "./wikiPhoto";
 import HeaderMeta from "./components/HeaderMeta";
-import ChampionsWall, { ChampionsTrigger } from "./components/ChampionsWall";
+import ChampionsWall from "./components/ChampionsWall";
 import type { CountryProfile } from "./countries.mock";
 import HeroCard from "./components/HeroCard";
 import HomepageGrid from "./components/HomepageGrid";
@@ -67,8 +66,9 @@ export default function App() {
     }
   }, []);
 
-  // The radial bracket is desktop-only; phones always get the list view. Track
-  // the viewport reactively so resizing across the breakpoint stays correct.
+  // The radial bracket is desktop-only; phones get the champion-timeline grid
+  // instead. Track the viewport reactively so resizing across the breakpoint
+  // stays correct.
   const [isMobile, setIsMobile] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -107,10 +107,6 @@ export default function App() {
   }, [lightMode]);
 
   const [activeYear, setActiveYear] = useState<number>(2026);
-  const [viewMode, setViewMode] = useState<"radial" | "list">("radial");
-
-  // On mobile we force the list view regardless of the stored preference.
-  const effectiveViewMode = isMobile ? "list" : viewMode;
 
   const countryCode = route.path === "country" ? route.params.code : null;
   // Country profiles live inside the lazy CountryRoute chunk; the page is parked
@@ -581,17 +577,6 @@ export default function App() {
             <p className="sub text-brand-muted text-sm md:mt-3 leading-relaxed max-w-[280px] max-md:hidden">
               Every knockout bracket since 1930 one radial map, from Round of 16 to final
             </p>
-            <a
-              href={`${countriesPath}/`}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(`${countriesPath}/`);
-              }}
-              className="inline-flex items-center gap-1.5 mt-3 font-mono text-[11px] font-medium tracking-[0.18em] uppercase text-brand-gold hover:text-brand-gold-hi transition-colors cursor-pointer max-md:justify-center"
-            >
-              Browse all nations
-              <span aria-hidden>→</span>
-            </a>
           </div>
 
           <Timeline
@@ -645,10 +630,8 @@ export default function App() {
                 onNavigate={navigate}
                 analyses={analyses}
               />
-              {/* Clearance so the last cards aren't hidden behind the sticky pill. */}
-              <div aria-hidden className="h-24" />
             </div>
-          ) : effectiveViewMode === "radial" ? (
+          ) : (
             <Suspense fallback={<div className="flex-1" />}>
             <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto max-md:overflow-hidden">
               <div className="stage relative h-full max-h-[680px] w-auto max-w-full aspect-square max-md:animate-none md:animate-[floatUp_1s_cubic-bezier(0.2,0.7,0.2,1)_0.3s_both] before:content-[''] before:absolute before:inset-0 before:z-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_50%_50%,rgba(246,196,83,0.11),rgba(246,196,83,0.03)_24%,transparent_46%)]">
@@ -665,50 +648,24 @@ export default function App() {
               </div>
             </div>
             </Suspense>
-          ) : (
-            <div className="flex-1 w-full min-h-0">
-              <BracketList
-                data={currentData}
-                analysis={currentAnalysis}
-                onSelectMatch={handleSelectMatch}
-                onNavigateCountry={handleNavigateCountry}
-              />
-            </div>
           )}
 
           {/* Explore gateway cards — only on the homepage, desktop and mobile */}
           {route.path === "home" && (
-            <ExploreCards
-              onNavigate={navigate}
-              onOpenChampions={openChampions}
-              activeYear={activeYear}
-            />
+            <ExploreCards onNavigate={navigate} onOpenChampions={openChampions} />
           )}
 
-          {/* View toggle + legend — desktop only; phones are locked to list view */}
+          {/* Radial bracket legend — desktop only. */}
           <div className="flex-none w-full pt-3 pb-6 max-md:hidden">
-            <div className="flex justify-center mb-1 max-md:hidden">
-              <button
-                onClick={() => setViewMode(viewMode === "radial" ? "list" : "radial")}
-                className="text-[10px] font-mono tracking-wider uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer flex items-center gap-1.5"
-              >
-                {viewMode === "radial" ? "☰ List view" : "◉ Radial view"}
-              </button>
-            </div>
             <div className="flex gap-6 justify-center flex-wrap items-center text-brand-muted font-mono text-[11px] tracking-wider uppercase relative z-10">
-              {effectiveViewMode === "radial" ? (
-                <>
-                  <div className="item flex items-center gap-2 max-md:hidden">
-                    <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
-                    Hover or tap flags to trace runs
-                  </div>
-                  <div className="item flex items-center gap-2 max-md:hidden">
-                    <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
-                    Winners advance to center
-                  </div>
-                </>
-              ) : null}
-              <ChampionsTrigger onClick={openChampions} className="max-md:hidden" />
+              <div className="item flex items-center gap-2 max-md:hidden">
+                <span className="sw rainbow w-5 h-0.5 rounded bg-gradient-to-r from-[#6cc2ef] via-[#ffd21e] to-[#e02531]" />
+                Hover or tap flags to trace runs
+              </div>
+              <div className="item flex items-center gap-2 max-md:hidden">
+                <span className="sw dotc w-2 h-2 rounded-full bg-brand-steel" />
+                Winners advance to center
+              </div>
             </div>
           </div>
 
@@ -718,18 +675,6 @@ export default function App() {
           </p>
         </main>
       </div>
-
-      {/* Hall of Champions — floating sticky variant (mobile homepage only).
-          z-30 sits below the full-screen overlays (z-40), so opening a
-          tournament/match hides it. */}
-      {isMobile && route.path === "home" && (
-        <div
-          className="md:hidden fixed bottom-0 inset-x-0 z-30 flex justify-center px-5 pt-10 bg-gradient-to-t from-brand-bg via-brand-bg/90 to-transparent backdrop-blur-xl pointer-events-none"
-          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
-        >
-          <ChampionsTrigger onClick={openChampions} className="pointer-events-auto shadow-[0_8px_30px_rgba(0,0,0,0.5)]" />
-        </div>
-      )}
 
       {/* Floating Tooltip */}
       {tooltip.visible && tooltipContent && (

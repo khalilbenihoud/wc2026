@@ -8,6 +8,7 @@ import {
   ResultLevel,
 } from "./countries.mock";
 import { COUNTRY_STATS } from "./countryStats.generated";
+import { postDatasetMatchesForTeam } from "./matches";
 import { ROUND_NAME } from "./constants";
 import { HIGHLIGHTS } from "./highlights";
 
@@ -658,6 +659,29 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
     const record = stats
       ? { ...stats.record }
       : { ...countMatchResults(code), pensWon: 0, pensLost: 0 };
+
+    // The dataset-backed branches (record + rivalries) cover World Cups through
+    // 2022; fold in later editions that live only in TOURNAMENTS so the figures
+    // agree with the titles/timeline the rest of the profile derives from the
+    // same bracket data. The fallback branch already spans every edition via
+    // countMatchResults, so only the `stats` branch needs augmenting.
+    const postMatches = stats ? postDatasetMatchesForTeam(code) : [];
+    for (const m of postMatches) {
+      record.gf += m.gf;
+      record.ga += m.ga;
+      if (m.result === "W") record.w++;
+      else if (m.result === "L") record.l++;
+      else record.d++;
+    }
+    const postByOpponent = new Map<string, { played: number; w: number; d: number; l: number }>();
+    for (const m of postMatches) {
+      const e = postByOpponent.get(m.opponent) ?? { played: 0, w: 0, d: 0, l: 0 };
+      e.played++;
+      if (m.result === "W") e.w++;
+      else if (m.result === "L") e.l++;
+      else e.d++;
+      postByOpponent.set(m.opponent, e);
+    }
     const historical = stats ? stats.topScorers : getTopScorers(code);
     const recent = getTopScorers(code, 2026);
     const merged = new Map<string, { name: string; goals: number; years: Set<number> }>();
@@ -684,16 +708,22 @@ export function generateCountryProfiles(): Record<string, CountryProfile> {
         const ys = Array.from(s.years).sort();
         return { name: s.name, goals: s.goals, span: ys.length === 1 ? `${ys[0]}` : `${ys[0]}–${ys[ys.length - 1]}` };
       });
+    // The rivalries list is a curated set of a nation's most-played opponents;
+    // we correct the record of any that were also met after 2022 rather than
+    // promoting a one-off knockout tie into the list.
     const rivalries = stats
-      ? stats.rivalries.map((r) => ({
-          code: r.code,
-          name: getTeamName(r.code),
-          flag: getTeamFlag(r.code),
-          played: r.played,
-          w: r.w,
-          d: r.d,
-          l: r.l,
-        }))
+      ? stats.rivalries.map((r) => {
+          const extra = postByOpponent.get(r.code);
+          return {
+            code: r.code,
+            name: getTeamName(r.code),
+            flag: getTeamFlag(r.code),
+            played: r.played + (extra?.played ?? 0),
+            w: r.w + (extra?.w ?? 0),
+            d: r.d + (extra?.d ?? 0),
+            l: r.l + (extra?.l ?? 0),
+          };
+        })
       : [];
 
     const titles: { year: number; final: string }[] = [];

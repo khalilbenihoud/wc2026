@@ -1,10 +1,9 @@
-import { countriesPath, tournamentPath, COUNTRY_PAGE_ENABLED } from "../router";
+import { countriesPath, tournamentPath } from "../router";
 import { TOURNAMENT_YEARS } from "../constants";
 
 interface Props {
   onNavigate: (path: string) => void;
   onOpenChampions: () => void;
-  activeYear: number;
 }
 
 const cards = [
@@ -13,14 +12,12 @@ const cards = [
     desc: "71 teams, their World Cup history, records, rivalries",
     icon: "🏆",
     href: `${countriesPath}/`,
-    enabled: true,
   },
   {
     label: "Champions Wall",
     desc: "Every World Cup winner from 1930 to today",
     icon: "👑",
     action: "champions",
-    enabled: true,
   },
   {
     label: "Latest Edition",
@@ -28,14 +25,12 @@ const cards = [
     icon: "⚽",
     href: (year: number) => `${tournamentPath(year)}/`,
     dynamic: true,
-    enabled: true,
   },
   {
     label: "First Edition",
     desc: "Where the story began — Uruguay 1930",
     icon: "📜",
     href: `${tournamentPath(1930)}/`,
-    enabled: true,
   },
 ] as const;
 
@@ -47,11 +42,12 @@ const LABEL_CLASS =
 const DESC_CLASS =
   "text-[11px] text-brand-muted leading-relaxed";
 
-export default function ExploreCards({ onNavigate, onOpenChampions, activeYear }: Props) {
-  const currentEdition = TOURNAMENT_YEARS[TOURNAMENT_YEARS.length - 1];
+export default function ExploreCards({ onNavigate, onOpenChampions }: Props) {
+  // TOURNAMENT_YEARS is sorted newest-first, so the latest edition is index 0.
+  const currentEdition = TOURNAMENT_YEARS[0];
 
   return (
-    <div className="flex-none w-full max-w-[640px] pt-2 pb-2 max-md:px-5">
+    <div className="flex-none w-full max-w-[1100px] pt-2 pb-2 max-md:px-5">
       <div className="flex items-center gap-2 mb-3">
         <span className="font-mono text-[9px] font-semibold tracking-[0.28em] uppercase text-brand-muted/60">
           Explore
@@ -60,8 +56,6 @@ export default function ExploreCards({ onNavigate, onOpenChampions, activeYear }
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {cards.map((card) => {
-          if (!card.enabled) return null;
-
           const href =
             "href" in card
               ? typeof card.href === "function"
