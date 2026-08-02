@@ -247,7 +247,7 @@ function buildTournament(year: number): string {
     nationsHtml + otherHtml +
     `</main>`;
 
-  const ogImage = `${BASE}/og/tournaments/${year}.png`;
+  const ogImage = `${BASE}/og/tournaments/${year}.webp`;
   const ogAlt = champName
     ? `${year} FIFA World Cup — ${champName} champions`
     : `${year} FIFA World Cup`;
@@ -446,7 +446,7 @@ function buildCountry(code: string, p: CountryProfile): string {
     `<p><a href="/">Explore every World Cup bracket, 1930–2026</a></p>` +
     `</main>`;
 
-  const ogImage = `${BASE}/og/countries/${slug}.png`;
+  const ogImage = `${BASE}/og/countries/${slug}.webp`;
   const ogAlt = `${p.name} at the FIFA World Cup — record and honours`;
   return render(title, description, canonical, jsonLd, content, ogImage, ogAlt);
 }
@@ -594,7 +594,7 @@ function buildCountriesHub(): string {
     honour + grouped +
     `</main>`;
 
-  const ogImage = `${BASE}/og/countries.png`;
+  const ogImage = `${BASE}/og/countries.webp`;
   return render(title, description, canonical, jsonLd, content, ogImage, "World Cup Nations — every team, 1930–2026");
 }
 

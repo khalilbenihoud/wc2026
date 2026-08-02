@@ -8,6 +8,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
+import sharp from "sharp";
 import { TOURNAMENTS, getTeamName, getTeamFlag } from "../src/data";
 import { champion, runnerUp } from "./tournament-result";
 import { CHAMPION_IMAGES } from "../src/championImages.generated";
@@ -150,7 +151,13 @@ async function renderCard(c: Card): Promise<Buffer> {
       return dataUri(readFileSync(p), "image/svg+xml");
     },
   });
-  return Buffer.from(new Resvg(svg, { fitTo: { mode: "width", value: 1200 } }).render().asPng());
+  // Encode WebP straight from the raw RGBA pixmap (no PNG round-trip). These
+  // cards are photographic, so WebP is ~5–10× smaller than PNG at the same
+  // visual quality — a big cut to the deploy/bandwidth footprint.
+  const rendered = new Resvg(svg, { fitTo: { mode: "width", value: 1200 } }).render();
+  return sharp(rendered.pixels, { raw: { width: rendered.width, height: rendered.height, channels: 4 } })
+    .webp({ quality: 82 })
+    .toBuffer();
 }
 
 // Final result line from the champion's perspective (final `s` stored top–bottom).
@@ -197,14 +204,14 @@ async function main() {
         credit: null,
       };
     }
-    writeFileSync(resolve(DIST, `og/tournaments/${year}.png`), await renderCard(card));
+    writeFileSync(resolve(DIST, `og/tournaments/${year}.webp`), await renderCard(card));
     console.log(`  ✓ tournament ${year}`);
   }
 
   // ── Countries hub card ───────────────────────────────────────────────
   const hub = getHubData();
   writeFileSync(
-    resolve(DIST, "og/countries.png"),
+    resolve(DIST, "og/countries.webp"),
     await renderCard({
       photo: PITCH,
       mapCode: null,
@@ -237,7 +244,7 @@ async function main() {
         : `${p.appearances} appearance${p.appearances === 1 ? "" : "s"} · since ${p.firstAppearance}`,
       credit: hero?.authorName ?? null,
     };
-    writeFileSync(resolve(DIST, `og/countries/${slug}.png`), await renderCard(card));
+    writeFileSync(resolve(DIST, `og/countries/${slug}.webp`), await renderCard(card));
     console.log(`  ✓ country ${slug}`);
   }
 }
