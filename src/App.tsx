@@ -3,13 +3,14 @@
 //  ╚══════════════════════════════════════╝
 import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { TournamentAnalysis } from "./types";
-import { TOURNAMENTS, getTeamFlag, getTeamName } from "./data";
+import { TOURNAMENTS, getTeamFlag, getTeamName, isUpcomingEdition } from "./data";
 import Timeline from "./components/Timeline";
 const RadialBracket = lazy(() => import("./components/RadialBracket"));
 import Splash from "./components/Splash";
 import { useWikiPhoto } from "./wikiPhoto";
 import HeaderMeta from "./components/HeaderMeta";
 import BracketTooltip from "./components/BracketTooltip";
+import UpcomingEdition from "./components/UpcomingEdition";
 import ChampionsWall from "./components/ChampionsWall";
 import type { CountryProfile } from "./countries.mock";
 import HeroCard from "./components/HeroCard";
@@ -207,6 +208,10 @@ export default function App() {
     return analyses[activeYear];
   }, [analyses, activeYear]);
 
+  // An upcoming edition (seeded, no qualified teams yet) shows an empty-state
+  // preview instead of a bracket.
+  const isUpcoming = isUpcomingEdition(currentData);
+
   const handleSelectMatch = useCallback((round: string, idx: number) => {
     setSelectedMatch({ round, idx });
   }, []);
@@ -366,6 +371,8 @@ export default function App() {
                 analyses={analyses}
               />
             </div>
+          ) : isUpcoming ? (
+            <UpcomingEdition year={activeYear} host={currentData.host} hostFlag={currentData.hostFlag} />
           ) : (
             <Suspense fallback={<div className="flex-1" />}>
             <div className="stage-wrap flex-1 min-h-0 flex justify-center items-center p-1 w-full max-w-[680px] max-md:max-w-none mx-auto max-md:overflow-hidden">

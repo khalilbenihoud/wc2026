@@ -13,7 +13,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve } from "path";
-import { TOURNAMENTS, TEAMS, getTeamName } from "../src/data";
+import { TOURNAMENTS, TEAMS, getTeamName, isUpcomingEdition } from "../src/data";
 import { analyze } from "../src/analysis";
 import { enumerateMatches, EnumeratedMatch } from "../src/matches";
 import { ROUND_NAME } from "../src/constants";
@@ -132,9 +132,60 @@ function knockout(t: T, year: number): string {
   return parts.join("");
 }
 
+// ── Upcoming edition (seeded, no bracket yet) ────────────────────────────────
+function buildUpcoming(year: number): string {
+  const t = TOURNAMENTS[year];
+  const canonical = `${BASE}/tournaments/${year}/`;
+  const title = `${year} FIFA World Cup — Hosts, Dates & Format · The Road to Glory`;
+  const description =
+    `The ${year} FIFA World Cup will be co-hosted by ${t.host} — 48 teams, ` +
+    `June–July ${year}. Host nations, format, the centenary opening matches, and ` +
+    `qualification, tracked as the tournament takes shape.`;
+
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SportsEvent",
+        name: `${year} FIFA World Cup`,
+        sport: "Association football",
+        eventStatus: "https://schema.org/EventScheduled",
+        startDate: `${year}-06`,
+        location: t.host.split(" · ").map((c) => ({ "@type": "Country", name: c })),
+        url: canonical,
+      },
+      faqPage([
+        { question: `Where is the ${year} World Cup being held?`, answer: `The ${year} FIFA World Cup is co-hosted by ${t.host}, with three centenary opening matches in Uruguay, Argentina and Paraguay.` },
+        { question: `When is the ${year} World Cup?`, answer: `The tournament is scheduled for June–July ${year}.` },
+        { question: `How many teams play at the ${year} World Cup?`, answer: `48 teams, as in 2026.` },
+      ]),
+      breadcrumbList([
+        { name: SITE_NAME, url: `${BASE}/` },
+        { name: `${year} FIFA World Cup`, url: canonical },
+      ]),
+    ],
+  });
+
+  const content =
+    `<main class="prerender">` +
+    `<p><a href="/">← World Cup Archive</a></p>` +
+    `<h1>${year} FIFA World Cup</h1>` +
+    `<p><strong>Upcoming — qualification underway.</strong> ${esc(t.host)}.</p>` +
+    `<h2>Host nations</h2><p>${esc(t.host)}.</p>` +
+    `<h2>Format</h2><p>48 teams, June–July ${year}.</p>` +
+    `<h2>Centenary</h2><p>A century after the first World Cup, ${year} opens with three ` +
+    `celebratory matches in Uruguay, Argentina and Paraguay — where the tournament began in 1930.</p>` +
+    `<p><a href="/tournaments/2026/">See the most recent World Cup (2026)</a> · <a href="/">Explore every edition, 1930–${year}</a></p>` +
+    `</main>`;
+
+  const ogImage = `${BASE}/og/tournaments/${year}.webp`;
+  return render(title, description, canonical, jsonLd, content, ogImage, `${year} FIFA World Cup — hosts and format`);
+}
+
 // ── Per-year SEO + content ───────────────────────────────────────────────────
 function buildTournament(year: number): string {
   const t = TOURNAMENTS[year];
+  if (isUpcomingEdition(t)) return buildUpcoming(year);
   const champ = champion(t);
   const champName = champ ? getTeamName(champ) : null;
   const ru = runnerUp(t);

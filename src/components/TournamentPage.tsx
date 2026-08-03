@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TOURNAMENTS, getTeamName, getTeamFlag } from "../data";
+import { TOURNAMENTS, getTeamName, getTeamFlag, isUpcomingEdition } from "../data";
 import { getMatchNotes, TOURNAMENT_YEARS } from "../constants";
 import { countryPath, tournamentPath, matchPath, comparePath, COUNTRY_PAGE_ENABLED } from "../router";
 import { matchSlug } from "../matches";
 import { CHAMPION_IMAGES } from "../championImages.generated";
+import UpcomingEdition from "./UpcomingEdition";
 import { useWikiPhoto } from "../wikiPhoto";
 import { fireConfetti } from "../confetti";
 import PlayerAvatar from "./PlayerAvatar";
@@ -112,6 +113,27 @@ export default function TournamentPage({ year, onBack, onNavigate, instant }: To
     </div>
   );
 }
+
+  // Upcoming edition (no qualified teams / bracket yet): preview instead of results.
+  if (isUpcomingEdition(t)) {
+    return (
+      <div
+        ref={scrollRef}
+        className={`fixed inset-0 z-40 bg-brand-bg text-brand-text overflow-y-auto flex flex-col ${
+          isClosing ? "animate-[fadeOut_0.2s_ease_forwards]" : skipIntro ? "" : "animate-[fadeIn_0.2s_ease]"
+        }`}
+      >
+        <div className="max-w-[880px] mx-auto w-full px-5 md:px-8 pt-6">
+          <button onClick={handleClose} className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-muted hover:text-brand-gold transition-colors cursor-pointer">
+            ← The Road to Glory
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 flex items-center px-5 md:px-8 pb-16">
+          <UpcomingEdition year={year} host={t.host} hostFlag={t.hostFlag} onExplore={() => onNavigate(`${tournamentPath(2026)}/`)} />
+        </div>
+      </div>
+    );
+  }
 
 function TournamentRelated({ champion, runnerUp, onNavigate }: {
   champion: string | null;

@@ -1045,4 +1045,25 @@ export const TOURNAMENTS: Record<number, TournamentData> = {
     // Final: Spain 1–0 Argentina (a.e.t.) — Ferran Torres 106'; Spain's second World Cup, 10-man Argentina (Enzo Fernández sent off)
     final: [M(1, 0, 0, null, "a.e.t.", [["Ferran Torres 106'"], []])],
   },
+
+  // Upcoming edition — no qualified teams or bracket yet. `seeded: true` with an
+  // empty `teams` array marks it as a preview: the timeline shows 🔮, and the
+  // app/prerender render an "upcoming" empty state instead of a bracket. Fill in
+  // teams + results (and flip `seeded` to false) as the tournament unfolds.
+  2030: {
+    host: "Morocco · Portugal · Spain",
+    hostFlag: "🇲🇦 🇵🇹 🇪🇸",
+    quote: "A century on — the road begins again.",
+    seeded: true,
+    teams: [],
+    r16: null,
+    qf: null,
+    sf: null,
+    final: null,
+  },
 };
+
+// An edition with `seeded: true` but no qualified teams yet is upcoming: show
+// the empty-state preview instead of a bracket, everywhere (app + prerender).
+export const isUpcomingEdition = (t: TournamentData): boolean =>
+  !!t.seeded && t.teams.length === 0;

@@ -3,7 +3,7 @@
 // what scripts/prerender.ts bakes into the static HTML for the same routes.
 
 import { TournamentAnalysis } from "./types";
-import { TOURNAMENTS, getTeamName } from "./data";
+import { TOURNAMENTS, getTeamName, isUpcomingEdition } from "./data";
 import { ROUND_NAME } from "./constants";
 import { findMatchBySlug } from "./matches";
 import { getHighlights } from "./highlights";
@@ -112,6 +112,17 @@ export function buildSeoMeta({
   }
   if (route.path === "tournament" && tournamentYear && TOURNAMENTS[tournamentYear]) {
     const t = TOURNAMENTS[tournamentYear];
+    if (isUpcomingEdition(t)) {
+      return {
+        title: `${tournamentYear} FIFA World Cup — Hosts, Dates & Format · The Road to Glory`,
+        description: `The ${tournamentYear} FIFA World Cup will be co-hosted by ${t.host} — 48 teams, June–July ${tournamentYear}. Host nations, format, the centenary opening matches, and qualification.`,
+        canonical: `${tournamentPath(tournamentYear)}/`,
+        breadcrumb: breadcrumbList([
+          { name: SITE_NAME, url: `${BASE_URL}/` },
+          { name: `${tournamentYear} FIFA World Cup`, url: `${BASE_URL}${tournamentPath(tournamentYear)}/` },
+        ]),
+      };
+    }
     const champ = getChampionForYear(tournamentYear, analyses);
     const champName = champ ? getTeamName(champ) : "TBD";
     const faqNodes = faqPage([

@@ -1,5 +1,6 @@
 import { countriesPath, tournamentPath } from "../router";
 import { TOURNAMENT_YEARS } from "../constants";
+import { TOURNAMENTS } from "../data";
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -43,8 +44,9 @@ const DESC_CLASS =
   "text-[11px] text-brand-muted leading-relaxed";
 
 export default function ExploreCards({ onNavigate, onOpenChampions }: Props) {
-  // TOURNAMENT_YEARS is sorted newest-first, so the latest edition is index 0.
-  const currentEdition = TOURNAMENT_YEARS[0];
+  // TOURNAMENT_YEARS is sorted newest-first; skip any upcoming (seeded) edition
+  // so "Latest Edition" points at the most recent one with real results.
+  const currentEdition = TOURNAMENT_YEARS.find((y) => !TOURNAMENTS[y].seeded) ?? TOURNAMENT_YEARS[0];
 
   return (
     <div className="flex-none w-full max-w-[1100px] pt-2 pb-2 max-md:px-5">

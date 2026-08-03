@@ -16,7 +16,13 @@ const BASE = "https://worldcuparchive.net";
 // pages that aggregate the whole archive carry the latest edition's date.
 const editionLastmod = (year: number) => `${year}-07-20`;
 const years = Object.keys(TOURNAMENTS).map(Number);
-const archiveLastmod = editionLastmod(Math.max(...years));
+// The latest *completed* edition; upcoming (seeded) editions haven't happened,
+// so they mustn't drive a future lastmod for the archive-wide pages.
+const latestCompleted = Math.max(...years.filter((y) => !TOURNAMENTS[y].seeded));
+const archiveLastmod = editionLastmod(latestCompleted);
+// Upcoming editions carry the archive date, not their own future date.
+const yearLastmod = (year: number) =>
+  TOURNAMENTS[year].seeded ? archiveLastmod : editionLastmod(year);
 
 const urls: { loc: string; priority: number; changefreq: string; lastmod: string }[] = [
   { loc: "/", priority: 1.0, changefreq: "weekly", lastmod: archiveLastmod },
@@ -27,13 +33,13 @@ const urls: { loc: string; priority: number; changefreq: string; lastmod: string
 for (const year of years) {
   // Trailing slash matches the 200 URL Netlify serves (pretty_urls 301s the
   // non-slash form), so canonicals/sitemap point at the real page, not a redirect.
-  urls.push({ loc: `/tournaments/${year}/`, priority: 0.9, changefreq: "monthly", lastmod: editionLastmod(year) });
+  urls.push({ loc: `/tournaments/${year}/`, priority: 0.9, changefreq: "monthly", lastmod: yearLastmod(year) });
   // Per-match detail pages are prerendered (scripts/prerender.ts) for every
   // played knockout match, so advertise those real static pages too.
   const t = TOURNAMENTS[year];
   for (const m of enumerateMatches(t, analyze(t))) {
     if (!m.played) continue;
-    urls.push({ loc: `/tournaments/${year}/matches/${m.slug}/`, priority: 0.7, changefreq: "monthly", lastmod: editionLastmod(year) });
+    urls.push({ loc: `/tournaments/${year}/matches/${m.slug}/`, priority: 0.7, changefreq: "monthly", lastmod: yearLastmod(year) });
   }
 }
 
